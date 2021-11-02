@@ -1,18 +1,18 @@
 /**
  * 
- * @param {*} rule A rule
- * @param {*} context An object containing known context values. For items that are not known initially, they will be filled
+ * @param {string} rule A rule
+ * @param {Record<string, any>} context An object containing known context values. For items that are not known initially, they will be filled
  * in as the context providers are invoked.
- * @param {*} contextProviders 
- * @returns 
+ * @param {Record<string, (ctx) => any>} contextProviders A set of functions that, given context object, will give the value of a requested property.
+ * @returns boolean
  */
-async function evaluateRule(rule, initialContext={}, contextProviders={}) {
-    const context = {...initialContext}
+async function evaluateRule(rule, context={}, contextProviders={}) {
+    const mutableContext = {...context}
 
     if (Array.isArray(rule)) {
-        return await evaluateOrRule(rule, context, contextProviders)
+        return await evaluateOrRule(rule, mutableContext, contextProviders)
     } else {
-        return await evaluateSingleRule(rule, context, contextProviders)
+        return await evaluateSingleRule(rule, mutableContext, contextProviders)
     }
 }
 

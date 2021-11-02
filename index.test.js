@@ -108,7 +108,7 @@ describe("evaluateRule", () => {
 
         const rule = [
             { slowName: "Fred" },
-            { fastName: "Diablo" }
+            { fastName: "Diego" }
         ]
 
         const ctx = {
