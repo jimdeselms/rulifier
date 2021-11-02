@@ -1,4 +1,14 @@
-async function evaluateRule(rule, context={}, contextProviders={}) {
+/**
+ * 
+ * @param {*} rule A rule
+ * @param {*} context An object containing known context values. For items that are not known initially, they will be filled
+ * in as the context providers are invoked.
+ * @param {*} contextProviders 
+ * @returns 
+ */
+async function evaluateRule(rule, initialContext={}, contextProviders={}) {
+    const context = {...initialContext}
+
     if (Array.isArray(rule)) {
         return await evaluateOrRule(rule, context, contextProviders)
     } else {

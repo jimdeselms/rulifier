@@ -127,4 +127,17 @@ describe("evaluateRule", () => {
         expect(slowProviderWasCalled).toBe(true)
     })
 
+    it("will not mutate the passed-in context", async () => {
+        const rule = { a: 1 }
+
+        const ctx = {}
+
+        const providers = {
+            a: () => 1
+        }
+
+        expect(await evaluateRule(rule, ctx, providers)).toBeTruthy()
+        expect(ctx.a).toBeUndefined()
+    })
+
 })
