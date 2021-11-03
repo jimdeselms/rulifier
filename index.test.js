@@ -1,4 +1,4 @@
-const { evaluateRule } = require('.')
+const { evaluateRule, selectValue } = require('.')
 
 describe("evaluateRule", () => {
     it("is true if the item is in the context", async () => {
@@ -139,5 +139,19 @@ describe("evaluateRule", () => {
         expect(await evaluateRule(rule, ctx, providers)).toBeTruthy()
         expect(ctx.a).toBeUndefined()
     })
+})
 
+describe("selectValue", () => {
+    it("can select a value", async () => {
+        const value = await selectValue([{ rule: {a: 1}, value: "Hello" }], { a: 1 })
+        expect(value).toBe("Hello")
+    })
+
+    it("will replace tokens from context", async () => {
+        const ctx = { name: "Fred" }
+        const rules = [
+            { rule: {}, value: "Hello, {name}, nice to meet you, {name}"}
+        ]
+        expect(await selectValue(rules, ctx, {})).toBe("Hello, Fred, nice to meet you, Fred")
+    })
 })

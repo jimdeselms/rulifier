@@ -9,10 +9,58 @@
 async function evaluateRule(rule, context={}, contextProviders={}) {
     const mutableContext = {...context}
 
+    return await evaluateRuleWithMutableContext(rule, mutableContext, contextProviders)
+}
+
+async function selectValue(possibleValues, context={}, contextProviders={}) {
+    const mutableContext = {...context}
+
+    for (const { rule, value } of possibleValues) {
+        if (await evaluateRuleWithMutableContext(rule, context, contextProviders)) {
+            return await getValue(value, context, contextProviders)
+        }
+    }
+
+    return undefined
+}
+
+async function getValue(parameterizedObject, context, contextProviders) {
+    switch (typeof(parameterizedObject)) {
+        case "string":
+            return await replaceTokens(parameterizedObject, context, contextProviders)
+        case "object":
+            if (parameterizedObject === null) {
+                return null
+            } else if (Array.isArray(parameterizedObject)) {
+                return await Promise.all(parameterizedObject.map(o => getValue(o, context, contextProviders)))
+            } else {
+                const result = {}
+                const entries = await Promise.all(Object.entries(parameterizedObject).map(async ([key, value]) => [key, await getValue(value, context,  contextProviders)]))
+                return Object.fromEntries(entries)
+            }
+        default:
+            return parameterizedObject
+    }
+}
+
+async function replaceTokens(str, context, contextProviders) {
+    const matches = str.matchAll(/{[a-zA-Z0-9]+}/g)
+    for (const match of matches) {
+        const key = match[0].slice(1, -1)
+        const value = await getPropertyFromContext(key, context, contextProviders)
+        if (value) {
+            str = str.replace(`{${key}}`, value)
+        }
+    }
+
+    return str
+}
+
+async function evaluateRuleWithMutableContext(rule, context, contextProviders) {
     if (Array.isArray(rule)) {
-        return await evaluateOrRule(rule, mutableContext, contextProviders)
+        return await evaluateOrRule(rule, context, contextProviders)
     } else {
-        return await evaluateSingleRule(rule, mutableContext, contextProviders)
+        return await evaluateSingleRule(rule, context, contextProviders)
     }
 }
 
@@ -40,9 +88,13 @@ async function evaluateOrRule(rules, context, contextProviders) {
 }
 
 function isSlowRule(rule, context, contextProviders) {
-    for (const key in rule) {
-        if (context[key] === undefined) {
-            return true
+    if (Array.isArray(rule)) {
+        return rule.some(r => isSlowRule(r, context, contextProviders))
+    } else {
+        for (const key in rule) {
+            if (context[key] === undefined) {
+                return true
+            }
         }
     }
 
@@ -84,5 +136,6 @@ async function getPropertyFromContext(property, ctx, providers) {
 }
 
 module.exports = {
-    evaluateRule
+    evaluateRule,
+    selectValue
 }
