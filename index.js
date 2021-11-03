@@ -1,3 +1,6 @@
+const axios = require('axios')
+const jp = require('jsonpath')
+
 /**
  * 
  * @param {string} rule A rule
@@ -22,6 +25,14 @@ async function selectValue(possibleValues, context={}, contextProviders={}) {
     }
 
     return undefined
+}
+
+async function readValueFromService(ctx, contextProviders, { url, jpathQuery }) {
+    url = await replaceTokens(url, ctx, contextProviders)
+    jpathQuery = await replaceTokens(jpathQuery, ctx, contextProviders)
+    const response = await axios.get(url)
+    const result = jp.query(response.data, jpathQuery)[0]
+    return result
 }
 
 async function getValue(parameterizedObject, context, contextProviders) {
@@ -118,18 +129,18 @@ async function evaluateSingleRule(rule, context, contextProviders) {
     return true
 }
 
-async function getPropertyFromContext(property, ctx, providers) {
+async function getPropertyFromContext(property, ctx, contextProviders) {
     const value = ctx[property]
     if (value !== undefined) {
         return value
     }
 
-    const provider = providers[property]
+    const provider = contextProviders[property]
     if (!provider) {
         return undefined
     }
 
-    const calculatedValue = await provider(ctx)
+    const calculatedValue = await provider(ctx, contextProviders)
     ctx[property] = calculatedValue
 
     return calculatedValue
@@ -137,5 +148,6 @@ async function getPropertyFromContext(property, ctx, providers) {
 
 module.exports = {
     evaluateRule,
-    selectValue
+    selectValue,
+    readValueFromService
 }
