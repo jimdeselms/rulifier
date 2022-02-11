@@ -18,7 +18,7 @@ describe('if', () => {
     it('works in the false case', async () => {
         const resp = buildResponse({
             $if: {
-                condition: false,
+                condition: () => false,
                 then: 1,
                 else: 2
             }

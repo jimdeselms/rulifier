@@ -17,7 +17,7 @@ const builtinDirectives = {
         return true
     },
     async $and(obj, root) {
-        for (const value of await obj) {
+        for (const value of obj) {
             if (!await value) {
                 return false
             }
@@ -25,7 +25,7 @@ const builtinDirectives = {
         return true
     },
     async $or(obj, root) {
-        for (const value of await obj) {
+        for (const value of obj) {
             if (await value) {
                 return true
             }
@@ -72,7 +72,10 @@ function proxify(context, directives, root) {
     let key, directive
 
     if (keys.length === 1 && (key = keys[0]) && (directive = directives[key])) {
-        return proxify(directive(context[key], root), directives, root)
+        
+        const directiveArgument = proxify(context[key])
+
+        return proxify(directive(directiveArgument, root), directives, root)
     }
 
     const proxy = new Proxy(context, {
@@ -83,15 +86,20 @@ function proxify(context, directives, root) {
             }
             
             // Is this a promise?
-            if (typeof target?.then === "function") {
+            const then = target?.then
+            if (typeof then === "function") {
                 if (prop === "then") {
-                    return target.then.bind(target)
+                    return then.bind(target)
                 } else {
-                    return proxify(target.then.bind(target)(data => {
+                    return proxify(then.bind(target)(data => {
                         const value = data[prop]
                         return proxify(value, directives, root)
                     }), directives, root)
                 }
+            }
+
+            if (prop === Symbol.iterator) {
+                return target[Symbol.iterator]
             }
 
             const result = proxify(target[prop], directives, root)

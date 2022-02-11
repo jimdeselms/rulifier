@@ -30,6 +30,13 @@ describe("buildResponse", () => {
         expect(await resp[1]).toBe(2)
     })
 
+    it("works with arrays of functions", async () => {
+        const resp = buildResponse([ () => 1, () => 2 ])
+
+        expect(await resp[0]).toBe(1)
+        expect(await resp[1]).toBe(2)
+    })
+
     it("works with an object that has a then that isn't a promise", async () => {
         const resp = buildResponse({ then: 123 })
 
@@ -158,4 +165,8 @@ describe("buildResponse", () => {
 async function delayed(response) {
     await new Promise(r => setTimeout(r, 1))
     return response
+}
+
+module.exports = {
+    delayed
 }
