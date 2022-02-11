@@ -1,34 +1,25 @@
 const { buildResponse } = require("./index.js")
-const { delayed } = require('./index.test.js')
+const { delayed } = require("./index.test.js")
 
-describe('predicates', () => {
-
+describe("predicates", () => {
     describe("and", () => {
-        it('returns true if everything is true', async () => {
+        it("returns true if everything is true", async () => {
             const resp = buildResponse({
-                $and: [ 
-                    true,
-                    () => true,
-                    () => delayed(true)
-                ]
+                $and: [true, () => true, () => delayed(true)],
             })
-    
+
             const result = await resp
-    
+
             expect(result).toBe(true)
         })
-    
-        it('returns false if anything is false', async () => {
+
+        it("returns false if anything is false", async () => {
             const resp = buildResponse({
-                $and: [ 
-                    true,
-                    () => delayed(false), 
-                    () => true 
-                ]
+                $and: [true, () => delayed(false), () => true],
             })
-    
+
             const result = await resp
-    
+
             expect(result).toBe(false)
         })
     })
@@ -41,11 +32,11 @@ describe('predicates', () => {
                 value: {
                     $rule: {
                         name: "Jim",
-                        age: 29
+                        age: 29,
                     },
-                }
+                },
             })
-    
+
             expect(await resp.value).toBe(true)
         })
 
@@ -54,11 +45,11 @@ describe('predicates', () => {
                 age: 32,
                 value: {
                     $rule: {
-                        age: { $lt: 35 }
+                        age: { $lt: 35 },
                     },
-                }
+                },
             })
-    
+
             expect(await resp.value).toBe(true)
         })
 
@@ -67,13 +58,12 @@ describe('predicates', () => {
                 age: 35,
                 value: {
                     $rule: {
-                        age: { $lt: 32 }
+                        age: { $lt: 32 },
                     },
-                }
+                },
             })
-    
+
             expect(await resp.value).toBe(false)
         })
     })
 })
-

@@ -1,14 +1,16 @@
 const builtinDirectives = {
-    async $directives() { throw new Error("directives can only be defined at the root of a context")},
+    async $directives() {
+        throw new Error("directives can only be defined at the root of a context")
+    },
     async $if(obj) {
         const condition = await obj.condition
         return condition ? obj.then : obj.else
     },
-    
+
     async $rule(obj, { root }) {
         for (const key in obj) {
             const objVal = await obj[key]
-            
+
             if (objVal === Symbol.for("__true")) {
                 continue
             } else if (objVal === Symbol.for("__false")) {
@@ -26,7 +28,7 @@ const builtinDirectives = {
     },
     async $and(obj) {
         for (const value of obj) {
-            if (!await value) {
+            if (!(await value)) {
                 return false
             }
         }
@@ -47,7 +49,7 @@ const builtinDirectives = {
         const objValue = await obj
 
         return rootValue < objValue ? Symbol.for("__true") : Symbol.for("__false")
-    }
+    },
 }
 
 function buildResponse(...contexts) {
@@ -65,10 +67,11 @@ function buildResponse(...contexts) {
 }
 
 function normalizeDirectives(directives) {
-    if (!directives) { return undefined }
+    if (!directives) {
+        return undefined
+    }
 
-    const entries = Object.entries(directives)
-        .map(([k,v]) => [k[0]==="$" ? k : "$"+k, v])
+    const entries = Object.entries(directives).map(([k, v]) => [k[0] === "$" ? k : "$" + k, v])
 
     return Object.fromEntries(entries)
 }
@@ -77,7 +80,7 @@ function proxify(context, directives, root, prop) {
     if (typeof context === "function") {
         context = context()
     }
-    
+
     if (context === null || typeof context !== "object") {
         return context
     }
@@ -88,7 +91,6 @@ function proxify(context, directives, root, prop) {
     let key, directive
 
     if (keys.length === 1 && (key = keys[0]) && (directive = directives?.[key])) {
-        
         const directiveArgument = proxify(context[key], directives, root, prop)
 
         return proxify(directive(directiveArgument, { root, prop }), directives, root, prop)
@@ -102,22 +104,26 @@ function proxify(context, directives, root, prop) {
         root = proxy
     }
 
-    handler.get = function(target, prop) {
-
+    handler.get = function (target, prop) {
         if (Object.getOwnPropertyDescriptor(resolved, prop)) {
             return resolved[prop]
         }
-        
+
         // Is this a promise?
         const then = target?.then
         if (typeof then === "function") {
             if (prop === "then") {
                 return then.bind(target)
             } else {
-                return proxify(then.bind(target)(data => {
-                    const value = data[prop]
-                    return proxify(value, directives, root, prop)
-                }), directives, root, prop)
+                return proxify(
+                    then.bind(target)((data) => {
+                        const value = data[prop]
+                        return proxify(value, directives, root, prop)
+                    }),
+                    directives,
+                    root,
+                    prop
+                )
             }
         }
 
@@ -134,6 +140,6 @@ function proxify(context, directives, root, prop) {
     return proxy
 }
 
-module.exports = {  
-    buildResponse
+module.exports = {
+    buildResponse,
 }
