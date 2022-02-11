@@ -22,18 +22,19 @@ function chainify(context) {
             const next = target[prop]
             if (typeof next === "function") {
                 const result = next()
-                if (result.then) {
-                    return result
+                if (result.then && typeof result.then === "function") {
+                    return new Promise(r => result.then(resp => r(chainify(resp))))
                 } else {
                     return chainify(result)
                 }
+            } else {
+                return chainify(next)
             }
-            return chainify(next)
         }
     })
 }
 
-module.exports = {
+module.exports = {  
     buildResponse
 }
 

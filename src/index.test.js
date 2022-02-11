@@ -48,6 +48,38 @@ describe("buildResponse", () => {
 
         expect(await resp.a).toBe(500)
     })
+
+    it("works with a chain of promises", async () => {
+        const resp = buildResponse(
+            { 
+                a: () => ({
+                    b: delayed(500) 
+                })
+            }
+        )
+
+        expect(await resp.a.b).toBe(500)
+    })
+
+    it("works with a chain of functions", async () => {
+        const resp = buildResponse({ 
+            a: () => ({
+                b: () => ({
+                    c: 12345
+                })
+            })
+        })
+
+        expect(await resp.a.b.c).toBe(12345)
+    })
+
+    it("works with a function that returns a simple object", async () => {
+        const resp = buildResponse({ 
+            a: () => 123
+        })
+
+        expect(await resp.a).toBe(123)
+    })
 })
 
 async function delayed(response) {
