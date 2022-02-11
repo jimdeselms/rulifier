@@ -49,12 +49,26 @@ describe("buildResponse", () => {
         expect(await resp.a).toBe(500)
     })
 
-    it("works with a chain of promises", async () => {
+    it("works with a chain of functions that return promises", async () => {
         const resp = buildResponse(
             { 
                 a: () => delayed({
                     b: () => delayed({
                         c: () => delayed(12321)
+                    })
+                })
+            }
+        )
+
+        expect(await resp.a.b.c).toBe(12321)
+    })
+
+    it("works with a chain of promises", async () => {
+        const resp = buildResponse(
+            { 
+                a: delayed({
+                    b: delayed({
+                        c: delayed(12321)
                     })
                 })
             }
@@ -81,6 +95,41 @@ describe("buildResponse", () => {
         })
 
         expect(await resp.a).toBe(123)
+    })
+
+    it("ensures that functions that aren't referenced aren't evaluated", async () => {
+        let executed = false
+
+        const resp = buildResponse({
+            a: () => 123,
+            b: () => { 
+                executed = true
+            }
+        })
+
+        expect(await resp.a).toBe(123)
+        expect(executed).toBe(false)
+    })
+
+    it("ensures that functions only have to be executed a single time", async () => {
+        let executed = 0
+
+        const resp = buildResponse({
+            a: () => {
+                ++executed
+                return {
+                    b: 1,
+                    c: 2,
+                    d: 3
+                }
+            }
+        })
+
+        expect(await resp.a.b).toBe(1)
+        expect(await resp.a.c).toBe(2)
+        expect(await resp.a.d).toBe(3)
+
+        expect(executed).toBe(1)
     })
 })
 

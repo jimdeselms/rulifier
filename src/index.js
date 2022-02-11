@@ -13,9 +13,15 @@ function proxify(context) {
         return context
     }
 
+    const resolved = {}
+
     return new Proxy(context, {
         get: (target, prop, handler) => {
 
+            if (Object.getOwnPropertyDescriptor(resolved, prop)) {
+                return resolved[prop]
+            }
+            
             // Is this a promise?
             if (typeof target?.then === "function") {
                 if (prop === "then") {
@@ -28,9 +34,10 @@ function proxify(context) {
                 }
             }
 
-            const result = target[prop]
+            const result = proxify(target[prop])
+            resolved[prop] = result
 
-            return proxify(result)
+            return result
         }
     })
 }
