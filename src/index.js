@@ -1,7 +1,23 @@
 function buildResponse(...contexts) {
-    const merged = Object.assign({}, ...contexts)
+    const merged = {}
+
+    for (const context of contexts) {
+        const [values, directives] = splitValuesAndDirectives(context)
+        Object.assign(merged, values)
+    }
 
     return proxify(merged)
+}
+
+function splitValuesAndDirectives(obj) {
+    const values = {}
+    const directives = {}
+
+    for (const key in obj) {
+        (key.startsWith("$") ? directives : values)[key] = obj[key]
+    }
+
+    return [values, directives]
 }
 
 function proxify(context) {
