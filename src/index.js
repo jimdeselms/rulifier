@@ -1,25 +1,32 @@
+const builtinDirectives = {
+    async $directives() { throw new Error("directives can only be defined at the root of an object")},
+    async $if(obj) {
+        const condition = await obj.condition
+        return condition ? obj.ifTrue : obj.ifFalse
+    }
+}
+
 function buildResponse(...contexts) {
     const merged = {}
-    const directives = {}
+    const directives = Object.assign({}, builtinDirectives)
 
     for (const context of contexts) {
-        const [values, currDirectives] = splitValuesAndDirectives(context)
-        Object.assign(merged, values)
-        Object.assign(directives, currDirectives)
+        Object.assign(merged, context)
+        Object.assign(directives, normalizeDirectives(context.$directives))
     }
+
+    delete merged.$directives
 
     return proxify(merged, directives)
 }
 
-function splitValuesAndDirectives(obj) {
-    const values = {}
-    const directives = {}
+function normalizeDirectives(directives) {
+    if (!directives) { return undefined }
 
-    for (const [key, value] of Object.entries(obj)) {
-        (key.startsWith("$") ? directives : values)[key] = value
-    }
+    const entries = Object.entries(directives)
+        .map(([k,v]) => [k[0]==="$" ? k : "$"+k, v])
 
-    return [values, directives]
+    return Object.fromEntries(entries)
 }
 
 function proxify(context, directives) {
@@ -34,10 +41,10 @@ function proxify(context, directives) {
     const resolved = {}
 
     const keys = Object.keys(context)
-    let directive
+    let key, directive
 
-    if (keys.length === 1 && (directive = directives[keys[0]])) {
-        console.log("found a directive")
+    if (keys.length === 1 && (key = keys[0]) && (directive = directives[key])) {
+        return proxify(directive(context[key]))
     }
 
     return new Proxy(context, {
@@ -70,15 +77,3 @@ function proxify(context, directives) {
 module.exports = {  
     buildResponse
 }
-
-
-
-
-
-/*
-
-What I want is to return a promise which also happens to have the properties of the next thing in the chain.
-So, if you call "then" on the thing, then you'll resolve the promise.
-// If you get one of the other properties, then you'll get the other thing.
-
-*/

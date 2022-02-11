@@ -130,6 +130,29 @@ describe("buildResponse", () => {
 
         expect(executed).toBe(1)
     })
+
+    it("knows about directives", async () => {
+        const resp = buildResponse({
+            $directives: {
+                capitalize: (name) => name.toUpperCase()
+            },
+            name: {
+                $capitalize: "Fred"
+            }
+        })
+
+        expect(await resp.name).toBe("FRED")
+    })
+
+    it("a response can have more context added to it", async () => {
+        const resp = buildResponse({a: 1})
+        const resp2 = buildResponse(resp, {b: 2})
+        const resp3 = buildResponse(resp2, { c: 3 })
+
+        expect(await resp3.a).toBe(1)
+        expect(await resp3.b).toBe(2)
+        expect(await resp3.c).toBe(3)
+    })
 })
 
 async function delayed(response) {
