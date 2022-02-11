@@ -1,34 +1,27 @@
 function buildResponse(...contexts) {
     const merged = Object.assign({}, ...contexts)
 
-    return chainify(merged)
+    return proxify(merged)
 }
 
-function chainify(context) {
+function proxify(context) {
     if (context === null || typeof context !== "object") {
+        return context
+    }
+
+    const then = context.then
+    if (typeof then === "function") {
         return context
     }
 
     return new Proxy(context, {
         get: (target, prop, handler) => {
-            if (prop === "then") {
-                if (target.then) {
-                    return target.then
-                } else {
-                    return target
-                }
-            }
+            const result = target[prop]
 
-            const next = target[prop]
-            if (typeof next === "function") {
-                const result = next()
-                if (result.then && typeof result.then === "function") {
-                    return new Promise(r => result.then(resp => r(chainify(resp))))
-                } else {
-                    return chainify(result)
-                }
+            if (typeof result === "function") {
+                return proxify(result())
             } else {
-                return chainify(next)
+                return proxify(result)
             }
         }
     })

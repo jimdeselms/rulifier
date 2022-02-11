@@ -52,9 +52,9 @@ describe("buildResponse", () => {
     it("works with a chain of promises", async () => {
         const resp = buildResponse(
             { 
-                a: () => ({
+                a: () => delayed(({
                     b: delayed(500) 
-                })
+                }))
             }
         )
 
