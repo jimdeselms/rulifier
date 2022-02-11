@@ -61,6 +61,19 @@ describe('predicates', () => {
     
             expect(await resp.value).toBe(true)
         })
+
+        it("returns false the current value is not less than the given value", async () => {
+            const resp = buildResponse({
+                age: 35,
+                value: {
+                    $rule: {
+                        age: { $lt: 32 }
+                    },
+                }
+            })
+    
+            expect(await resp.value).toBe(false)
+        })
     })
 })
 
