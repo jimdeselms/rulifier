@@ -65,7 +65,7 @@ describe("buildResponse", () => {
         const resp = buildResponse({ 
             a: () => ({
                 b: () => ({
-                    c: 12345
+                    c: () => 12345
                 })
             })
         })

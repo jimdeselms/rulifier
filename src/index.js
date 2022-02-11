@@ -19,7 +19,11 @@ function proxify(context) {
                 } else {
                     return target.then.bind(target)(data => {
                         const value = data[prop]
-                        return proxify(value)
+                        if (typeof value === "function") {
+                            return proxify(value())
+                        } else {
+                            return proxify(value)
+                        }
                     })
                 }
             }
