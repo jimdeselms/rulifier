@@ -5,6 +5,9 @@ function buildResponse(...contexts) {
 }
 
 function proxify(context) {
+    if (typeof context === "function") {
+        context = context()
+    }
     if (context === null || typeof context !== "object") {
         return context
     }
@@ -19,22 +22,14 @@ function proxify(context) {
                 } else {
                     return target.then.bind(target)(data => {
                         const value = data[prop]
-                        if (typeof value === "function") {
-                            return proxify(value())
-                        } else {
-                            return proxify(value)
-                        }
+                        return proxify(value)
                     })
                 }
             }
 
             const result = target[prop]
 
-            if (typeof result === "function") {
-                return proxify(result())
-            } else {
-                return proxify(result)
-            }
+            return proxify(result)
         }
     })
 }
