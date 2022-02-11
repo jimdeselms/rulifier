@@ -1,13 +1,21 @@
 const builtinDirectives = {
-    async $directives() { throw new Error("directives can only be defined at the root of an object")},
+    async $directives() { throw new Error("directives can only be defined at the root of a context")},
     async $if(obj) {
         const condition = await obj.condition
         return condition ? obj.then : obj.else
     },
-    async $rule(obj, root) {
+    
+    async $rule(obj, { root }) {
         for (const key in obj) {
-            const objVal = await obj.value
-            const rootVal = await root.value
+            const objVal = await obj[key]
+            
+            if (objVal === Symbol.for("__true")) {
+                continue
+            } else if (objVal === Symbol.for("__false")) {
+                return false
+            }
+
+            const rootVal = await root[key]
 
             if (objVal !== rootVal) {
                 return false
@@ -16,7 +24,7 @@ const builtinDirectives = {
 
         return true
     },
-    async $and(obj, root) {
+    async $and(obj) {
         for (const value of obj) {
             if (!await value) {
                 return false
@@ -24,13 +32,21 @@ const builtinDirectives = {
         }
         return true
     },
-    async $or(obj, root) {
+
+    async $or(obj) {
         for (const value of obj) {
             if (await value) {
                 return true
             }
         }
         return false
+    },
+
+    async $lt(obj, { root, prop }) {
+        const rootValue = await root[prop]
+        const objValue = await obj
+
+        return rootValue < objValue ? Symbol.for("__true") : Symbol.for("__false")
     }
 }
 
@@ -57,7 +73,7 @@ function normalizeDirectives(directives) {
     return Object.fromEntries(entries)
 }
 
-function proxify(context, directives, root) {
+function proxify(context, directives, root, prop) {
     if (typeof context === "function") {
         context = context()
     }
@@ -71,46 +87,48 @@ function proxify(context, directives, root) {
     const keys = Object.keys(context)
     let key, directive
 
-    if (keys.length === 1 && (key = keys[0]) && (directive = directives[key])) {
+    if (keys.length === 1 && (key = keys[0]) && (directive = directives?.[key])) {
         
-        const directiveArgument = proxify(context[key])
+        const directiveArgument = proxify(context[key], directives, root, prop)
 
-        return proxify(directive(directiveArgument, root), directives, root)
+        return proxify(directive(directiveArgument, { root, prop }), directives, root, prop)
     }
 
-    const proxy = new Proxy(context, {
-        get: (target, prop, handler) => {
+    const handler = {}
 
-            if (Object.getOwnPropertyDescriptor(resolved, prop)) {
-                return resolved[prop]
-            }
-            
-            // Is this a promise?
-            const then = target?.then
-            if (typeof then === "function") {
-                if (prop === "then") {
-                    return then.bind(target)
-                } else {
-                    return proxify(then.bind(target)(data => {
-                        const value = data[prop]
-                        return proxify(value, directives, root)
-                    }), directives, root)
-                }
-            }
-
-            if (prop === Symbol.iterator) {
-                return target[Symbol.iterator]
-            }
-
-            const result = proxify(target[prop], directives, root)
-            resolved[prop] = result
-
-            return result
-        }
-    })
+    const proxy = new Proxy(context, handler)
 
     if (root === undefined) {
         root = proxy
+    }
+
+    handler.get = function(target, prop) {
+
+        if (Object.getOwnPropertyDescriptor(resolved, prop)) {
+            return resolved[prop]
+        }
+        
+        // Is this a promise?
+        const then = target?.then
+        if (typeof then === "function") {
+            if (prop === "then") {
+                return then.bind(target)
+            } else {
+                return proxify(then.bind(target)(data => {
+                    const value = data[prop]
+                    return proxify(value, directives, root, prop)
+                }), directives, root, prop)
+            }
+        }
+
+        if (prop === Symbol.iterator) {
+            return target[Symbol.iterator]
+        }
+
+        const result = proxify(target[prop], directives, root, prop)
+        resolved[prop] = result
+
+        return result
     }
 
     return proxy
