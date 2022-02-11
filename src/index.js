@@ -9,13 +9,21 @@ function proxify(context) {
         return context
     }
 
-    const then = context.then
-    if (typeof then === "function") {
-        return context
-    }
-
     return new Proxy(context, {
         get: (target, prop, handler) => {
+
+            // Is this a promise?
+            if (typeof target?.then === "function") {
+                if (prop === "then") {
+                    return target.then.bind(target)
+                } else {
+                    return target.then.bind(target)(data => {
+                        const value = data[prop]
+                        return proxify(value)
+                    })
+                }
+            }
+
             const result = target[prop]
 
             if (typeof result === "function") {

@@ -52,13 +52,13 @@ describe("buildResponse", () => {
     it("works with a chain of promises", async () => {
         const resp = buildResponse(
             { 
-                a: () => delayed(({
-                    b: delayed(500) 
-                }))
+                a: () => delayed({
+                    b: () => delayed(12321)
+                })
             }
         )
-
-        expect(await resp.a.b).toBe(500)
+        
+        expect(await resp.a.b).toBe(12321)
     })
 
     it("works with a chain of functions", async () => {
