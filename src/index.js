@@ -8,6 +8,7 @@ function proxify(context) {
     if (typeof context === "function") {
         context = context()
     }
+    
     if (context === null || typeof context !== "object") {
         return context
     }
@@ -20,10 +21,10 @@ function proxify(context) {
                 if (prop === "then") {
                     return target.then.bind(target)
                 } else {
-                    return target.then.bind(target)(data => {
+                    return proxify(target.then.bind(target)(data => {
                         const value = data[prop]
                         return proxify(value)
-                    })
+                    }))
                 }
             }
 
