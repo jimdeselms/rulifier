@@ -5,8 +5,8 @@ describe('if', () => {
         const resp = buildResponse({
             $if: {
                 condition: true,
-                ifTrue: 1,
-                ifFalse: 2
+                then: 1,
+                else: 2
             }
         })
 
@@ -19,8 +19,8 @@ describe('if', () => {
         const resp = buildResponse({
             $if: {
                 condition: false,
-                ifTrue: 1,
-                ifFalse: 2
+                then: 1,
+                else: 2
             }
         })
 
