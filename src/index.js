@@ -1,26 +1,28 @@
 function buildResponse(...contexts) {
     const merged = {}
+    const directives = {}
 
     for (const context of contexts) {
-        const [values, directives] = splitValuesAndDirectives(context)
+        const [values, currDirectives] = splitValuesAndDirectives(context)
         Object.assign(merged, values)
+        Object.assign(directives, currDirectives)
     }
 
-    return proxify(merged)
+    return proxify(merged, directives)
 }
 
 function splitValuesAndDirectives(obj) {
     const values = {}
     const directives = {}
 
-    for (const key in obj) {
-        (key.startsWith("$") ? directives : values)[key] = obj[key]
+    for (const [key, value] of Object.entries(obj)) {
+        (key.startsWith("$") ? directives : values)[key] = value
     }
 
     return [values, directives]
 }
 
-function proxify(context) {
+function proxify(context, directives) {
     if (typeof context === "function") {
         context = context()
     }
@@ -30,6 +32,13 @@ function proxify(context) {
     }
 
     const resolved = {}
+
+    const keys = Object.keys(context)
+    let directive
+
+    if (keys.length === 1 && (directive = directives[keys[0]])) {
+        console.log("found a directive")
+    }
 
     return new Proxy(context, {
         get: (target, prop, handler) => {
@@ -45,12 +54,12 @@ function proxify(context) {
                 } else {
                     return proxify(target.then.bind(target)(data => {
                         const value = data[prop]
-                        return proxify(value)
-                    }))
+                        return proxify(value, directives)
+                    }), directives)
                 }
             }
 
-            const result = proxify(target[prop])
+            const result = proxify(target[prop], directives)
             resolved[prop] = result
 
             return result

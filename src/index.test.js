@@ -1,11 +1,10 @@
 const { buildResponse } = require("./index.js")
 
 describe("buildResponse", () => {
-    it("works", async () => {
-        const resp = buildResponse({a: 1, b: { c: 3 }})
+    it("simple chain", async () => {
+        const resp = buildResponse({a: { b: 5 }})
 
-        expect(await resp.a).toBe(1)
-        expect(await resp.b.c).toBe(3)
+        expect(await resp.a.b).toBe(5)
     })
 
     it("can handle merged objects, and later objects replace earlier ones", async () => {
