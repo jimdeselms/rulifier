@@ -42,7 +42,7 @@ const builtinDirectives = {
             const val1 = await i1[prop]
             const val2 = await i2[prop]
 
-            if (!await builtinDirectives.$eq([val1, val2])) {
+            if (!await builtinDirectives.$match(val1, { root: val2, prop })) {
                 return false
             }
         }

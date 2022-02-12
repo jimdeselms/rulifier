@@ -218,7 +218,7 @@ describe("predicates", () => {
                                 size: "Large",
                                 dimensions: {
                                     width: 10,
-                                    height: 20
+                                    height: { $lt: 21 }
                                 }
                             }
                         }

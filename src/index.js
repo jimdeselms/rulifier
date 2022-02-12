@@ -112,6 +112,10 @@ function proxify(context, directives, root, prop) {
     return proxy
 }
 
+function get(target, prop, root) {
+    
+}
+
 module.exports = {
     buildResponse: rulify,
 }
