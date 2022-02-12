@@ -1,58 +1,10 @@
-const builtinDirectives = {
-    async $directives() {
-        throw new Error("directives can only be defined at the root of a context")
-    },
-    async $if(obj) {
-        const condition = await obj.condition
-        return condition ? obj.then : obj.else
-    },
+const { builtinDirectives } = require('./builtinDirectives')
 
-    async $rule(obj, { root }) {
-        for (const key in obj) {
-            const objVal = await obj[key]
-
-            if (objVal === Symbol.for("__true")) {
-                continue
-            } else if (objVal === Symbol.for("__false")) {
-                return false
-            }
-
-            const rootVal = await root[key]
-
-            if (objVal !== rootVal) {
-                return false
-            }
-        }
-
-        return true
-    },
-    async $and(obj) {
-        for (const value of obj) {
-            if (!(await value)) {
-                return false
-            }
-        }
-        return true
-    },
-
-    async $or(obj) {
-        for (const value of obj) {
-            if (await value) {
-                return true
-            }
-        }
-        return false
-    },
-
-    async $lt(obj, { root, prop }) {
-        const rootValue = await root[prop]
-        const objValue = await obj
-
-        return rootValue < objValue ? Symbol.for("__true") : Symbol.for("__false")
-    },
-}
-
-function buildResponse(...contexts) {
+/**
+ * @param  {...Record<any, any>} contexts 
+ * @returns {any}
+ */
+function rulify(...contexts) {
     const root = {}
     const directives = Object.assign({}, builtinDirectives)
 
@@ -141,5 +93,5 @@ function proxify(context, directives, root, prop) {
 }
 
 module.exports = {
-    buildResponse,
+    buildResponse: rulify,
 }

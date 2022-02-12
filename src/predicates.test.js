@@ -65,5 +65,18 @@ describe("predicates", () => {
 
             expect(await resp.value).toBe(false)
         })
+
+        it("in", async () => {
+            const resp = buildResponse({
+                age: 35,
+                value: {
+                    $rule: {
+                        age: { $in: [30, 35, 40] }
+                    }
+                }
+            })
+
+            expect(await resp.value).toBe(true)
+        })
     })
 })
