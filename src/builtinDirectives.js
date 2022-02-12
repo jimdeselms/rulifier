@@ -1,5 +1,5 @@
-const TRUE = Symbol.for("__TRUE")
-const FALSE = Symbol.for("__FALSE")
+const ROOT_CONTEXT_TRUE = Symbol.for("__TRUE")
+const ROOT_CONTEXT_FALSE = Symbol.for("__FALSE")
 
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
@@ -51,9 +51,7 @@ const builtinDirectives = {
             if (typeof y === "string") {
                 return new RegExp(y).test(x)
             } else {
-                const pattern = await y.pattern
-                const flags = await y.flags
-                return new RegExp(pattern, flags).test(x)
+                return new RegExp(y.pattern, y.flags).test(x)
             }
         }),
 
@@ -62,27 +60,31 @@ const builtinDirectives = {
 
         for (const entry of obj) {
             if ((await entry) === lhs) {
-                return TRUE
+                return ROOT_CONTEXT_TRUE
             }
         }
 
-        return FALSE
+        return ROOT_CONTEXT_FALSE
     },
 }
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
-    const lhs = await root[prop]
-    const rhs = await obj
+    obj = await obj
 
-    const result = await predicate(lhs, rhs)
-    return result ? TRUE : FALSE
+    if (Array.isArray(obj)) {
+        // We're not in the root context; just compare the two things in the array.
+        return predicate(obj[0], obj[1])
+    } else {
+        // In the root context, we compare against a property of the root.
+        return (await predicate(root[prop], obj)) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
+    }
 }
 
 async function eq(item1, item2, match) {
     const i1 = await item1
     const i2 = await item2
 
-    if (i1 === i2 || i1 === TRUE) {
+    if (i1 === i2 || i1 === ROOT_CONTEXT_TRUE) {
         return true
     }
 
@@ -110,8 +112,8 @@ async function eq(item1, item2, match) {
     for (const prop of props) {
         // Since we might have directives here that care about the root, we want to replace the root, so let's use the
         // "GET_WITH_NEW_ROOT" function
-        const val1 = await i1[GET_WITH_NEW_ROOT](i2, prop)
-        const val2 = await i2[prop]
+        const val1 = i1[GET_WITH_NEW_ROOT](i2, prop)
+        const val2 = i2[prop]
 
         if (!(await eq(val1, val2, match))) {
             return false

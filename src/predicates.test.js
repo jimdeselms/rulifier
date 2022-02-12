@@ -24,6 +24,12 @@ describe("predicates", () => {
         })
     })
 
+    describe("binary operators", () => {
+        it("lt", async () => {
+            expect(await buildResponse({ $lt: [5, 10] })).toBe(true)
+        })
+    })
+
     describe("match", () => {
         it("understands simple rules", async () => {
             const resp = buildResponse({
