@@ -15,7 +15,12 @@ const builtinDirectives = {
     },
 
     async $match(obj, { root }) {
-        return eq(obj, root, true)
+        obj = await obj
+        if (Array.isArray(obj)) {
+            return eq(obj[0], obj[1], true, false)
+        } else {
+            return eq(obj, root, true, true)
+        }
     },
 
     async $eq([item1, item2]) {
@@ -73,14 +78,14 @@ async function evaluateBinary(obj, { root, prop }, predicate) {
 
     if (Array.isArray(obj)) {
         // We're not in the root context; just compare the two things in the array.
-        return predicate(obj[0], obj[1])
+        return predicate(await obj[0], await obj[1])
     } else {
         // In the root context, we compare against a property of the root.
-        return (await predicate(root[prop], obj)) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
+        return (await predicate(await root[prop], await obj)) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
     }
 }
 
-async function eq(item1, item2, match) {
+async function eq(item1, item2, match, useRootContext) {
     const i1 = await item1
     const i2 = await item2
 
@@ -112,10 +117,12 @@ async function eq(item1, item2, match) {
     for (const prop of props) {
         // Since we might have directives here that care about the root, we want to replace the root, so let's use the
         // "GET_WITH_NEW_ROOT" function
-        const val1 = i1[GET_WITH_NEW_ROOT](i2, prop)
+        const val1 = useRootContext
+            ? i1[GET_WITH_NEW_ROOT](i2, prop)
+            : i1[prop]
         const val2 = i2[prop]
 
-        if (!(await eq(val1, val2, match))) {
+        if (!(await eq(val1, val2, match, useRootContext))) {
             return false
         }
     }

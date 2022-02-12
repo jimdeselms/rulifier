@@ -24,10 +24,81 @@ describe("predicates", () => {
         })
     })
 
-    describe("binary operators", () => {
-        it("lt", async () => {
-            expect(await buildResponse({ $lt: [5, 10] })).toBe(true)
-        })
+    test("binary operators", async () => {
+        expect(await buildResponse({ $lt: [5, 10] })).toBe(true)
+        expect(await buildResponse({ $lt: [15, 10] })).toBe(false)
+
+        expect(await buildResponse({ $lte: [9, 10] })).toBe(true)
+        expect(await buildResponse({ $lte: [10, 10] })).toBe(true)
+        expect(await buildResponse({ $lte: delayed([11, 10]) })).toBe(false)
+
+        expect(await buildResponse({ $gt: [5, delayed(10)] })).toBe(false)
+        expect(await buildResponse({ $gt: [5, 10] })).toBe(false)
+        expect(await buildResponse({ $gt: [15, 10] })).toBe(true)
+
+        expect(await buildResponse({ $gte: [9, 10] })).toBe(false)
+        expect(await buildResponse({ $gte: [10, () => 10] })).toBe(true)
+        expect(await buildResponse({ $gte: [11, 10] })).toBe(true)
+
+        expect(await buildResponse({ $eq: [5, delayed(5)]})).toBe(true)
+        expect(await buildResponse({ $eq: [5, 10]})).toBe(false)
+
+        expect(await buildResponse({ $ne: [5, 5]})).toBe(false)
+        expect(await buildResponse({ $ne: [5, 10]})).toBe(true)
+    })
+
+    test("binary match", async () => {
+        expect(await buildResponse(
+            {
+                $directives: {
+                    async $capitalize(str) { 
+                        return (await str).toUpperCase() 
+                    }
+                }
+            },
+            {
+                $match: [
+                    {
+                        name: "Fred",
+                        details: {
+                            friends: () => delayed([ "BILL", "STEVE" ])
+                        }
+                    },
+                    {
+                        name: "Fred",
+                        details: {
+                            friends: [ { $capitalize: "bill" }, { $capitalize: "steve" }]
+                        }
+                    }
+                ]
+            }
+        )).toBe(true)
+
+        expect(await buildResponse(
+            {
+                $directives: {
+                    async $capitalize(str) { 
+                        return (await str).toUpperCase() 
+                    }
+                }
+            },
+            {
+                $match: [
+                    {
+                        name: "Fred",
+                        details: {
+                            friends: () => delayed([ "TED", "STEVE" ])
+                        }
+                    },
+                    {
+                        name: "Fred",
+                        details: {
+                            friends: [ { $capitalize: "bill" }, { $capitalize: "steve" }]
+                        }
+                    }
+                ]
+            }
+        )).toBe(false)
     })
 
     describe("match", () => {
