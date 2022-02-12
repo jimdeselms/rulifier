@@ -1,19 +1,31 @@
 const { builtinDirectives } = require('./builtinDirectives')
 
+const RAW_VALUE = Symbol.for("__RAW_VALUE")
+const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
+
 /**
  * @param  {...Record<any, any>} contexts 
  * @returns {any}
  */
 function rulify(...contexts) {
     const root = {}
-    const directives = Object.assign({}, builtinDirectives)
+    let directives = {}
+
+    let alreadyRulified = false
 
     for (const context of contexts) {
+        if (context[IS_RULIFIED]) {
+            alreadyRulified = true
+        }
         Object.assign(root, context)
         Object.assign(directives, normalizeDirectives(context.$directives))
     }
 
     delete root.$directives
+
+    if (!alreadyRulified) {
+        directives = Object.assign({}, builtinDirectives, directives)
+    }
 
     return proxify(root, directives)
 }
@@ -57,6 +69,14 @@ function proxify(context, directives, root, prop) {
     }
 
     handler.get = function (target, prop) {
+        if (prop === RAW_VALUE) {
+            return target
+        }
+
+        if (prop === IS_RULIFIED) {
+            return true
+        }
+
         if (Object.getOwnPropertyDescriptor(resolved, prop)) {
             return resolved[prop]
         }

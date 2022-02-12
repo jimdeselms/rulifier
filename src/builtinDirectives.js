@@ -1,6 +1,8 @@
 const TRUE = Symbol.for("__TRUE")
 const FALSE = Symbol.for("__FALSE")
 
+const RAW_VALUE = Symbol.for("__RAW_VALUE")
+
 const builtinDirectives = {
     async $directives() {
         throw new Error("directives can only be defined at the root of a context")
@@ -22,7 +24,9 @@ const builtinDirectives = {
 
             const rootVal = await root[key]
 
-            if (objVal !== rootVal) {
+            if (objVal instanceof RegExp) {
+                return objVal[RAW_VALUE].test(rootVal)
+            } else if (objVal !== rootVal) {
                 return false
             }
         }
@@ -52,6 +56,15 @@ const builtinDirectives = {
     $gt: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x > y),
     $gte: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x >= y),
     $ne: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x !== y),
+    $regex: (obj, opt) => evaluateBinary(obj, opt, async (x, y) => {
+        if (typeof y === "string") {
+            return new RegExp(y).test(x)
+        } else {
+            const pattern = await y.pattern
+            const flags = await y.flags
+            return new RegExp(pattern, flags).test(x)
+        }
+    }),
 
     async $in(obj, {root, prop}) {
         const lhs = await root[prop]
@@ -65,13 +78,15 @@ const builtinDirectives = {
         return FALSE
     }
 
+
 }
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
     const lhs = await root[prop]
     const rhs = await obj
 
-    return predicate(lhs, rhs) ? TRUE : FALSE
+    const result = await predicate(lhs, rhs)
+    return result ? TRUE : FALSE
 }
 
 module.exports = { builtinDirectives }
