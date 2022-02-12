@@ -77,16 +77,12 @@ function proxify(context, directives, root, prop) {
 }
 
 function get(target, prop, root, directives, resolved) {
-    if (prop === RAW_VALUE) {
-        return target
-    }
-
-    if (prop === IS_RULIFIED) {
-        return true
-    }
-
-    if (prop === GET_WITH_NEW_ROOT) {
-        return (newRoot, newProp) => get(target, newProp, newRoot, directives, resolved)
+    // Handle these special properties first. Switch is faster than an if-else chain.
+    switch (prop) {
+        case RAW_VALUE: return target
+        case IS_RULIFIED: return true
+        case GET_WITH_NEW_ROOT: return (newRoot, newProp) => get(target, newProp, newRoot, directives, resolved)
+        case Symbol.iterator: return target[Symbol.iterator]
     }
 
     if (Object.getOwnPropertyDescriptor(resolved, prop)) {
@@ -109,10 +105,6 @@ function get(target, prop, root, directives, resolved) {
                 prop
             )
         }
-    }
-
-    if (prop === Symbol.iterator) {
-        return target[Symbol.iterator]
     }
 
     const result = proxify(target[prop], directives, root, prop)
