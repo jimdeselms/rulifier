@@ -1,11 +1,11 @@
-const { builtinDirectives } = require('./builtinDirectives')
+const { builtinDirectives } = require("./builtinDirectives")
 
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
 const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
 
 /**
- * @param  {...Record<any, any>} contexts 
+ * @param  {...Record<any, any>} contexts
  * @returns {any}
  */
 function rulify(...contexts) {
@@ -79,10 +79,14 @@ function proxify(context, directives, root, prop) {
 function get(target, prop, root, directives, resolved) {
     // Handle these special properties first. Switch is faster than an if-else chain.
     switch (prop) {
-        case RAW_VALUE: return target
-        case IS_RULIFIED: return true
-        case GET_WITH_NEW_ROOT: return (newRoot, newProp) => get(target, newProp, newRoot, directives, resolved)
-        case Symbol.iterator: return target[Symbol.iterator]
+        case RAW_VALUE:
+            return target
+        case IS_RULIFIED:
+            return true
+        case GET_WITH_NEW_ROOT:
+            return (newRoot, newProp) => get(target, newProp, newRoot, directives, resolved)
+        case Symbol.iterator:
+            return target[Symbol.iterator]
     }
 
     if (Object.getOwnPropertyDescriptor(resolved, prop)) {

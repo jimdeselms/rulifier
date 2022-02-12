@@ -8,6 +8,7 @@ const builtinDirectives = {
     async $directives() {
         throw new Error("directives can only be defined at the root of a context")
     },
+
     async $if(obj) {
         const condition = await obj.condition
         return condition ? obj.then : obj.else
@@ -45,27 +46,28 @@ const builtinDirectives = {
     $gte: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x >= y),
     $ne: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x !== y),
 
-    $regex: (obj, opt) => evaluateBinary(obj, opt, async (x, y) => {
-        if (typeof y === "string") {
-            return new RegExp(y).test(x)
-        } else {
-            const pattern = await y.pattern
-            const flags = await y.flags
-            return new RegExp(pattern, flags).test(x)
-        }
-    }),
+    $regex: (obj, opt) =>
+        evaluateBinary(obj, opt, async (x, y) => {
+            if (typeof y === "string") {
+                return new RegExp(y).test(x)
+            } else {
+                const pattern = await y.pattern
+                const flags = await y.flags
+                return new RegExp(pattern, flags).test(x)
+            }
+        }),
 
-    async $in(obj, {root, prop}) {
+    async $in(obj, { root, prop }) {
         const lhs = await root[prop]
 
         for (const entry of obj) {
-            if (await entry === lhs) {
+            if ((await entry) === lhs) {
                 return TRUE
             }
         }
 
         return FALSE
-    }
+    },
 }
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
@@ -88,7 +90,7 @@ async function eq(item1, item2, match) {
     if (i1 === null || i2 === null) {
         return false
     }
-    
+
     if (typeof i2 === "string" && i1 instanceof RegExp) {
         return i1[RAW_VALUE].test(i2)
     }
@@ -106,12 +108,12 @@ async function eq(item1, item2, match) {
 
     // Now just make sure that every property of i1 matches i2.
     for (const prop of props) {
-        // Since we might have directives here that care about the root, we want to replace the root, so let's use the 
+        // Since we might have directives here that care about the root, we want to replace the root, so let's use the
         // "GET_WITH_NEW_ROOT" function
         const val1 = await i1[GET_WITH_NEW_ROOT](i2, prop)
         const val2 = await i2[prop]
 
-        if (!await eq(val1, val2, match)) {
+        if (!(await eq(val1, val2, match))) {
             return false
         }
     }

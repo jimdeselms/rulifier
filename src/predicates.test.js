@@ -151,22 +151,22 @@ describe("predicates", () => {
                 age: 35,
                 value: {
                     $match: {
-                        age: { $in: [30, 35, 40] }
-                    }
-                }
+                        age: { $in: [30, 35, 40] },
+                    },
+                },
             })
 
             expect(await resp.value).toBe(true)
         })
-        
+
         it("false if not in", async () => {
             const resp = buildResponse({
                 age: 34,
                 value: {
                     $match: {
-                        age: { $in: [30, 35, 40] }
-                    }
-                }
+                        age: { $in: [30, 35, 40] },
+                    },
+                },
             })
 
             expect(await resp.value).toBe(false)
@@ -177,9 +177,9 @@ describe("predicates", () => {
                 arr: [5, 10, 15],
                 value: {
                     $match: {
-                        arr: [5, 10, 15]
-                    }
-                }
+                        arr: [5, 10, 15],
+                    },
+                },
             })
 
             expect(await resp.value).toBe(true)
@@ -190,9 +190,9 @@ describe("predicates", () => {
                 arr: [5, 10, 12],
                 value: {
                     $match: {
-                        arr: [5, 10, 15]
-                    }
-                }
+                        arr: [5, 10, 15],
+                    },
+                },
             })
 
             expect(await resp.value).toBe(false)
@@ -206,9 +206,9 @@ describe("predicates", () => {
                         size: "Large",
                         dimensions: {
                             width: 10,
-                            height: 20
-                        }
-                    }
+                            height: 20,
+                        },
+                    },
                 },
                 value: {
                     $match: {
@@ -218,12 +218,12 @@ describe("predicates", () => {
                                 size: "Large",
                                 dimensions: {
                                     width: 10,
-                                    height: { $lt: 21 }
-                                }
-                            }
-                        }
-                    }
-                }
+                                    height: { $lt: 21 },
+                                },
+                            },
+                        },
+                    },
+                },
             })
 
             expect(await resp.value).toBe(true)
@@ -237,9 +237,9 @@ describe("predicates", () => {
                         size: "Large",
                         dimensions: {
                             width: 10,
-                            height: 20
-                        }
-                    }
+                            height: 20,
+                        },
+                    },
                 },
                 value: {
                     $match: {
@@ -249,12 +249,12 @@ describe("predicates", () => {
                                 size: "Large",
                                 dimensions: {
                                     width: 10,
-                                    height: 21
-                                }
-                            }
-                        }
-                    }
-                }
+                                    height: 21,
+                                },
+                            },
+                        },
+                    },
+                },
             })
 
             expect(await resp.value).toBe(false)
