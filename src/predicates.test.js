@@ -24,13 +24,13 @@ describe("predicates", () => {
         })
     })
 
-    describe("rule", () => {
+    describe("match", () => {
         it("understands simple rules", async () => {
             const resp = buildResponse({
                 name: "Jim",
                 age: 29,
                 value: {
-                    $rule: {
+                    $match: {
                         name: "Jim",
                         age: 29,
                     },
@@ -43,8 +43,10 @@ describe("predicates", () => {
         it("returns true the current value is less than the given value", async () => {
             const resp = buildResponse({
                 age: 32,
+                name: "Fred",
                 value: {
-                    $rule: {
+                    $match: {
+                        name: "Fred",
                         age: { $lt: 35 },
                     },
                 },
@@ -57,7 +59,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 age: 35,
                 value: {
-                    $rule: {
+                    $match: {
                         age: { $lt: 32 },
                     },
                 },
@@ -70,7 +72,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 name: "FRED",
                 value: {
-                    $rule: {
+                    $match: {
                         name: /ed/i,
                     },
                 },
@@ -83,7 +85,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 name: "Bill",
                 value: {
-                    $rule: {
+                    $match: {
                         name: /ed/,
                     },
                 },
@@ -96,7 +98,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 name: "Fred",
                 value: {
-                    $rule: {
+                    $match: {
                         name: { $regex: "ed" },
                     },
                 },
@@ -109,7 +111,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 name: "Bill",
                 value: {
-                    $rule: {
+                    $match: {
                         name: { $regex: "ed" },
                     },
                 },
@@ -122,7 +124,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 name: "Fred",
                 value: {
-                    $rule: {
+                    $match: {
                         name: { $regex: { pattern: "ED", flags: "i" } },
                     },
                 },
@@ -135,7 +137,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 name: "Bill",
                 value: {
-                    $rule: {
+                    $match: {
                         name: { $regex: { pattern: "ed", flags: "i" } },
                     },
                 },
@@ -148,7 +150,7 @@ describe("predicates", () => {
             const resp = buildResponse({
                 age: 35,
                 value: {
-                    $rule: {
+                    $match: {
                         age: { $in: [30, 35, 40] }
                     }
                 }
@@ -161,8 +163,96 @@ describe("predicates", () => {
             const resp = buildResponse({
                 age: 34,
                 value: {
-                    $rule: {
+                    $match: {
                         age: { $in: [30, 35, 40] }
+                    }
+                }
+            })
+
+            expect(await resp.value).toBe(false)
+        })
+
+        it("can match arrays", async () => {
+            const resp = buildResponse({
+                arr: [5, 10, 15],
+                value: {
+                    $match: {
+                        arr: [5, 10, 15]
+                    }
+                }
+            })
+
+            expect(await resp.value).toBe(true)
+        })
+
+        it("can't match arrays that are different", async () => {
+            const resp = buildResponse({
+                arr: [5, 10, 12],
+                value: {
+                    $match: {
+                        arr: [5, 10, 15]
+                    }
+                }
+            })
+
+            expect(await resp.value).toBe(false)
+        })
+
+        it("deep equality match true if objects match", async () => {
+            const resp = buildResponse({
+                thing: {
+                    color: "Blue",
+                    details: {
+                        size: "Large",
+                        dimensions: {
+                            width: 10,
+                            height: 20
+                        }
+                    }
+                },
+                value: {
+                    $match: {
+                        thing: {
+                            color: "Blue",
+                            details: {
+                                size: "Large",
+                                dimensions: {
+                                    width: 10,
+                                    height: 20
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+
+            expect(await resp.value).toBe(true)
+        })
+
+        it("failed deep equality match if objects have differences", async () => {
+            const resp = buildResponse({
+                thing: {
+                    color: "Blue",
+                    details: {
+                        size: "Large",
+                        dimensions: {
+                            width: 10,
+                            height: 20
+                        }
+                    }
+                },
+                value: {
+                    $match: {
+                        thing: {
+                            color: "Blue",
+                            details: {
+                                size: "Large",
+                                dimensions: {
+                                    width: 10,
+                                    height: 21
+                                }
+                            }
+                        }
                     }
                 }
             })

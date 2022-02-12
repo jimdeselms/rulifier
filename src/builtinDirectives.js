@@ -12,27 +12,44 @@ const builtinDirectives = {
         return condition ? obj.then : obj.else
     },
 
-    async $rule(obj, { root }) {
-        for (const key in obj) {
-            const objVal = await obj[key]
+    async $match(obj, { root }) {
+        return builtinDirectives.$eq([obj, root])
+    },
 
-            if (objVal === TRUE) {
-                continue
-            } else if (objVal === FALSE) {
-                return false
-            }
+    async $eq([item1, item2]) {
+        const i1 = await item1
+        const i2 = await item2
 
-            const rootVal = await root[key]
+        if (i1 === i2 || i1 === TRUE) {
+            return true
+        }
 
-            if (objVal instanceof RegExp) {
-                return objVal[RAW_VALUE].test(rootVal)
-            } else if (objVal !== rootVal) {
+        // Are they at least the same type?
+        if (i1 === null || i2 === null) {
+            return false
+        }
+        
+        if (typeof i2 === "string" && i1 instanceof RegExp) {
+            return i1[RAW_VALUE].test(i2)
+        }
+
+        if (typeof i1 !== "object" || typeof i2 !== "object") {
+            return false
+        }
+
+        // Now just make sure that every property of i1 matches i2.
+        for (const prop in i1) {
+            const val1 = await i1[prop]
+            const val2 = await i2[prop]
+
+            if (!await builtinDirectives.$eq([val1, val2])) {
                 return false
             }
         }
 
         return true
     },
+
     async $and(obj) {
         for (const value of obj) {
             if (!(await value)) {
@@ -56,6 +73,7 @@ const builtinDirectives = {
     $gt: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x > y),
     $gte: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x >= y),
     $ne: (obj, opt) => evaluateBinary(obj, opt, (x, y) => x !== y),
+
     $regex: (obj, opt) => evaluateBinary(obj, opt, async (x, y) => {
         if (typeof y === "string") {
             return new RegExp(y).test(x)
