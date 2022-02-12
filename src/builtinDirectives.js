@@ -71,6 +71,19 @@ const builtinDirectives = {
 
         return ROOT_CONTEXT_FALSE
     },
+
+    async $ref(obj, { root }) {
+        const path = (await obj).split(".")
+
+        let curr = await root
+        for (const key of path) {
+            if (curr === undefined) {
+                return undefined
+            }
+            curr = await curr[key]
+        }
+        return curr
+    },
 }
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
@@ -117,9 +130,7 @@ async function eq(item1, item2, match, useRootContext) {
     for (const prop of props) {
         // Since we might have directives here that care about the root, we want to replace the root, so let's use the
         // "GET_WITH_NEW_ROOT" function
-        const val1 = useRootContext
-            ? i1[GET_WITH_NEW_ROOT](i2, prop)
-            : i1[prop]
+        const val1 = useRootContext ? i1[GET_WITH_NEW_ROOT](i2, prop) : i1[prop]
         const val2 = i2[prop]
 
         if (!(await eq(val1, val2, match, useRootContext))) {

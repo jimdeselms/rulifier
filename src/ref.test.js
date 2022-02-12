@@ -1,0 +1,73 @@
+const { buildResponse } = require("./index.js")
+const { delayed } = require("./index.test.js")
+
+describe("ref", () => {
+    it("can understand a simple ref", async () => {
+        const resp = await buildResponse({
+            thing: 123,
+            value: { $ref: "thing" },
+        })
+
+        expect(await resp.value).toBe(123)
+    })
+
+    it("can understand a promise or function ref", async () => {
+        const resp = await buildResponse({
+            thing1: 1,
+            thing2: () => 2,
+            thing3: delayed(3),
+            thing4: () => delayed(4),
+
+            value1: { $ref: "thing1" },
+            value2: { $ref: "thing2" },
+            value3: { $ref: "thing3" },
+            value4: { $ref: "thing4" },
+        })
+
+        expect(await resp.value1).toBe(1)
+        expect(await resp.value2).toBe(2)
+        expect(await resp.value3).toBe(3)
+        expect(await resp.value4).toBe(4)
+    })
+
+    it("can understand a ref that has a path", async () => {
+        const resp = await buildResponse({
+            x: {
+                y: {
+                    z: "Hello",
+                },
+            },
+
+            value: { $ref: "x.y.z" },
+        })
+
+        expect(await resp.value).toBe("Hello")
+    })
+
+    it("can understand a ref to an array using numeric paths", async () => {
+        const resp = await buildResponse({
+            x: [1, 2, [3, 4, 5, [6, 7]]],
+
+            value: { $ref: "x.2.3.1" },
+        })
+
+        expect(await resp.value).toBe(7)
+    })
+
+    it("returns undefined if the thing isn't found", async () => {
+        const resp = await buildResponse({
+            value: { $ref: "hello" },
+        })
+
+        expect(await resp.value).toBeUndefined()
+    })
+
+    it("returns undefined if any step in a path returns undefined", async () => {
+        const resp = await buildResponse({
+            hello: { a: 1 },
+            value: { $ref: "hello.b.c" },
+        })
+
+        expect(await resp.value).toBeUndefined()
+    })
+})
