@@ -2,6 +2,7 @@ const TRUE = Symbol.for("__TRUE")
 const FALSE = Symbol.for("__FALSE")
 
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
+const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
 
 const builtinDirectives = {
     async $directives() {
@@ -39,7 +40,9 @@ const builtinDirectives = {
 
         // Now just make sure that every property of i1 matches i2.
         for (const prop in i1) {
-            const val1 = await i1[prop]
+            // Since we might have directives here that care about the root, we want to replace the root, so let's use the 
+            // "GET_WITH_NEW_ROOT" function
+            const val1 = await i1[GET_WITH_NEW_ROOT](i2, prop)
             const val2 = await i2[prop]
 
             if (!await builtinDirectives.$match(val1, { root: val2, prop })) {

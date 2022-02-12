@@ -2,6 +2,7 @@ const { builtinDirectives } = require('./builtinDirectives')
 
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
+const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
 
 /**
  * @param  {...Record<any, any>} contexts 
@@ -69,51 +70,55 @@ function proxify(context, directives, root, prop) {
     }
 
     handler.get = function (target, prop) {
-        if (prop === RAW_VALUE) {
-            return target
-        }
-
-        if (prop === IS_RULIFIED) {
-            return true
-        }
-
-        if (Object.getOwnPropertyDescriptor(resolved, prop)) {
-            return resolved[prop]
-        }
-
-        // Is this a promise?
-        const then = target?.then
-        if (typeof then === "function") {
-            if (prop === "then") {
-                return then.bind(target)
-            } else {
-                return proxify(
-                    then.bind(target)((data) => {
-                        const value = data[prop]
-                        return proxify(value, directives, root, prop)
-                    }),
-                    directives,
-                    root,
-                    prop
-                )
-            }
-        }
-
-        if (prop === Symbol.iterator) {
-            return target[Symbol.iterator]
-        }
-
-        const result = proxify(target[prop], directives, root, prop)
-        resolved[prop] = result
-
-        return result
+        return get(target, prop, root, directives, resolved)
     }
 
     return proxy
 }
 
-function get(target, prop, root) {
-    
+function get(target, prop, root, directives, resolved) {
+    if (prop === RAW_VALUE) {
+        return target
+    }
+
+    if (prop === IS_RULIFIED) {
+        return true
+    }
+
+    if (prop === GET_WITH_NEW_ROOT) {
+        return (newRoot, newProp) => get(target, newProp, newRoot, directives, resolved)
+    }
+
+    if (Object.getOwnPropertyDescriptor(resolved, prop)) {
+        return resolved[prop]
+    }
+
+    // Is this a promise?
+    const then = target?.then
+    if (typeof then === "function") {
+        if (prop === "then") {
+            return then.bind(target)
+        } else {
+            return proxify(
+                then.bind(target)((data) => {
+                    const value = data[prop]
+                    return proxify(value, directives, root, prop)
+                }),
+                directives,
+                root,
+                prop
+            )
+        }
+    }
+
+    if (prop === Symbol.iterator) {
+        return target[Symbol.iterator]
+    }
+
+    const result = proxify(target[prop], directives, root, prop)
+    resolved[prop] = result
+
+    return result
 }
 
 module.exports = {
