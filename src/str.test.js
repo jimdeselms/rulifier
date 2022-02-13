@@ -47,5 +47,14 @@ describe("str", () => {
 
         expect(await resp.value).toBe("Hello, Fred! Have a great Sunday!")
     })
+
+    it("will escape substitutions that begin with a \\", async () => {
+        const resp = await buildResponse({
+            greeting: "Hello",
+            value: { $str: "\\${greeting}, world!" },
+        })
+
+        expect(await resp.value).toBe("${greeting}, world!")
+    })
 })
 
