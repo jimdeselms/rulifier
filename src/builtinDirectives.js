@@ -84,7 +84,22 @@ const builtinDirectives = {
         }
         return curr
     },
+
+    async $str(obj, { root }) {
+        let result = await obj
+        for (const match of result.matchAll(STR_INTERP_REGEX)) {
+            const replacement = await builtinDirectives.$ref(match[1], { root })
+            if (replacement === null) {
+                result = result.replace(match[0], "")
+            } else if (replacement !== undefined) {
+                result = result.replace(match[0], replacement)
+            }
+        }
+        return result
+    }
 }
+
+const STR_INTERP_REGEX = /\${([^}]+)}*/g
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
     obj = await obj
