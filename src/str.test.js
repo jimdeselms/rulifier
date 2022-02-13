@@ -1,9 +1,9 @@
-const { buildResponse } = require("./index.js")
-const { delayed } = require("./index.test.js")
+const { rulify } = require("./index.js")
+const { delayed } = require("./helpers.test.js")
 
 describe("str", () => {
     it("can understand a simple string interpolation", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             thing: 123,
             value: { $str: "The value is ${thing}." },
         })
@@ -12,7 +12,7 @@ describe("str", () => {
     })
 
     it("a null substitution is replaced by an empty string", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             thing: null,
             value: { $str: "No value here: (${thing})." },
         })
@@ -21,7 +21,7 @@ describe("str", () => {
     })
 
     it("a undefined substitution is ignored", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             thing: undefined,
             value: { $str: "No replacement here: (${thing})." },
         })
@@ -30,7 +30,7 @@ describe("str", () => {
     })
 
     it("a reference that isn't found is ignored", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             value: { $str: "No replacement here: (${thing})." },
         })
 
@@ -38,7 +38,7 @@ describe("str", () => {
     })
 
     it("can handle multiple replacements in the same string", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             greeting: "Hello",
             customer: "Fred",
             today: "Sunday",
@@ -49,7 +49,7 @@ describe("str", () => {
     })
 
     it("will escape substitutions that begin with a \\", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             greeting: "Hello",
             value: { $str: "\\${greeting}, world!" },
         })
@@ -57,4 +57,3 @@ describe("str", () => {
         expect(await resp.value).toBe("${greeting}, world!")
     })
 })
-

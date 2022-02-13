@@ -1,9 +1,9 @@
-const { buildResponse } = require("./index.js")
-const { delayed } = require("./index.test.js")
+const { rulify } = require("./index.js")
+const { delayed } = require("./helpers.test.js")
 
 describe("ref", () => {
     it("can understand a simple ref", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             thing: 123,
             value: { $ref: "thing" },
         })
@@ -12,7 +12,7 @@ describe("ref", () => {
     })
 
     it("can understand a promise or function ref", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             thing1: 1,
             thing2: () => 2,
             thing3: delayed(3),
@@ -31,7 +31,7 @@ describe("ref", () => {
     })
 
     it("can understand a ref that has a path", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             x: {
                 y: {
                     z: "Hello",
@@ -45,7 +45,7 @@ describe("ref", () => {
     })
 
     it("can understand a ref to an array using numeric paths", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             x: [1, 2, [3, 4, 5, [6, 7]]],
 
             value: { $ref: "x.2.3.1" },
@@ -55,7 +55,7 @@ describe("ref", () => {
     })
 
     it("returns undefined if the thing isn't found", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             value: { $ref: "hello" },
         })
 
@@ -63,7 +63,7 @@ describe("ref", () => {
     })
 
     it("returns undefined if any step in a path returns undefined", async () => {
-        const resp = await buildResponse({
+        const resp = await rulify({
             hello: { a: 1 },
             value: { $ref: "hello.b.c" },
         })

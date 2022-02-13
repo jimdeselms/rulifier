@@ -91,7 +91,7 @@ const builtinDirectives = {
             const matchText = match[0]
 
             // You can escape it with "\"
-            if (matchText[0] === '\\') {
+            if (matchText[0] === "\\") {
                 result = result.replace(matchText, matchText.slice(1))
             } else {
                 const replacement = await builtinDirectives.$ref(match[1], { root })
@@ -103,7 +103,7 @@ const builtinDirectives = {
             }
         }
         return result
-    }
+    },
 }
 
 const STR_INTERP_REGEX = /\\?\${([^}]+)}*/g

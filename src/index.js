@@ -14,13 +14,18 @@ function rulify(...contexts) {
 
     let alreadyRulified = false
 
+    // The caches use weak maps so that they won't cause memory leaks
+    // when the proxies or resolved values go out of scope.
     const caches = {
         proxyCache: new WeakMap(),
-        resolvedValueCache: new WeakMap()
+        resolvedValueCache: new WeakMap(),
     }
 
-    for (const context of contexts) {
+    for (let context of contexts) {
         if (context[IS_RULIFIED]) {
+            // If the thing is "already rulfied", then we want to grab the
+            // raw value and re-proxify it.
+            context = context[RAW_VALUE]
             alreadyRulified = true
         }
         Object.assign(root, context)
@@ -29,6 +34,8 @@ function rulify(...contexts) {
 
     delete root.$directives
 
+    // If none of the contexts are already "rulified", then that means
+    // we have to add in the builtin directives.
     if (!alreadyRulified) {
         directives = Object.assign({}, builtinDirectives, directives)
     }
@@ -74,7 +81,7 @@ function proxify(context, directives, root, prop, caches) {
 
     const proxy = new Proxy(context, handler)
     caches.proxyCache.set(context, proxy)
-    
+
     // If the context was a function, then the value of that function should also be cached.
     if (context !== originalContext) {
         caches.proxyCache.set(originalContext, proxy)
@@ -143,5 +150,5 @@ function get(target, proxy, prop, root, directives, caches) {
 }
 
 module.exports = {
-    buildResponse: rulify,
+    rulify,
 }

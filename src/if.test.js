@@ -1,8 +1,8 @@
-const { buildResponse } = require("./index.js")
+const { rulify } = require("./index.js")
 
 describe("if", () => {
     it("works in the true case", async () => {
-        const resp = buildResponse({
+        const resp = rulify({
             $if: {
                 condition: true,
                 then: 1,
@@ -16,7 +16,7 @@ describe("if", () => {
     })
 
     it("works in the false case", async () => {
-        const resp = buildResponse({
+        const resp = rulify({
             $if: {
                 condition: () => false,
                 then: 1,
