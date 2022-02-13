@@ -1,5 +1,4 @@
 const { rulify } = require("./index.js")
-const { delayed } = require("./helpers.test.js")
 
 describe("str", () => {
     it("can understand a simple string interpolation", async () => {

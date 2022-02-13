@@ -1,12 +1,9 @@
 {
-  "name": "ruley2",
-  "version": "1.0.0",
+  "name": "rulify",
+  "version": "0.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {
-    "axios": "^0.24.0",
-    "jsonpath": "^1.1.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "jest": "^27.5.1",
     "prettier": "^2.5.1"
