@@ -14,6 +14,11 @@ function rulify(...contexts) {
 
     let alreadyRulified = false
 
+    const caches = {
+        proxyCache: new WeakMap(),
+        resolvedValueCache: new WeakMap()
+    }
+
     for (const context of contexts) {
         if (context[IS_RULIFIED]) {
             alreadyRulified = true
@@ -28,7 +33,7 @@ function rulify(...contexts) {
         directives = Object.assign({}, builtinDirectives, directives)
     }
 
-    return proxify(root, directives)
+    return proxify(root, directives, undefined, undefined, caches)
 }
 
 function normalizeDirectives(directives) {
@@ -41,7 +46,13 @@ function normalizeDirectives(directives) {
     return Object.fromEntries(entries)
 }
 
-function proxify(context, directives, root, prop) {
+function proxify(context, directives, root, prop, caches) {
+    const originalContext = context
+
+    if (caches.proxyCache.has(context)) {
+        return caches.proxyCache.get(context)
+    }
+
     if (typeof context === "function") {
         context = context()
     }
@@ -50,33 +61,37 @@ function proxify(context, directives, root, prop) {
         return context
     }
 
-    const resolved = {}
-
     const keys = Object.keys(context)
     let key, directive
 
     if (keys.length === 1 && (key = keys[0]) && (directive = directives?.[key])) {
-        const directiveArgument = proxify(context[key], directives, root, prop)
+        const directiveArgument = proxify(context[key], directives, root, prop, caches)
 
-        return proxify(directive(directiveArgument, { root, prop }), directives, root, prop)
+        return proxify(directive(directiveArgument, { root, prop }), directives, root, prop, caches)
     }
 
     const handler = {}
 
     const proxy = new Proxy(context, handler)
+    caches.proxyCache.set(context, proxy)
+    
+    // If the context was a function, then the value of that function should also be cached.
+    if (context !== originalContext) {
+        caches.proxyCache.set(originalContext, proxy)
+    }
 
     if (root === undefined) {
         root = proxy
     }
 
     handler.get = function (target, prop) {
-        return get(target, prop, root, directives, resolved)
+        return get(target, proxy, prop, root, directives, caches)
     }
 
     return proxy
 }
 
-function get(target, prop, root, directives, resolved) {
+function get(target, proxy, prop, root, directives, caches) {
     // Handle these special properties first. Switch is faster than an if-else chain.
     switch (prop) {
         case RAW_VALUE:
@@ -84,35 +99,45 @@ function get(target, prop, root, directives, resolved) {
         case IS_RULIFIED:
             return true
         case GET_WITH_NEW_ROOT:
-            return (newRoot, newProp) => get(target, newProp, newRoot, directives, resolved)
+            return (newRoot, newProp) => get(target, proxy, newProp, newRoot, directives, caches)
         case Symbol.iterator:
             return target[Symbol.iterator]
     }
 
-    if (Object.getOwnPropertyDescriptor(resolved, prop)) {
-        return resolved[prop]
+    let resolvedValues = caches.resolvedValueCache.get(proxy)
+    if (resolvedValues) {
+        if (resolvedValues.has(prop)) {
+            return resolvedValues.get(prop)
+        }
+    } else {
+        resolvedValues = new Map()
+        caches.resolvedValueCache.set(proxy, resolvedValues)
     }
+
+    let result
 
     // Is this a promise?
     const then = target?.then
     if (typeof then === "function") {
         if (prop === "then") {
-            return then.bind(target)
+            result = then.bind(target)
         } else {
-            return proxify(
+            result = proxify(
                 then.bind(target)((data) => {
                     const value = data[prop]
-                    return proxify(value, directives, root, prop)
+                    return proxify(value, directives, root, prop, caches)
                 }),
                 directives,
                 root,
-                prop
+                prop,
+                caches
             )
         }
+    } else {
+        result = proxify(target[prop], directives, root, prop, caches)
     }
 
-    const result = proxify(target[prop], directives, root, prop)
-    resolved[prop] = result
+    resolvedValues.set(prop, result)
 
     return result
 }
