@@ -1,13 +1,14 @@
 {
   "name": "rulifier",
-  "version": "0.0.1-pre.0",
+  "version": "0.0.1-pre.1",
   "description": "A lightweight rule engine designed for speed and ease of use",
   "main": "index.js",
   "devDependencies": {
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
     "rollup": "^2.67.2",
-    "rollup-plugin-babel-minify": "^10.0.0"
+    "rollup-plugin-babel-minify": "^10.0.0",
+    "rollup-plugin-cleanup": "^3.2.1"
   },
   "scripts": {
     "pretest": "npm run build",
