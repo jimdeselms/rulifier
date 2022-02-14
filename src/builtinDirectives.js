@@ -73,7 +73,7 @@ export const builtinDirectives = {
     },
 
     async $ref(obj, { root }) {
-        const path = (await obj).split(".")
+        const path = parsePath(await obj)
 
         let curr = await root
         for (const key of path) {
@@ -107,6 +107,7 @@ export const builtinDirectives = {
 }
 
 const STR_INTERP_REGEX = /\\?\${([^}]+)}*/g
+const ARRAY_INDEX_REGEX = /\[([0-9])+\]/g
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
     obj = await obj
@@ -163,3 +164,13 @@ async function eq(item1, item2, match, useRootContext) {
     return true
 }
 
+
+function parsePath(path) {
+    const indexes = path.matchAll(ARRAY_INDEX_REGEX)
+
+    for (const index of indexes) {
+        path = path.replace(index[0], "." + index[1])
+    }
+
+    return path.split('.')
+}

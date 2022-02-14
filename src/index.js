@@ -150,4 +150,3 @@ function get(target, proxy, prop, root, directives, caches) {
 
     return result
 }
-

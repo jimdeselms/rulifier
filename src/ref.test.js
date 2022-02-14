@@ -54,6 +54,18 @@ describe("ref", () => {
         expect(await resp.value).toBe(7)
     })
 
+    it("can understand a ref to an array using array index notation", async () => {
+        const resp = await rulify({
+            x: [1, 2, [3, 4, 5, [6, 7]]],
+
+            value: { $ref: "x[2][3][1]" },
+            value2: { $ref: "x[2][2]"}
+        })
+
+        expect(await resp.value).toBe(7)
+        expect(await resp.value2).toBe(5)
+    })
+
     it("returns undefined if the thing isn't found", async () => {
         const resp = await rulify({
             value: { $ref: "hello" },
