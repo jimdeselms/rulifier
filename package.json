@@ -1,16 +1,20 @@
 {
-  "name": "rulify",
+  "name": "rulifier",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "dependencies": {},
   "devDependencies": {
     "jest": "^27.5.1",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "rollup": "^2.67.2",
+    "rollup-plugin-babel-minify": "^10.0.0"
   },
   "scripts": {
     "test": "jest",
-    "prettier": "prettier --write src"
+    "prettier": "prettier --write src",
+    "build": "rollup -c ./rollup.config.js"
   },
   "author": "Jim",
   "license": "ISC"

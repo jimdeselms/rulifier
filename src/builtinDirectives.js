@@ -4,7 +4,7 @@ const ROOT_CONTEXT_FALSE = Symbol.for("__FALSE")
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
 
-const builtinDirectives = {
+export const builtinDirectives = {
     async $directives() {
         throw new Error("directives can only be defined at the root of a context")
     },
@@ -163,4 +163,3 @@ async function eq(item1, item2, match, useRootContext) {
     return true
 }
 
-module.exports = { builtinDirectives }

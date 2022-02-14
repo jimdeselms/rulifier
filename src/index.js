@@ -1,4 +1,6 @@
-const { builtinDirectives } = require("./builtinDirectives")
+//const { builtinDirectives } = require("./builtinDirectives")
+
+import { builtinDirectives } from "./builtinDirectives"
 
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
@@ -8,7 +10,7 @@ const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
  * @param  {...Record<any, any>} contexts
  * @returns {any}
  */
-function rulify(...contexts) {
+export function rulify(...contexts) {
     const root = {}
     let directives = {}
 
@@ -149,6 +151,3 @@ function get(target, proxy, prop, root, directives, caches) {
     return result
 }
 
-module.exports = {
-    rulify,
-}
