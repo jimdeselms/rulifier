@@ -1,4 +1,4 @@
-const { rulify } = require("./index.js")
+const { rulify } = require("../dist/index.cjs.js")
 const { delayed } = require("./helpers.test.js")
 
 describe("ref", () => {

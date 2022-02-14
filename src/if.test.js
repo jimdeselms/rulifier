@@ -1,4 +1,4 @@
-const { rulify } = require("./index.js")
+const { rulify } = require("../dist/index.cjs.js")
 
 describe("if", () => {
     it("works in the true case", async () => {

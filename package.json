@@ -12,6 +12,7 @@
     "rollup-plugin-babel-minify": "^10.0.0"
   },
   "scripts": {
+    "pretest": "npm run build",
     "test": "jest",
     "prettier": "prettier --write src",
     "build": "rollup -c ./rollup.config.js"
