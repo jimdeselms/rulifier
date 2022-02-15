@@ -13,6 +13,16 @@ export const builtinHandlers = {
         const condition = await obj.condition
         return condition ? obj.then : obj.else
     },
+    
+    async $switch(obj) {
+        for (const currCase of (await obj.cases) ?? []) {
+            if (await currCase.condition) {
+                return currCase.value
+            }
+        }
+
+        return obj.default
+    },
 
     async $match(obj, { root }) {
         obj = await obj
