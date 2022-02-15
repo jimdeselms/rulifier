@@ -82,4 +82,16 @@ describe("ref", () => {
 
         expect(await resp.value).toBeUndefined()
     })
+
+    it("undefstands escaped dots and brackets in paths", async () => {
+        const resp = await rulify({
+            "hello.a": { "b.c": 1 },
+            "howdy[0]": { "boo[1]": 5 },
+            value1: { $ref: "hello\\.a.b\\.c" },
+            value2: { $ref: "howdy\\[0].boo\\[1]" }
+        })
+
+        expect(await resp.value1).toBe(1)
+        expect(await resp.value2).toBe(5)
+    })
 })
