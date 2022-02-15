@@ -171,7 +171,7 @@ describe("rulify", () => {
         expect(await resp.name).toBe("FRED")
     })
 
-    it("a response can have more context added to it", async () => {
+    it("a response can have more data source added to it", async () => {
         const resp = rulify({ a: 1 })
         const resp2 = rulify(resp, { b: 2 })
         const resp3 = rulify(resp2, { c: 3 })

@@ -4,7 +4,7 @@ export async function $eq([item1, item2]) {
     return eq(item1, item2, false)
 }
 
-export async function eq(item1, item2, match, useRootContext) {
+export async function eq(item1, item2, match, useRootDataSource) {
     const i1 = await item1
     const i2 = await item2
 
@@ -36,10 +36,10 @@ export async function eq(item1, item2, match, useRootContext) {
     for (const prop of props) {
         // Since we might have handlers here that care about the root, we want to replace the root, so let's use the
         // "GET_WITH_NEW_ROOT" function
-        const val1 = useRootContext ? i1[GET_WITH_NEW_ROOT](i2, prop) : i1[prop]
+        const val1 = useRootDataSource ? i1[GET_WITH_NEW_ROOT](i2, prop) : i1[prop]
         const val2 = i2[prop]
 
-        if (!(await eq(val1, val2, match, useRootContext))) {
+        if (!(await eq(val1, val2, match, useRootDataSource))) {
             return false
         }
     }

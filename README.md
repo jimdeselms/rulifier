@@ -2,7 +2,7 @@
 
 Rulifier is a light-weight rule engine designed for speed and ease-of-use.
 
-Rulifier works by merging "contexts." A context is a thing that sets 
+Rulifier works by merging "data sources." A data source is a thing that sets 
 ## Usage
 
 

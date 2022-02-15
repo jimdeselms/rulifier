@@ -11,7 +11,7 @@ import { $lt, $gt, $lte, $gte, $ne, $regex } from "./handlers/binaryOperators"
 
 export const builtinHandlers = {
     async $handlers() {
-        throw new Error("handlers can only be defined at the root of a context")
+        throw new Error("handlers can only be defined at the root of a data source")
     },
 
     $if,

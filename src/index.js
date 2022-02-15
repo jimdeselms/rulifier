@@ -6,10 +6,10 @@ import { GET_WITH_NEW_ROOT, RAW_VALUE } from "./common"
 const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
 
 /**
- * @param  {...Record<any, any>} contexts
+ * @param  {...Record<any, any>} dataSources
  * @returns {any}
  */
-export function rulify(...contexts) {
+export function rulify(...dataSources) {
     const root = {}
     let handlers = {}
 
@@ -22,20 +22,20 @@ export function rulify(...contexts) {
         resolvedValueCache: new WeakMap(),
     }
 
-    for (let context of contexts) {
-        if (context[IS_RULIFIED]) {
+    for (let dataSource of dataSources) {
+        if (dataSource[IS_RULIFIED]) {
             // If the thing is "already rulfied", then we want to grab the
             // raw value and re-proxify it.
-            context = context[RAW_VALUE]
+            dataSource = dataSource[RAW_VALUE]
             alreadyRulified = true
         }
-        Object.assign(root, context)
-        Object.assign(handlers, normalizeHandlers(context.$handlers))
+        Object.assign(root, dataSource)
+        Object.assign(handlers, normalizeHandlers(dataSource.$handlers))
     }
 
     delete root.$handlers
 
-    // If none of the contexts are already "rulified", then that means
+    // If none of the data sources are already "rulified", then that means
     // we have to add in the builtin handlers.
     if (!alreadyRulified) {
         handlers = Object.assign({}, builtinHandlers, handlers)
@@ -54,38 +54,38 @@ function normalizeHandlers(handlers) {
     return Object.fromEntries(entries)
 }
 
-function proxify(context, handlers, root, prop, caches) {
-    const originalContext = context
+function proxify(dataSource, handlers, root, prop, caches) {
+    const originalDataSource = dataSource
 
-    if (caches.proxyCache.has(context)) {
-        return caches.proxyCache.get(context)
+    if (caches.proxyCache.has(dataSource)) {
+        return caches.proxyCache.get(dataSource)
     }
 
-    if (typeof context === "function") {
-        context = context()
+    if (typeof dataSource === "function") {
+        dataSource = dataSource()
     }
 
-    if (context === null || typeof context !== "object") {
-        return context
+    if (dataSource === null || typeof dataSource !== "object") {
+        return dataSource
     }
 
-    const keys = Object.keys(context)
+    const keys = Object.keys(dataSource)
     let key, handler
 
     if (keys.length === 1 && (key = keys[0]) && (handler = handlers?.[key])) {
-        const handlerArgument = proxify(context[key], handlers, root, prop, caches)
+        const handlerArgument = proxify(dataSource[key], handlers, root, prop, caches)
 
         return proxify(handler(handlerArgument, { root, prop }), handlers, root, prop, caches)
     }
 
     const proxyHandler = {}
 
-    const proxy = new Proxy(context, proxyHandler)
-    caches.proxyCache.set(context, proxy)
+    const proxy = new Proxy(dataSource, proxyHandler)
+    caches.proxyCache.set(dataSource, proxy)
 
-    // If the context was a function, then the value of that function should also be cached.
-    if (context !== originalContext) {
-        caches.proxyCache.set(originalContext, proxy)
+    // If the data source was a function, then the value of that function should also be cached.
+    if (dataSource !== originalDataSource) {
+        caches.proxyCache.set(originalDataSource, proxy)
     }
 
     if (root === undefined) {
