@@ -24,6 +24,47 @@ describe("predicates", () => {
         })
     })
 
+    describe("or", () => {
+        it("returns true if one thing is true", async () => {
+            const resp = rulify({
+                $or: [delayed(false), delayed(false), () => delayed(true)],
+            })
+
+            const result = await resp
+
+            expect(result).toBe(true)
+        })
+
+        it("returns false if everything is false", async () => {
+            const resp = rulify({
+                $and: [delayed(false), delayed(false), () => delayed(false)],
+            })
+
+            const result = await resp
+
+            expect(result).toBe(false)
+        })
+    })
+
+    describe("not", () => {
+        it("negates the value", async () => {
+            expect(await rulify({ $not: true })).toBe(false)
+            expect(await rulify({ $not: false })).toBe(true)
+            expect(await rulify({ $not: delayed(1) })).toBe(false)
+            expect(await rulify({ $not: delayed(0) })).toBe(true)
+        })
+
+        it("returns false if everything is false", async () => {
+            const resp = rulify({
+                $and: [delayed(false), delayed(false), () => delayed(false)],
+            })
+
+            const result = await resp
+
+            expect(result).toBe(false)
+        })
+    })
+
     test("binary operators", async () => {
         expect(await rulify({ $lt: [5, 10] })).toBe(true)
         expect(await rulify({ $lt: [15, 10] })).toBe(false)

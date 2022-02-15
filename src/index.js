@@ -1,10 +1,9 @@
 //const { builtinHandlers } = require("./builtinHandlers")
 
 import { builtinHandlers } from "./builtinHandlers"
+import { GET_WITH_NEW_ROOT, RAW_VALUE } from "./common"
 
-const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
-const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
 
 /**
  * @param  {...Record<any, any>} contexts
