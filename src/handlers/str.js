@@ -1,6 +1,6 @@
 const STR_INTERP_REGEX = /\\?\${([^}]+)}*/g
 
-import { $ref } from './ref'
+import { $ref } from "./ref"
 
 export async function $str(obj, { root }) {
     let result = await obj

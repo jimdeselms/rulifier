@@ -8,14 +8,14 @@ describe("switch", () => {
                 cases: [
                     {
                         condition: true,
-                        value: 1
+                        value: 1,
                     },
                     {
                         condition: true,
-                        value: 2
-                    }
-                ]
-            }
+                        value: 2,
+                    },
+                ],
+            },
         })
 
         expect(await resp).toEqual(1)
@@ -25,14 +25,14 @@ describe("switch", () => {
                 cases: [
                     {
                         condition: false,
-                        value: 1
+                        value: 1,
                     },
                     {
                         condition: true,
-                        value: 2
-                    }
-                ]
-            }
+                        value: 2,
+                    },
+                ],
+            },
         })
 
         expect(await resp).toEqual(2)
@@ -41,8 +41,8 @@ describe("switch", () => {
     it("if no cases are present, it returns the default", async () => {
         let resp = rulify({
             $switch: {
-                default: 3
-            }
+                default: 3,
+            },
         })
 
         expect(await resp).toEqual(3)
@@ -53,11 +53,11 @@ describe("switch", () => {
             $switch: {
                 cases: [
                     {
-                        value: 1
+                        value: 1,
                     },
                 ],
-                default: 2
-            }
+                default: 2,
+            },
         })
 
         expect(await resp).toEqual(2)
@@ -69,10 +69,10 @@ describe("switch", () => {
                 cases: [
                     {
                         condition: false,
-                        value: 1
+                        value: 1,
                     },
-                ]
-            }
+                ],
+            },
         })
 
         expect(await resp).toEqual(undefined)
@@ -84,15 +84,15 @@ describe("switch", () => {
                 cases: [
                     {
                         condition: delayed(true),
-                        value: delayed(1)
+                        value: delayed(1),
                     },
                     {
                         condition: delayed(true),
-                        value: delayed(2)
+                        value: delayed(2),
                     },
                 ],
-                default: delayed(3)
-            }
+                default: delayed(3),
+            },
         })
 
         expect(await resp).toEqual(1)
@@ -102,15 +102,15 @@ describe("switch", () => {
                 cases: [
                     {
                         condition: delayed(false),
-                        value: delayed(1)
+                        value: delayed(1),
                     },
                     {
                         condition: delayed(true),
-                        value: delayed(2)
+                        value: delayed(2),
                     },
                 ],
-                default: delayed(3)
-            }
+                default: delayed(3),
+            },
         })
 
         expect(await resp).toEqual(2)
@@ -120,15 +120,15 @@ describe("switch", () => {
                 cases: [
                     {
                         condition: delayed(false),
-                        value: delayed(1)
+                        value: delayed(1),
                     },
                     {
                         condition: delayed(false),
-                        value: delayed(2)
+                        value: delayed(2),
                     },
                 ],
-                default: delayed(3)
-            }
+                default: delayed(3),
+            },
         })
 
         expect(await resp).toEqual(3)

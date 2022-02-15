@@ -1,4 +1,4 @@
-import { ROOT_CONTEXT_TRUE, GET_WITH_NEW_ROOT, RAW_VALUE } from '../common'
+import { ROOT_CONTEXT_TRUE, GET_WITH_NEW_ROOT, RAW_VALUE } from "../common"
 
 export async function $eq([item1, item2]) {
     return eq(item1, item2, false)

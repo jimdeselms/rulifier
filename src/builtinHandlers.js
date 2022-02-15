@@ -1,13 +1,13 @@
-import { $match } from './handlers/match'
-import { $str } from './handlers/str'
-import { $ref } from './handlers/ref'
-import { $eq } from './handlers/eq'
-import { $in } from './handlers/in'
-import { $if } from './handlers/if'
-import { $switch } from './handlers/switch'
-import { $and, $or, $not } from './handlers/booleanOperators'
+import { $match } from "./handlers/match"
+import { $str } from "./handlers/str"
+import { $ref } from "./handlers/ref"
+import { $eq } from "./handlers/eq"
+import { $in } from "./handlers/in"
+import { $if } from "./handlers/if"
+import { $switch } from "./handlers/switch"
+import { $and, $or, $not } from "./handlers/booleanOperators"
 
-import { $lt, $gt, $lte, $gte, $ne, $regex } from './handlers/binaryOperators'
+import { $lt, $gt, $lte, $gte, $ne, $regex } from "./handlers/binaryOperators"
 
 export const builtinHandlers = {
     async $handlers() {

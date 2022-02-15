@@ -59,7 +59,7 @@ describe("ref", () => {
             x: [1, 2, [3, 4, 5, [6, 7]]],
 
             value: { $ref: "x[2][3][1]" },
-            value2: { $ref: "x[2][2]"}
+            value2: { $ref: "x[2][2]" },
         })
 
         expect(await resp.value).toBe(7)
@@ -88,7 +88,7 @@ describe("ref", () => {
             "hello.a": { "b.c": 1 },
             "howdy[0]": { "boo[1]": 5 },
             value1: { $ref: "hello\\.a.b\\.c" },
-            value2: { $ref: "howdy\\[0].boo\\[1]" }
+            value2: { $ref: "howdy\\[0].boo\\[1]" },
         })
 
         expect(await resp.value1).toBe(1)

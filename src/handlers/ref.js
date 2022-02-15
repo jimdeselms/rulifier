@@ -16,7 +16,6 @@ const ESCAPED_DOT_REPLACEMENT_REGEX = /\\\./g
 const ESCAPED_BRACKET_REPLACEMENT_REGEX = /\\\[/g
 
 function parsePath(path) {
-
     path = path.replace(ESCAPED_DOT_REPLACEMENT_REGEX, "((<{dot}))>>")
     path = path.replace(ESCAPED_BRACKET_REPLACEMENT_REGEX, "((<{brk}))>>")
 
@@ -26,9 +25,10 @@ function parsePath(path) {
         path = path.replace(index[0], "." + index[1])
     }
 
-    const parts = path.split('.')
-        .map(p => p.replace(/\(\(\<\{dot\}\)\)\>\>/g, "."))
-        .map(p => p.replace(/\(\(\<\{brk\}\)\)\>\>/g, "["))
+    const parts = path
+        .split(".")
+        .map((p) => p.replace(/\(\(\<\{dot\}\)\)\>\>/g, "."))
+        .map((p) => p.replace(/\(\(\<\{brk\}\)\)\>\>/g, "["))
 
     return parts
 }
