@@ -4,9 +4,9 @@ const ROOT_CONTEXT_FALSE = Symbol.for("__FALSE")
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
 
-export const builtinDirectives = {
-    async $directives() {
-        throw new Error("directives can only be defined at the root of a context")
+export const builtinHandlers = {
+    async $handlers() {
+        throw new Error("handlers can only be defined at the root of a context")
     },
 
     async $if(obj) {
@@ -94,7 +94,7 @@ export const builtinDirectives = {
             if (matchText[0] === "\\") {
                 result = result.replace(matchText, matchText.slice(1))
             } else {
-                const replacement = await builtinDirectives.$ref(match[1], { root })
+                const replacement = await builtinHandlers.$ref(match[1], { root })
                 if (replacement === null) {
                     result = result.replace(matchText, "")
                 } else if (replacement !== undefined) {
@@ -151,7 +151,7 @@ async function eq(item1, item2, match, useRootContext) {
 
     // Now just make sure that every property of i1 matches i2.
     for (const prop of props) {
-        // Since we might have directives here that care about the root, we want to replace the root, so let's use the
+        // Since we might have handlers here that care about the root, we want to replace the root, so let's use the
         // "GET_WITH_NEW_ROOT" function
         const val1 = useRootContext ? i1[GET_WITH_NEW_ROOT](i2, prop) : i1[prop]
         const val2 = i2[prop]

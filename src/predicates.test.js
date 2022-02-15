@@ -51,7 +51,7 @@ describe("predicates", () => {
         expect(
             await rulify(
                 {
-                    $directives: {
+                    $handlers: {
                         async $capitalize(str) {
                             return (await str).toUpperCase()
                         },
@@ -79,7 +79,7 @@ describe("predicates", () => {
         expect(
             await rulify(
                 {
-                    $directives: {
+                    $handlers: {
                         async $capitalize(str) {
                             return (await str).toUpperCase()
                         },

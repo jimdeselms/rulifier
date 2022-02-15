@@ -1,6 +1,6 @@
-//const { builtinDirectives } = require("./builtinDirectives")
+//const { builtinHandlers } = require("./builtinHandlers")
 
-import { builtinDirectives } from "./builtinDirectives"
+import { builtinHandlers } from "./builtinHandlers"
 
 const RAW_VALUE = Symbol.for("__RAW_VALUE")
 const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
@@ -12,7 +12,7 @@ const GET_WITH_NEW_ROOT = Symbol.for("__GET_WITH_NEW_ROOT")
  */
 export function rulify(...contexts) {
     const root = {}
-    let directives = {}
+    let handlers = {}
 
     let alreadyRulified = false
 
@@ -31,31 +31,31 @@ export function rulify(...contexts) {
             alreadyRulified = true
         }
         Object.assign(root, context)
-        Object.assign(directives, normalizeDirectives(context.$directives))
+        Object.assign(handlers, normalizeHandlers(context.$handlers))
     }
 
-    delete root.$directives
+    delete root.$handlers
 
     // If none of the contexts are already "rulified", then that means
-    // we have to add in the builtin directives.
+    // we have to add in the builtin handlers.
     if (!alreadyRulified) {
-        directives = Object.assign({}, builtinDirectives, directives)
+        handlers = Object.assign({}, builtinHandlers, handlers)
     }
 
-    return proxify(root, directives, undefined, undefined, caches)
+    return proxify(root, handlers, undefined, undefined, caches)
 }
 
-function normalizeDirectives(directives) {
-    if (!directives) {
+function normalizeHandlers(handlers) {
+    if (!handlers) {
         return undefined
     }
 
-    const entries = Object.entries(directives).map(([k, v]) => [k[0] === "$" ? k : "$" + k, v])
+    const entries = Object.entries(handlers).map(([k, v]) => [k[0] === "$" ? k : "$" + k, v])
 
     return Object.fromEntries(entries)
 }
 
-function proxify(context, directives, root, prop, caches) {
+function proxify(context, handlers, root, prop, caches) {
     const originalContext = context
 
     if (caches.proxyCache.has(context)) {
@@ -71,17 +71,17 @@ function proxify(context, directives, root, prop, caches) {
     }
 
     const keys = Object.keys(context)
-    let key, directive
+    let key, handler
 
-    if (keys.length === 1 && (key = keys[0]) && (directive = directives?.[key])) {
-        const directiveArgument = proxify(context[key], directives, root, prop, caches)
+    if (keys.length === 1 && (key = keys[0]) && (handler = handlers?.[key])) {
+        const handlerArgument = proxify(context[key], handlers, root, prop, caches)
 
-        return proxify(directive(directiveArgument, { root, prop }), directives, root, prop, caches)
+        return proxify(handler(handlerArgument, { root, prop }), handlers, root, prop, caches)
     }
 
-    const handler = {}
+    const proxyHandler = {}
 
-    const proxy = new Proxy(context, handler)
+    const proxy = new Proxy(context, proxyHandler)
     caches.proxyCache.set(context, proxy)
 
     // If the context was a function, then the value of that function should also be cached.
@@ -93,14 +93,14 @@ function proxify(context, directives, root, prop, caches) {
         root = proxy
     }
 
-    handler.get = function (target, prop) {
-        return get(target, proxy, prop, root, directives, caches)
+    proxyHandler.get = function (target, prop) {
+        return get(target, proxy, prop, root, handlers, caches)
     }
 
     return proxy
 }
 
-function get(target, proxy, prop, root, directives, caches) {
+function get(target, proxy, prop, root, handlers, caches) {
     // Handle these special properties first. Switch is faster than an if-else chain.
     switch (prop) {
         case RAW_VALUE:
@@ -108,7 +108,7 @@ function get(target, proxy, prop, root, directives, caches) {
         case IS_RULIFIED:
             return true
         case GET_WITH_NEW_ROOT:
-            return (newRoot, newProp) => get(target, proxy, newProp, newRoot, directives, caches)
+            return (newRoot, newProp) => get(target, proxy, newProp, newRoot, handlers, caches)
         case Symbol.iterator:
             return target[Symbol.iterator]
     }
@@ -134,16 +134,16 @@ function get(target, proxy, prop, root, directives, caches) {
             result = proxify(
                 then.bind(target)((data) => {
                     const value = data[prop]
-                    return proxify(value, directives, root, prop, caches)
+                    return proxify(value, handlers, root, prop, caches)
                 }),
-                directives,
+                handlers,
                 root,
                 prop,
                 caches
             )
         }
     } else {
-        result = proxify(target[prop], directives, root, prop, caches)
+        result = proxify(target[prop], handlers, root, prop, caches)
     }
 
     resolvedValues.set(prop, result)

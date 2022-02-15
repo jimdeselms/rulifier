@@ -158,9 +158,9 @@ describe("rulify", () => {
         expect(executed).toBe(true)
     })
 
-    it("knows about directives", async () => {
+    it("knows about handlers", async () => {
         const resp = rulify({
-            $directives: {
+            $handlers: {
                 capitalize: (name) => name.toUpperCase(),
             },
             name: {
