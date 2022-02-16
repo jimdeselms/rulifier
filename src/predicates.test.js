@@ -15,7 +15,7 @@ describe("predicates", () => {
 
         it("returns false if anything is false", async () => {
             const resp = rulify({
-                $and: [true, () => delayed(false), () => true],
+                $and: [true, { $fn: () => delayed(false) }, { $fn: () => true }],
             })
 
             const result = await resp
@@ -56,7 +56,7 @@ describe("predicates", () => {
 
         it("returns false if everything is false", async () => {
             const resp = rulify({
-                $and: [delayed(false), delayed(false), () => delayed(false)],
+                $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
             const result = await resp
@@ -78,7 +78,7 @@ describe("predicates", () => {
         expect(await rulify({ $gt: [15, 10] })).toBe(true)
 
         expect(await rulify({ $gte: [9, 10] })).toBe(false)
-        expect(await rulify({ $gte: [10, () => 10] })).toBe(true)
+        expect(await rulify({ $gte: [10, { $fn: () => 10 }] })).toBe(true)
         expect(await rulify({ $gte: [11, 10] })).toBe(true)
 
         expect(await rulify({ $eq: [5, delayed(5)] })).toBe(true)
@@ -103,7 +103,7 @@ describe("predicates", () => {
                         {
                             name: "Fred",
                             details: {
-                                friends: () => delayed(["BILL", "STEVE"]),
+                                friends: { $fn: () => delayed(["BILL", "STEVE"]) },
                             },
                         },
                         {

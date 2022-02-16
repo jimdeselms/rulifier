@@ -9,6 +9,8 @@ import { $and, $or, $not } from "./handlers/booleanOperators"
 
 import { $lt, $gt, $lte, $gte, $ne, $regex } from "./handlers/binaryOperators"
 
+import { RAW_VALUE } from './common'
+
 export const builtinHandlers = {
     async $handlers() {
         throw new Error("handlers can only be defined at the root of a data source")
@@ -33,4 +35,9 @@ export const builtinHandlers = {
     $in,
     $ref,
     $str,
+
+    async $fn(obj, opt) {
+        const fn = obj[RAW_VALUE]
+        return fn()
+    }
 }

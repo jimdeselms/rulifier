@@ -14,9 +14,9 @@ describe("ref", () => {
     it("can understand a promise or function ref", async () => {
         const resp = await rulify({
             thing1: 1,
-            thing2: () => 2,
+            thing2: { $fn: () => 2 },
             thing3: delayed(3),
-            thing4: () => delayed(4),
+            thing4: { $fn: () => delayed(4) },
 
             value1: { $ref: "thing1" },
             value2: { $ref: "thing2" },

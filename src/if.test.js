@@ -18,7 +18,7 @@ describe("if", () => {
     it("works in the false case", async () => {
         const resp = rulify({
             $if: {
-                condition: () => false,
+                condition: { $fn: () => false },
                 then: 1,
                 else: 2,
             },

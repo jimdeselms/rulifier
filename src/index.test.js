@@ -24,6 +24,18 @@ describe("rulify", () => {
         expect(c).toBe(3)
     })
 
+    it("can handle a thing that resolves to a function", async () => {
+        const resp = await rulify({ $fn: () => 100 })
+
+        expect(resp).toEqual(100)
+    })
+
+    it("can do function calls on intermediate results", async () => {
+        const resp = await rulify({ a: [0, 1, 2] })
+
+        expect(await resp.a.slice(0, 1)).toEqual([0])
+    })
+
     it("works with arrays", async () => {
         const resp = rulify([1, 2])
 
@@ -32,7 +44,7 @@ describe("rulify", () => {
     })
 
     it("works with arrays of functions", async () => {
-        const resp = rulify([() => 1, () => 2])
+        const resp = rulify([ { $fn: () => 1 }, { $fn: () => 2 }])
 
         expect(await resp[0]).toBe(1)
         expect(await resp[1]).toBe(2)
@@ -51,20 +63,22 @@ describe("rulify", () => {
     })
 
     it("works with promises", async () => {
-        const resp = rulify({ a: () => delayed(500) })
+        const resp = rulify({ a: { $fn: () => delayed(500) }})
 
         expect(await resp.a).toBe(500)
     })
 
     it("works with a chain of functions that return promises", async () => {
         const resp = rulify({
-            a: () =>
-                delayed({
-                    b: () =>
-                        delayed({
-                            c: () => delayed(12321),
+            a: {
+                $fn: () => delayed({
+                    b: { 
+                        $fn: () => delayed({
+                            c: { $fn: () => delayed(12321) },
                         }),
-                }),
+                    }
+                })
+            },
         })
 
         expect(await resp.a.b.c).toBe(12321)
@@ -84,11 +98,17 @@ describe("rulify", () => {
 
     it("works with a chain of functions", async () => {
         const resp = rulify({
-            a: () => ({
-                b: () => ({
-                    c: () => 12345,
+            a: { 
+                $fn: () => ({
+                    b: {
+                        $fn: () => ({
+                        c: {
+                            $fn: () => 12345
+                        }
+                        })
+                    },
                 }),
-            }),
+            }
         })
 
         expect(await resp.a.b.c).toBe(12345)
@@ -96,7 +116,7 @@ describe("rulify", () => {
 
     it("works with a function that returns a simple object", async () => {
         const resp = rulify({
-            a: () => 123,
+            a: { $fn: () => 123 },
         })
 
         expect(await resp.a).toBe(123)
@@ -106,10 +126,10 @@ describe("rulify", () => {
         let executed = false
 
         const resp = rulify({
-            a: () => 123,
-            b: () => {
+            a: { $fn: () => 123 },
+            b: { $fn: () => {
                 executed = true
-            },
+            }},
         })
 
         expect(await resp.a).toBe(123)
@@ -120,14 +140,16 @@ describe("rulify", () => {
         let executed = 0
 
         const resp = rulify({
-            a: () => {
-                ++executed
-                return {
-                    b: 1,
-                    c: 2,
-                    d: 3,
+            a: { 
+                $fn: () => {
+                    ++executed
+                    return {
+                        b: 1,
+                        c: 2,
+                        d: 3,
+                    }
                 }
-            },
+            }
         })
 
         expect(await resp.a.b).toBe(1)
@@ -141,10 +163,12 @@ describe("rulify", () => {
         let executed = false
 
         const resp = rulify({
-            a: () => {
-                executed = true
-                return 5
-            },
+            a: {
+                $fn: () => {
+                    executed = true
+                    return 5
+                }
+            }
         })
 
         expect(await resp.a).toBe(5)

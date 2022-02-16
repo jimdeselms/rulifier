@@ -35,11 +35,7 @@ export function rulify(...dataSources) {
 
     delete root.$handlers
 
-    // If none of the data sources are already "rulified", then that means
-    // we have to add in the builtin handlers.
-    if (!alreadyRulified) {
-        handlers = Object.assign({}, builtinHandlers, handlers)
-    }
+    Object.assign(handlers, builtinHandlers)
 
     return proxify(root, handlers, undefined, undefined, caches)
 }
@@ -61,21 +57,22 @@ function proxify(dataSource, handlers, root, prop, caches) {
         return caches.proxyCache.get(dataSource)
     }
 
-    if (typeof dataSource === "function") {
-        dataSource = dataSource()
-    }
+    const type = typeof dataSource
 
-    if (dataSource === null || typeof dataSource !== "object") {
+    if (dataSource === null || (type !== "object" && type !== "function")) {
         return dataSource
     }
 
-    const keys = Object.keys(dataSource)
-    let key, handler
-
-    if (keys.length === 1 && (key = keys[0]) && (handler = handlers?.[key])) {
-        const handlerArgument = proxify(dataSource[key], handlers, root, prop, caches)
-
-        return proxify(handler(handlerArgument, { root, prop }), handlers, root, prop, caches)
+    if (type === "object") {
+        // Check if it's a call to a handler
+        const keys = Object.keys(dataSource)
+        let key, handler
+    
+        if (keys.length === 1 && (key = keys[0]) && (handler = handlers?.[key])) {
+            const handlerArgument = proxify(dataSource[key], handlers, root, prop, caches)
+    
+            return proxify(handler(handlerArgument, { root, prop }), handlers, root, prop, caches)
+        }
     }
 
     const proxyHandler = {}
@@ -94,6 +91,14 @@ function proxify(dataSource, handlers, root, prop, caches) {
 
     proxyHandler.get = function (target, prop) {
         return get(target, proxy, prop, root, handlers, caches)
+    }
+
+    proxyHandler.apply = function(target, thisArg, argumentsList) {
+
+        debugger
+
+        const result = target.apply(thisArg[RAW_VALUE], argumentsList)
+        return proxify(result, handlers, root, prop, caches)
     }
 
     return proxy
