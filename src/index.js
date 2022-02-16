@@ -113,8 +113,8 @@ function get(target, proxy, prop, root, handlers, caches) {
             return true
         case GET_WITH_NEW_ROOT:
             return (newRoot, newProp) => get(target, proxy, newProp, newRoot, handlers, caches)
-        case Symbol.iterator:
-            return target[Symbol.iterator]
+        // case Symbol.iterator:
+        //     return target[Symbol.iterator]
     }
 
     let resolvedValues = caches.resolvedValueCache.get(proxy)
