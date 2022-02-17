@@ -1,5 +1,5 @@
-const { rulify } = require("../dist/index.cjs.js")
-const { delayed } = require("./helpers.test.js")
+import { rulify } from "./index"
+import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
     it("simple chain", async () => {

@@ -1,4 +1,4 @@
-const { rulify } = require("../dist/index.cjs.js")
+import { rulify } from "./index"
 
 describe("if", () => {
     it("works in the true case", async () => {

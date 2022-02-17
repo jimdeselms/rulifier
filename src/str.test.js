@@ -1,4 +1,4 @@
-const { rulify } = require("../dist/index.cjs.js")
+import { rulify } from "./index"
 
 describe("str", () => {
     it("can understand a simple string interpolation", async () => {

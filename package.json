@@ -9,15 +9,18 @@
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
     "rollup": "^2.67.2",
+    "rollup-jest": "^1.1.3",
     "rollup-plugin-babel-minify": "^10.0.0",
     "rollup-plugin-cleanup": "^3.2.1"
   },
   "scripts": {
-    "pretest": "npm run build",
     "test": "jest",
     "prettier": "prettier --write src",
     "build": "rollup -c ./rollup.config.js"
   },
   "author": "Jim DeSelms",
-  "license": "ISC"
+  "license": "ISC",
+  "jest": {
+    "preset": "rollup-jest"
+  }
 }
