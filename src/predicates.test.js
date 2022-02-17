@@ -5,7 +5,7 @@ describe("predicates", () => {
     describe("and", () => {
         it("returns true if everything is true", async () => {
             const resp = rulify({
-                $and: [true, () => true, () => delayed(true)],
+                $and: [true, { $fn: () => true }, { $fn: () => delayed(true) }],
             })
 
             const result = await resp
@@ -27,7 +27,7 @@ describe("predicates", () => {
     describe("or", () => {
         it("returns true if one thing is true", async () => {
             const resp = rulify({
-                $or: [delayed(false), delayed(false), () => delayed(true)],
+                $or: [delayed(false), delayed(false), { $fn: () => delayed(true) }],
             })
 
             const result = await resp
@@ -37,7 +37,7 @@ describe("predicates", () => {
 
         it("returns false if everything is false", async () => {
             const resp = rulify({
-                $and: [delayed(false), delayed(false), () => delayed(false)],
+                $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
             const result = await resp

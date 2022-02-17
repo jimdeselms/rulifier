@@ -1,7 +1,8 @@
 //const { builtinHandlers } = require("./builtinHandlers")
 
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE } from "./common"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, COST } from "./common"
+import { calculateCost } from './calculateCost'
 
 const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
 
@@ -94,9 +95,6 @@ function proxify(dataSource, handlers, root, prop, caches) {
     }
 
     proxyHandler.apply = function(target, thisArg, argumentsList) {
-
-        debugger
-
         const result = target.apply(thisArg[RAW_VALUE], argumentsList)
         return proxify(result, handlers, root, prop, caches)
     }
@@ -113,6 +111,8 @@ function get(target, proxy, prop, root, handlers, caches) {
             return true
         case GET_WITH_NEW_ROOT:
             return (newRoot, newProp) => get(target, proxy, newProp, newRoot, handlers, caches)
+        case COST:
+            return calculateCost(proxy, root, handlers)
         // case Symbol.iterator:
         //     return target[Symbol.iterator]
     }

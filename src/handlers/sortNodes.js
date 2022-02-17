@@ -1,19 +1,20 @@
-import { COST, CALCULATE_COST } from '../common'
+import { COST } from '../common'
 
 export function* sortNodes(nodes) {
 
     if (!nodes) { return }
+    
+    let proxies = []
+    for (const proxy of nodes) {
+        proxies.push(proxy)
+    }
 
-    const nodesCopy = nodes.slice(0)
-    while (nodesCopy.length > 0) {
-        nodesCopy.sort((n1, n2) => calcCost(n1) - calcCost(n2))
-        yield nodesCopy[0]
-        delete nodesCopy[0]
+    while (proxies.length > 0) {
+        proxies.sort((n1, n2) => calcCost(n1) - calcCost(n2))
+        yield proxies[0]
+        proxies = proxies.slice(1)
     }
 }
-
-const DEFAULT_FUNCTION_COST = 10
-const DEFAULT_NODE_COST = 1
 
 function calcCost(node) {
     const type = typeof node
@@ -22,10 +23,5 @@ function calcCost(node) {
         return 0
     }
 
-    // If it's a function, then it MAY have a cost associated with it
-    if (type === "function") {
-        return node[COST] ?? DEFAULT_FUNCTION_COST
-    }
-
-    return node[CALCULATE_COST]?.() ?? DEFAULT_NODE_COST
+    return node[COST]
 }
