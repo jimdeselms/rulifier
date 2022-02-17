@@ -4,7 +4,7 @@ import cleanup from 'rollup-plugin-cleanup'
 export default [
     {
         input: "src/index.js",
-        // plugins: [minify(), cleanup()],
+        plugins: [minify(), cleanup()],
         output: {
             sourcemap: true,
             file: "dist/index.cjs.js",
@@ -13,7 +13,7 @@ export default [
     },
     {
         input: "src/index.js",
-        // plugins: [minify(), cleanup()],
+        plugins: [minify(), cleanup()],
         output: {
             sourcemap: true,
             file: "dist/index.esm.js",

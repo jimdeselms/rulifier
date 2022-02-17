@@ -1,15 +1,13 @@
-import { $match } from "./handlers/match"
-import { $str } from "./handlers/str"
-import { $ref } from "./handlers/ref"
 import { $eq } from "./handlers/eq"
-import { $in } from "./handlers/in"
+import { $fn } from "./handlers/fn"
 import { $if } from "./handlers/if"
+import { $in } from "./handlers/in"
+import { $match } from "./handlers/match"
+import { $ref } from "./handlers/ref"
+import { $str } from "./handlers/str"
 import { $switch } from "./handlers/switch"
 import { $and, $or, $not } from "./handlers/booleanOperators"
-
 import { $lt, $gt, $lte, $gte, $ne, $regex } from "./handlers/binaryOperators"
-
-import { RAW_VALUE } from './common'
 
 export const builtinHandlers = {
     async $handlers() {
@@ -36,8 +34,5 @@ export const builtinHandlers = {
     $ref,
     $str,
 
-    async $fn(obj, opt) {
-        const fn = obj[RAW_VALUE]
-        return fn()
-    }
+    $fn,
 }
