@@ -13,7 +13,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await obj.value).toBe(false)
+        expect(await obj.value).toBe(true)
 
         expect(messages.length).toBe(1)
     })
@@ -33,7 +33,9 @@ async function rulifyWithCalc(value) {
     const messages = []
 
     async function $calc(obj) {
-        await obj.value
+        const obj1 = await obj
+        const val1 = await obj1.value
+        return val1
     }
 
     $calc[CALCULATE_COST] = (rawValue, handlers) => {
