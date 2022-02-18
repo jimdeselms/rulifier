@@ -1,8 +1,7 @@
 import { RAW_VALUE } from '../common'
 
 export async function $fn(obj, opt) {
-    const fn = obj[RAW_VALUE]
-    return await fn()
+    return await obj()
 }
 
 function ifCost(proxy) {

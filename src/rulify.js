@@ -62,6 +62,19 @@ function proxify(dataSource, handlers, root, prop, caches) {
         return dataSource
     }
 
+    if (type === "function") {
+        // Wrap it to ensure that the function carries the same name.
+        const name = (dataSource.name == "$fn" ? prop : dataSource.name) ?? "$fn"
+        const wrapper = {
+            [name]: async function() {
+                const newThis = await this
+                const result = dataSource.apply(newThis, arguments)
+                return proxify(result, handlers, root, prop, caches)
+            }
+        }
+        return wrapper[name]
+    }
+
     if (type === "object") {
         // Check if it's a call to a handler
         const keys = Object.keys(dataSource)
@@ -111,8 +124,8 @@ function get(target, proxy, prop, root, handlers, caches) {
             return (newRoot, newProp) => get(target, proxy, newProp, newRoot, handlers, caches)
         case COST:
             return calculateCost(target, handlers, caches)
-        // case Symbol.iterator:
-        //     return target[Symbol.iterator]
+        case Symbol.iterator:
+            return target[Symbol.iterator]
     }
 
     let resolvedValues = caches.resolvedValueCache.get(proxy)
