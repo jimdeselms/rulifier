@@ -15,23 +15,22 @@ describe("rulify", () => {
     })
 
     it("is harmless to await intermediate results", async () => {
-        const resp = await rulify({ a: { b: { c: 3 } } })
+        const resp = rulify({ a: { b: { c: 3 } } })
 
-        const a = await resp.a
-        const b = await a.b
-        const c = await b.c
+        const a = await resp.a.b.c
 
-        expect(c).toBe(3)
+        expect(a).toBe(3)
     })
 
     it("can handle a thing that resolves to a function", async () => {
-        const resp = await rulify({ $fn: () => 100 })
+        const result = rulify({ $fn: () => 100 })
+        const resp = await result
 
         expect(resp).toEqual(100)
     })
 
     it("can do function calls on intermediate results", async () => {
-        const resp = await rulify({ a: [0, 1, 2] })
+        const resp = rulify({ a: [0, 1, 2] })
 
         expect(await resp.a.slice(0, 1)).toEqual([0])
     })
