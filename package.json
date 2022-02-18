@@ -3,6 +3,7 @@
   "version": "0.0.1-pre.1",
   "description": "A lightweight rule engine designed for speed and ease of use",
   "files": "dist/**",
+  "type": "module",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "devDependencies": {
@@ -14,13 +15,10 @@
     "rollup-plugin-cleanup": "^3.2.1"
   },
   "scripts": {
-    "test": "jest",
+    "test": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
     "prettier": "prettier --write src",
     "build": "rollup -c ./rollup.config.js"
   },
   "author": "Jim DeSelms",
-  "license": "ISC",
-  "jest": {
-    "preset": "rollup-jest"
-  }
+  "license": "ISC"
 }

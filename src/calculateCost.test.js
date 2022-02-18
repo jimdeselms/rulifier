@@ -13,7 +13,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await obj.value).toBe(true)
+        expect(await obj.value).toBe(false)
 
         expect(messages.length).toBe(1)
     })

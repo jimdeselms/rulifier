@@ -1,6 +1,6 @@
 import { COST } from '../common'
 
-export function* sortNodes(nodes) {
+export async function* sortNodes(nodes) {
 
     if (!nodes) { return }
     
@@ -11,7 +11,8 @@ export function* sortNodes(nodes) {
 
     while (proxies.length > 0) {
         proxies.sort((n1, n2) => calcCost(n1) - calcCost(n2))
-        yield proxies[0]
+        const value = await proxies[0]
+        yield await proxies[0]
         proxies = proxies.slice(1)
     }
 }

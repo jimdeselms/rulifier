@@ -22,6 +22,23 @@ describe("predicates", () => {
 
             expect(result).toBe(false)
         })
+
+        it("can handle nested ands", async () => {
+            const resp = rulify({
+                $and: [
+                    { 
+                        $fn: () => ({ $and: [true, { $fn: () => true }] })
+                    },
+                    {
+                        $and: [true, true]
+                    }
+                ]
+            })
+
+            const result = await resp
+
+            expect(result).toBe(true)
+        })
     })
 
     describe("or", () => {

@@ -1,7 +1,8 @@
 import { sortNodes } from "./sortNodes"
 
 export async function $and(obj) {
-    for (const value of sortNodes(obj)) {
+    for (const value of await obj) {
+//    for await (const value of sortNodes(await obj)) {
         if (!(await value)) {
             return false
         }
@@ -10,7 +11,8 @@ export async function $and(obj) {
 }
 
 export async function $or(obj) {
-    for (const value of sortNodes(obj)) {
+//    for await (const value of sortNodes(await obj)) {
+    for (const value of await obj) {
         if (await value) {
             return true
         }

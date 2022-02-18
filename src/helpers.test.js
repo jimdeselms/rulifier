@@ -9,6 +9,6 @@ describe("testHelpers", () => {
     })
 })
 
-module.exports = {
-    delayed,
+export {
+    delayed
 }
