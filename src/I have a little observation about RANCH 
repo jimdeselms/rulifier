@@ -1,6 +1,0 @@
-I have a little observation about RANCH enumerations, specifically when a paged result returns an “href” for the next page. 
-
-The Wrangler service uses a Redis cache to store service responses. We store both the initial page, as well as the
-href for the next page when one is given to us. I'm pretty sure we always honor the cache-control headers returned.
-
-A little while ago, I flushed our Redis cached, and I noticed we had a little burst of errors from RANCH, where it
