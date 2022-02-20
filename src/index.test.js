@@ -3,29 +3,29 @@ import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
 
-    // it("simplest case", async () => {
-    //     const resp = rulify({ a: 5 })
-    //     expect(await resp.a.value()).toBe(5)
-    // })
-    // it("simple chain", async () => {
-    //     const resp = rulify({ a: { b: 5 } })
+    it("simplest case", async () => {
+        const resp = rulify({ a: 5 })
+        expect(await resp.a.value()).toBe(5)
+    })
+    it("simple chain", async () => {
+        const resp = rulify({ a: { b: 5 } })
 
-    //     expect(await resp.a.b).toBe(5)
-    // })
+        expect(await resp.a.b.value()).toBe(5)
+    })
 
-    // it("can handle merged objects, and later objects replace earlier ones", async () => {
-    //     const resp = rulify({ a: { b: { c: 3 } } })
+    it("can handle merged objects, and later objects replace earlier ones", async () => {
+        const resp = rulify({ a: { b: { c: 3 } } })
 
-    //     expect(await resp.a.b.c).toBe(3)
-    // })
+        expect(await resp.a.b.c.value()).toBe(3)
+    })
 
-    // it("is harmless to await intermediate results", async () => {
-    //     const resp = rulify({ a: { b: { c: 3 } } })
+    it("is harmless to await intermediate results", async () => {
+        const resp = rulify({ a: { b: { c: 3 } } })
 
-    //     const a = await resp.a.b.c
+        const a = await resp.a.b.c
 
-    //     expect(a).toBe(3)
-    // })
+        expect(await a.value()).toBe(3)
+    })
 
     // it("can handle a thing that resolves to a function", async () => {
     //     const result = rulify({ $fn: () => 100 })
@@ -34,18 +34,12 @@ describe("rulify", () => {
     //     expect(resp).toEqual(100)
     // })
 
-    // it("can do function calls on intermediate results", async () => {
-    //     const resp = rulify({ a: [0, 1, 2] })
+    it("works with arrays", async () => {
+        const resp = rulify([1, 2])
 
-    //     expect(await resp.a.slice(0, 1)).toEqual([0])
-    // })
-
-    // it("works with arrays", async () => {
-    //     const resp = rulify([1, 2])
-
-    //     expect(await resp[0]).toBe(1)
-    //     expect(await resp[1]).toBe(2)
-    // })
+        expect(await resp[0].value()).toBe(1)
+        expect(await resp[1].value()).toBe(2)
+    })
 
     // it("works with arrays of functions", async () => {
     //     const resp = rulify([ { $fn: () => 1 }, { $fn: () => 2 }])
@@ -54,17 +48,11 @@ describe("rulify", () => {
     //     expect(await resp[1]).toBe(2)
     // })
 
-    // it("works with an object that has a then that is not a promise", async () => {
-    //     const resp = rulify({ then: 123 })
+    it("works with an object that has a then that is not a promise", async () => {
+        const resp = rulify({ then: 123 })
 
-    //     expect(await resp.then).toBe(123)
-    // })
-
-    // it("works with functions", async () => {
-    //     const resp = rulify({ a: 5000 })
-
-    //     expect(await resp.a).toBe(5000)
-    // })
+        expect(await resp.then.value()).toBe(123)
+    })
 
     // it("works with promises", async () => {
     //     const resp = rulify({ a: { $fn: () => delayed(500) }})
