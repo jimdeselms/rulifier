@@ -217,5 +217,25 @@ async function materialize(value) {
         return value[SIMPLE_OBJECT]
     }
 
-    throw new Error("Not implemented yet")
+    const type = typeof value
+    if (value === null || (type !== "object" && type !== "function")) {
+        return value
+    }
+
+    // This is a promise, so we'll resolve it
+    if (typeof value?.then === "function") {
+        debugger
+        const result = await value
+        return await materialize(result)
+    }
+
+    throw new Error("FOO")
+
+    // const result = {}
+
+    // for (const [k, v] of Object.entries(value)) {
+    //     result [k] = await materialize(v)
+    // }
+
+    // return result
 }
