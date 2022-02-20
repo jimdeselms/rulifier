@@ -36,6 +36,18 @@ describe('proxify', () => {
 
         expect(await p[1].value()).toBe(2)
     })
+
+    test('getting value that resovles to an object with a key', async () => {
+        const p = prox({a: {b: {c: 1}}})
+
+        expect(await p.a.b.value()).toMatchObject({ c: 1 })
+    })
+
+    test('getting value that resovles to an array', async () => {
+        const p = prox({a: {b: [5, 10, 15]}})
+
+        expect(await p.a.b.value()).toMatchObject([5, 10, 15])
+    })
 })
 
 function prox(obj) {

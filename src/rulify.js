@@ -229,13 +229,11 @@ async function materialize(value) {
         return await materialize(result)
     }
 
-    throw new Error("FOO")
+    const result = Array.isArray(value) ? [] : {}
 
-    // const result = {}
+    for (const [k, v] of Object.entries(value)) {
+        result [k] = await materialize(v)
+    }
 
-    // for (const [k, v] of Object.entries(value)) {
-    //     result [k] = await materialize(v)
-    // }
-
-    // return result
+    return result
 }
