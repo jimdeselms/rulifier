@@ -32,9 +32,8 @@ export function rulify(...dataSources) {
 
     // Set up the context
     // handlers: the set of handlers
-    // resolvedValueCache: when we get values, if we've already resolved an object
-    //   then we'll just return the resolved object so that we don't have to waste
-    //   cycles.
+    // resolvedValueCache: In the resolution process, if we've already gotten a raw value
+    // before, then we'll cache a promise that returns its resolution
     // 
     // Note that the caches use weak maps so that they won't cause a memory leak as
     // values go out of scope
@@ -107,7 +106,7 @@ async function resolve(target, proxy, ctx) {
     let value = await target
 
     if (ctx.resolvedValueCache.has(value)) {
-        return ctx.resolvedValueCache.get(value)
+        return await ctx.resolvedValueCache.get(value)
     }
 
     if (value !== null && (typeof value === "object" || typeof value === "function")) {
@@ -115,11 +114,19 @@ async function resolve(target, proxy, ctx) {
             // Are we calling a handler? Then do it and pass back the result.
             const h = getHandlerAndArgument(value, ctx.handlers)
             if (h) {
-                // Proxify the argument so that we can resolve if it's also a rule reference.
-                const arg = await proxify(h.argument, ctx)
-                const resolvedValue = await h.handler(arg)
-                ctx.resolvedValueCache.set(value, resolvedValue)
-                return resolvedValue
+                // We'll cache the promise so that if another request tries to 
+                // resolve the same value, they'll both be waiting on the same
+                // promise.
+                const resolvedValuePromise = resolveHandler(h, ctx)
+                ctx.resolvedValueCache.set(value, resolvedValuePromise)
+                value = await resolvedValuePromise
+            } else {
+                // This might not be worth it; if we have a cache hit, the only
+                // thing we've saved is the type check and call to getHandlerAndArgument.
+                // 
+                // Later when we do a performance analysis, we can see if this
+                // actually speeds it up or not.
+                ctx.resolvedValueCache.set(value, Promise.resolve(value))
             }
         }
     }
@@ -139,6 +146,11 @@ function getHandlerAndArgument(obj, handlers) {
     } else {
         return undefined
     }
+}
+
+async function resolveHandler({ handler, argument }, ctx) {
+    const arg = await proxify(argument, ctx)
+    return await handler(arg)
 }
 
 async function materialize(value, proxy, ctx) {
