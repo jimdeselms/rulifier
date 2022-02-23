@@ -2,9 +2,7 @@ import { builtinHandlers } from "./builtinHandlers"
 import { GET_WITH_NEW_ROOT, RAW_VALUE, COST } from "./common"
 import { calculateCost } from './calculateCost'
 
-const IS_RULIFIED = Symbol.for("__IS_RULIFIED")
-const HANDLERS = Symbol.for("__HANDLERS")
-const DATA_SOURCE = Symbol.for("__DATA_SOURCE")
+const PROXY_CONTEXT = Symbol.for("__PROXY_CONTEXT")
 
 /**
  * @param  {...Record<any, any>} dataSources
@@ -20,12 +18,13 @@ export function rulify(...dataSources) {
     }
 
     for (let dataSource of dataSources) {
-        if (dataSource[DATA_SOURCE]) {
+        const proxyContext = dataSource[PROXY_CONTEXT]
+        if (proxyContext) {
             // If the thing is "already rulfied", then we want to grab the
             // raw value and re-proxify it.
-            Object.assign(handlers, dataSource[HANDLERS])
+            Object.assign(handlers, proxyContext.handlers)
 
-            dataSource = dataSource[DATA_SOURCE]
+            dataSource = proxyContext.dataSource
         } else {
             Object.assign(handlers, normalizeHandlers(dataSource.$handlers))
             delete dataSource.$handlers
@@ -51,6 +50,16 @@ export function rulify(...dataSources) {
     return proxify(root, ctx)
 }
 
+export async function evaluate(proxy) {
+    if (!proxy[PROXY_CONTEXT]) {
+        throw new Error("Attemplt to call evaluate on an object that isn't rulified")
+    }
+
+    debugger 
+
+    return await materialize(proxy[RAW_VALUE], proxy[PROXY_CONTEXT])
+}
+
 function normalizeHandlers(handlers) {
     if (!handlers) {
         return undefined
@@ -64,7 +73,7 @@ function normalizeHandlers(handlers) {
 export function proxify(value, ctx) {
 
     // If this is already a proxy, then just return it.
-    if (value[IS_RULIFIED]) {
+    if (value[PROXY_CONTEXT]) {
         return value
     }
 
@@ -87,21 +96,10 @@ export function proxify(value, ctx) {
 }
 
 function get(target, prop, ctx) {
-    switch (prop) {
-        // When requesting the value function, we return a promise to a function (not a proxy)
-        case "value": return () => materialize(target, ctx)
-
-        // This just tells us that we've already got an object that's a proxy
-        case IS_RULIFIED: return true
-
-        // This returns the raw, unprocessed promise
-        case RAW_VALUE: return target
-
-        // Get the handlers
-        case HANDLERS: return ctx.handlers
-
-        // When rebuilding, grab the existing dataSource.
-        case DATA_SOURCE: return ctx.dataSource
+    if (prop === PROXY_CONTEXT) {
+        return ctx
+    } else if (prop === RAW_VALUE) {
+        return target
     }
 
     return proxify(getAsync(target, prop, ctx), ctx)
@@ -165,6 +163,7 @@ async function resolveHandler({ handler, argument }, ctx) {
 
 async function materialize(value, ctx) {
 
+    debugger
     value = await resolve(value, ctx)
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {

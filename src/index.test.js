@@ -1,29 +1,29 @@
-import { rulify } from "./index"
+import { rulify, evaluate } from "./index"
 import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
 
     it("simplest case", async () => {
         const resp = rulify({ a: 5 })
-        expect(await resp.a.value()).toBe(5)
+        expect(await evaluate(resp.a)).toBe(5)
     })
 
     it("simple chain", async () => {
         const resp = rulify({ a: { b: 5 } })
 
-        expect(await resp.a.b.value()).toBe(5)
+        expect(await evaluate(resp.a.b)).toBe(5)
     })
 
     it("can handle merged objects, and later objects replace earlier ones", async () => {
         const resp = rulify({ a: { b: { c: 3 } } })
 
-        expect(await resp.a.b.c.value()).toBe(3)
+        expect(await evaluate(resp.a.b.c)).toBe(3)
     })
 
     it("can materialize a non-leaf node", async () => {
         const resp = rulify({ a: { b: { c: 3 } } })
 
-        expect(await resp.a.b.value()).toMatchObject({ c: 3 })
+        expect(await evaluate(resp.a.b)).toMatchObject({ c: 3 })
     })
 
     it("is harmless to await intermediate results", async () => {
@@ -32,49 +32,46 @@ describe("rulify", () => {
         const b = await resp.a.b
         const c = resp.a.b.c
 
-        expect(await b.value()).toMatchObject({ c: 3 })
-        expect(await b.c.value()).toBe(3)
-        expect(await c.value()).toBe(3)
+        expect(await evaluate(b)).toMatchObject({ c: 3 })
+        expect(await evaluate(b.c)).toBe(3)
+        expect(await evaluate(c)).toBe(3)
     })
 
     it("can handle a thing that resolves to a function", async () => {
-        const result = rulify({ $fn: () => 100 })
-        const valueFn = result.value
-        const value = valueFn()
-        const resp = await value
+        const resp = rulify({ $fn: () => 100 })
 
-        expect(resp).toEqual(100)
+        expect(await evaluate(resp)).toEqual(100)
     })
 
-    it("works with arrays", async () => {
+    it("works with arrays of simple values", async () => {
         const resp = rulify({ arr: [1, 2] })
 
-        expect(await resp.arr[0].value()).toBe(1)
-        expect(await resp.arr[1].value()).toBe(2)
+        expect(await evaluate(resp.arr[0])).toBe(1)
+//        expect(await evaluate(resp.arr[1])).toBe(2)
     })
 
     it("can materialize an array", async () => {
         const resp = rulify({ a: [1, 2] })
-        expect(await resp.a.value()).toMatchObject([1, 2])
+        expect(await evaluate(resp.a)).toMatchObject([1, 2])
     })
 
     it("works with arrays of functions", async () => {
         const resp = rulify({ a: [ { $fn: () => 1 }, { $fn: () => 2 }] })
 
-        expect(await resp.a[0].value()).toBe(1)
-        expect(await resp.a[1].value()).toBe(2)
+        expect(await evaluate(resp.a[0])).toBe(1)
+        expect(await evaluate(resp.a[1])).toBe(2)
     })
 
     it("works with an object that has a then that is not a promise", async () => {
         const resp = rulify({ then: 123 })
 
-        expect(await resp.then.value()).toBe(123)
+        expect(await evaluate(resp.then)).toBe(123)
     })
 
     it("works with promises", async () => {
         const resp = rulify({ a: { $fn: () => delayed(500) }})
 
-        expect(await resp.a.value()).toBe(500)
+        expect(await evaluate(resp.a)).toBe(500)
     })
 
     it("works with a chain of functions that return promises", async () => {
@@ -90,13 +87,13 @@ describe("rulify", () => {
             },
         })
 
-        expect(await resp.a.b.c.value()).toBe(12321)
+        expect(await evaluate(resp.a.b.c)).toBe(12321)
     })
 
     it("can directly proxify a promise", async () => {
         const resp = rulify({ a: Promise.resolve(5) })
 
-        expect(await resp.a.value()).toBe(5)
+        expect(await evaluate(resp.a)).toBe(5)
     })
 
     it("works with a chain of promises", async () => {
@@ -108,8 +105,8 @@ describe("rulify", () => {
             }),
         })
 
-        expect(await resp.a.b.value()).toMatchObject({c: 12321})
-        expect(await resp.a.b.c.value()).toBe(12321)
+        expect(await evaluate(resp.a.b)).toMatchObject({c: 12321})
+        expect(await evaluate(resp.a.b.c)).toBe(12321)
     })
 
     it("works with a chain of functions", async () => {
@@ -127,9 +124,9 @@ describe("rulify", () => {
             }
         })
 
-        expect(await resp.a.b.value()).toMatchObject({c: { d: 12345} })
-        expect(await resp.a.b.c.value()).toMatchObject({ d: 12345 })
-        expect(await resp.a.b.c.d.value()).toBe(12345)
+        expect(await evaluate(resp.a.b)).toMatchObject({c: { d: 12345} })
+        expect(await evaluate(resp.a.b.c)).toMatchObject({ d: 12345 })
+        expect(await evaluate(resp.a.b.c.d)).toBe(12345)
     })
 
     it("ensures that functions that are not referenced are not evaluated", async () => {
@@ -142,7 +139,7 @@ describe("rulify", () => {
             }},
         })
 
-        expect(await resp.a.value()).toBe(123)
+        expect(await evaluate(resp.a)).toBe(123)
         expect(executed).toBe(false)
     })
 
@@ -162,9 +159,9 @@ describe("rulify", () => {
             }
         })
 
-        expect(await resp.a.b.value()).toBe(1)
-        expect(await resp.a.c.value()).toBe(2)
-        expect(await resp.a.d.value()).toBe(3)
+        expect(await evaluate(resp.a.b)).toBe(1)
+        expect(await evaluate(resp.a.c)).toBe(2)
+        expect(await evaluate(resp.a.d)).toBe(3)
 
         expect(executed).toBe(1)
     })
@@ -181,14 +178,14 @@ describe("rulify", () => {
             }
         })
 
-        expect(await resp.a.value()).toBe(5)
+        expect(await evaluate(resp.a)).toBe(5)
         expect(executed).toBe(true)
 
         executed = false
 
         const resp2 = rulify(resp)
 
-        expect(await resp2.a.value()).toBe(5)
+        expect(await evaluate(resp2.a)).toBe(5)
         expect(executed).toBe(true)
     })
 
@@ -196,14 +193,14 @@ describe("rulify", () => {
         debugger
         const resp = rulify({
             $handlers: {
-                capitalize: async (name) => (await name.value()).toUpperCase(),
+                capitalize: async (name) => (await evaluate(name)).toUpperCase(),
             },
             name: {
                 $capitalize: "Fred",
             },
         })
 
-        expect(await resp.name.value()).toBe("FRED")
+        expect(await evaluate(resp.name)).toBe("FRED")
     })
 
     it("a response can have more data source added to it", async () => {
@@ -214,8 +211,8 @@ describe("rulify", () => {
         const resp2 = rulify(resp, { b: 2 })
         const resp3 = rulify(resp2, { c: 3 })
 
-        expect(await resp3.a.value()).toBe(1)
-        expect(await resp3.b.value()).toBe(2)
-        expect(await resp3.c.value()).toBe(3)
+        expect(await evaluate(resp3.a)).toBe(1)
+        expect(await evaluate(resp3.b)).toBe(2)
+        expect(await evaluate(resp3.c)).toBe(3)
     })
 })

@@ -1,4 +1,6 @@
+import { evaluate } from ".."
+
 export async function $if(obj) {
-    const condition = await obj.condition.value()
-    return condition ? await obj.then.value() : await obj.else.value()
+    const condition = await evaluate(obj.condition)
+    return condition ? await evaluate(obj.then) : await evaluate(obj.else)
 }

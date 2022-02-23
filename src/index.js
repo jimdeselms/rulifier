@@ -1,1 +1,1 @@
-export { rulify } from './rulify'
+export { rulify, evaluate } from './rulify'
