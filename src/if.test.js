@@ -10,9 +10,7 @@ describe("if", () => {
             },
         })
 
-        const result = await resp
-
-        expect(result).toBe(1)
+        expect(await resp.value()).toBe(1)
     })
 
     it("works in the false case", async () => {
@@ -24,8 +22,6 @@ describe("if", () => {
             },
         })
 
-        const result = await resp
-
-        expect(result).toBe(2)
+        expect(await resp.value()).toBe(2)
     })
 })
