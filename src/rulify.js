@@ -12,8 +12,6 @@ export function rulify(...dataSources) {
     const root = {}
     let handlers = {}
 
-    // The caches use weak maps so that they won't cause memory leaks
-    // when the proxies or resolved values go out of scope.
     const caches = {
         proxyCache: new WeakMap(),
         resolvedValueCache: new WeakMap(),
@@ -33,7 +31,23 @@ export function rulify(...dataSources) {
 
     Object.assign(handlers, builtinHandlers)
 
-    return proxify(root, handlers, undefined, undefined, caches)
+    // Set up the context
+    // handlers: the set of handlers
+    // proxyCache: the set of proxied objects; if we proxify the same object
+    //   more than once, then we should return the same proxy.
+    // resolvedValueCache: when we get values, if we've already resolved an object
+    //   then we'll just return the resolved object so that we don't have to waste
+    //   cycles.
+    // 
+    // Note that the caches use weak maps so that they won't cause a memory leak as
+    // values go out of scope
+    const ctx = { 
+        handlers,
+        proxyCache: new WeakMap(),
+        resolvedValueCache: new WeakMap()
+    }
+
+    return proxify(root, ctx)
 }
 
 function normalizeHandlers(handlers) {
@@ -46,18 +60,23 @@ function normalizeHandlers(handlers) {
     return Object.fromEntries(entries)
 }
 
-export function proxify(value, handlers) {
-
-    debugger 
+export function proxify(value, ctx) {
 
     // If this is already a proxy, then just return it.
     if (value[IS_RULIFIED]) {
         return value
     }
 
+    // If we've already built a proxy for this object, then return it.
+    if (ctx.proxyCache.has(value)) {
+        return ctx.proxyCache.get(value)
+    }
+
+    let promisifiedObject = value
+
     // proxify always wraps promises.
-    if (value === null || typeof value !== "object" || typeof value?.then !== "function") {
-        value = Promise.resolve(value)
+    if (promisifiedObject === null || typeof promisifiedObject !== "object" || typeof promisifiedObject?.then !== "function") {
+        promisifiedObject = Promise.resolve(promisifiedObject)
     }
 
     // Create the proxy, and add the handlers later so that they can reference the proxy.
@@ -65,20 +84,18 @@ export function proxify(value, handlers) {
     const proxy = new Proxy(value, proxyHandler)
 
     proxyHandler.get = function (target, prop) {
-        return get(target, prop, handlers)
+        return get(target, prop, proxy, ctx)
     }
+
+    ctx.proxyCache.set(value, proxy)
 
     return proxy
 }
 
-function get(target, prop, handlers) {
+function get(target, prop, proxy, ctx) {
     switch (prop) {
         // When requesting the value function, we return a promise to a function (not a proxy)
-        case "value": return () => materialize(target, handlers)
-
-        // We're trying to resolve the promise. Return a then that 
-        // gets the resolved value and turns it into a proxy.
-//        case "then": return (fn) => target.then(result => fn(proxify(result, handlers)))
+        case "value": return () => materialize(target, proxy, ctx)
 
         // This just tells us that we've already got an object that's a proxy
         case IS_RULIFIED: return true
@@ -87,30 +104,34 @@ function get(target, prop, handlers) {
         case RAW_VALUE: return target
     }
 
-    return proxify(getAsync(target, prop, handlers), handlers)
+    return proxify(getAsync(target, prop, proxy, ctx), ctx)
 }
 
-
-
-async function getAsync(target, prop, handlers) {
-    const resolved = await resolve(target, handlers)
+async function getAsync(target, prop, proxy, ctx) {
+    const resolved = await resolve(target, proxy, ctx)
     return resolved[prop]
 }
 
-async function resolve(target, handlers) {
+async function resolve(target, proxy, ctx) {
+    if (ctx.resolvedValueCache.has(proxy)) {
+        return ctx.resolvedValueCache.get(proxy)
+    }
+
     let value = await target
 
     if (value === null || typeof value !== "object") {
         return value
+    } else {
+        // Are we calling a handler? Then do it and pass back the result.
+        const h = getHandlerAndArgument(value, ctx.handlers)
+        if (h) {
+            // Proxify the argument so that we can resolve if it's also a rule reference.
+            const arg = await proxify(h.argument, ctx)
+            value = await h.handler(arg)
+        }
     }
 
-    // Are we calling a handler? Then do it and pass back the result.
-    const h = getHandlerAndArgument(value, handlers)
-    if (h) {
-        // Proxify the argument so that we can resolve if it's also a rule reference.
-        const arg = await proxify(h.argument, handlers)
-        value = await h.handler(arg)
-    }
+    ctx.resolvedValueCache.set(target, value)
 
     return value
 }
@@ -129,9 +150,9 @@ function getHandlerAndArgument(obj, handlers) {
     }
 }
 
-async function materialize(value, handlers) {
+async function materialize(value, proxy, ctx) {
 
-    value = await resolve(value, handlers)
+    value = await resolve(value, proxy, ctx)
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {
         return value
@@ -143,7 +164,7 @@ async function materialize(value, handlers) {
 
     for (const [k, v] of Object.entries(value)) {
         const resolved = await v
-        result[k] = await materialize(resolved, handlers)
+        result[k] = await materialize(resolved, proxy, ctx)
     }
 
     return result

@@ -47,10 +47,10 @@ describe("rulify", () => {
     })
 
     it("works with arrays", async () => {
-        const resp = rulify([1, 2])
+        const resp = rulify({ arr: [1, 2] })
 
-        expect(await resp[0].value()).toBe(1)
-        expect(await resp[1].value()).toBe(2)
+        expect(await resp.arr[0].value()).toBe(1)
+        expect(await resp.arr[1].value()).toBe(2)
     })
 
     it("can materialize an array", async () => {
