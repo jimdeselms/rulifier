@@ -48,13 +48,16 @@ function normalizeHandlers(handlers) {
     return Object.fromEntries(entries)
 }
 
-export function proxify(value) {
-    debugger
-
+export function proxify(value, handlers) {
     const type = typeof value
 
     if (value === null || (type !== "object" && type !== "function")) {
-        return proxify({ [SIMPLE_OBJECT]: value })
+        return proxify({ [SIMPLE_OBJECT]: value }, handlers)
+    }
+
+    // Already a proxify? Just return it.
+    if (value[IS_RULIFIED]) {
+        return value
     }
 
     // Create the proxy, and add the handlers later so that they can reference the proxy.
@@ -62,21 +65,155 @@ export function proxify(value) {
     const proxy = new Proxy(value, proxyHandler)
 
     proxyHandler.get = function (target, prop) {
-        debugger
-        return get(target, prop)
+        return get(target, prop, handlers)
     }
 
     return proxy
 }
 
-function get(target, prop) {
-    debugger
-    if (prop === "value" && target?.value === undefined) {
-        return () => materialize(target)
-    } else {
-        const value = target[prop]
-        return proxify(value)
+function get(target, prop, handlers) {
+    // What if the thing actually has a property called "value"?
+    switch (prop) {
+        case "value": return () => materialize(target, handlers)
+        case IS_RULIFIED: return true
+        case RAW_VALUE: return target
+        // case "then": return (fn) => {
+        //     debugger
+
+        //     if (typeof target.then === "function") {
+        //         target.then(result => {
+        //             proxify(result, handlers)
+        //         }).then(fn)
+        //     } else {
+        //         return fn(target)
+        //     }
+        // }
     }
+
+    return getAsync(target, prop, handlers)
+
+    const resolved = resolve(target, handlers)
+    
+    if (prop === "value") {
+        return () => materialize(resolved, handlers)
+    }
+
+    if (prop === "then") {
+        return (fn) => {
+            if (typeof resolved.then === "function") {
+                return resolved.then(result => {
+                    proxify(result, handlers)
+                }).then(fn)
+            } else {
+                debugger
+                return fn(proxify(resolved, handlers))
+            }
+        }
+    }
+
+    return proxify(resolved[prop], handlers)
+
+    // const resolved = resolve(target, handlers)
+
+    // if (typeof target.then === "function") {
+    //     return target.then(value => {
+    //         const result = proxify(value, handlers)
+    //         return get(result, prop, handlers)
+    //     })
+    // }
+
+    // const handlerAndArg = getHandlerAndArgument(target, handlers)
+    // if (handlerAndArg) {
+    //     const result = evaluateHandler(handlerAndArg, handlers).then(value => {
+    //         const r = proxify(value, handlers)
+    //         return get(r, prop, handlers)
+    //     })
+    //     return proxify(result, handlers)
+    // }
+
+    // if (prop === SIMPLE_OBJECT) {
+    //     return target[SIMPLE_OBJECT]
+    // }
+
+    // return proxify(target[prop], handlers)
+}
+
+async function getAsync(target, prop, handlers) {
+    
+}
+
+// Takes an object and gets it to a state where it's a boring object
+export function resolve(obj, handlers) {
+    // If it's a promise, then the result is a promise that resolves to the proxified value.
+    if (typeof obj.then === "function") {
+        return obj.then(async value => {
+            const resolved = await resolve(value, handlers)
+            return resolved
+        })
+    }
+
+    const handlerAndArg = getHandlerAndArgument(obj, handlers)
+    if (handlerAndArg) {
+        return evaluateHandler(handlerAndArg, handlers).then(async value => {
+            const resolved = await resolve(value)
+            return resolved
+        })
+    }
+
+    // If there's nothing special about this object, then it's already resolved and we can just return it.
+    return obj
+}
+
+function getHandlerAndArgument(obj, handlers) {
+    const keys = Object.keys(obj)
+    let key, handler
+    if (keys.length === 1 && (key = keys[0])[0] === "$" && (handler = handlers[key])) {
+        return { handler, argument: obj[key] }
+    } else {
+        return undefined
+    }
+}
+
+async function evaluateHandler({ handler, argument }, handlers) {
+    const arg = handler.name === "$fn"
+        ? argument
+        : proxify(await argument, handlers)
+
+    const result = await handler(arg)
+
+    return proxify(result, handlers)
+}
+
+
+async function materialize(value, handlers) {
+
+    if (SIMPLE_OBJECT in value) {
+        return value[SIMPLE_OBJECT]
+    }
+
+    const type = typeof value
+    if (value === null || (type !== "object" && type !== "function")) {
+        return value
+    }
+
+    // This is a promise, so we'll resolve it
+    if (typeof value?.then === "function") {
+        const result = await value
+        return await materialize(result, handlers)
+    }
+
+    const handlerAndArg = getHandlerAndArgument(value, handlers)
+    if (handlerAndArg) {
+        const result = await evaluateHandler(handlerAndArg, handlers)
+        return materialize(result, handlers)
+    }
+
+    const result = Array.isArray(value)
+    for (const [k, v] of Object.entries(value)) {
+        result[k] = await materialize(v, handlers)
+    }
+
+    return result
 }
 
 // export function proxify2(dataSource, handlers, root, prop, caches) {
@@ -210,30 +347,3 @@ function get(target, prop) {
 
 //     return proxified
 // }
-
-async function materialize(value) {
-
-    if (value.hasOwnProperty(SIMPLE_OBJECT)) {
-        return value[SIMPLE_OBJECT]
-    }
-
-    const type = typeof value
-    if (value === null || (type !== "object" && type !== "function")) {
-        return value
-    }
-
-    // This is a promise, so we'll resolve it
-    if (typeof value?.then === "function") {
-        debugger
-        const result = await value
-        return await materialize(result)
-    }
-
-    const result = Array.isArray(value) ? [] : {}
-
-    for (const [k, v] of Object.entries(value)) {
-        result [k] = await materialize(v)
-    }
-
-    return result
-}

@@ -22,17 +22,22 @@ describe("rulify", () => {
     it("is harmless to await intermediate results", async () => {
         const resp = rulify({ a: { b: { c: 3 } } })
 
-        const a = await resp.a.b.c
+        debugger
+
+        const a1 = await resp.a.b.c
+        const a2 = resp.a.b.c
 
         expect(await a.value()).toBe(3)
     })
 
-    // it("can handle a thing that resolves to a function", async () => {
-    //     const result = rulify({ $fn: () => 100 })
-    //     const resp = await result
+    it("can handle a thing that resolves to a function", async () => {
+        const result = rulify({ $fn: () => 100 })
+        const valueFn = result.value
+        const value = valueFn()
+        const resp = await value
 
-    //     expect(resp).toEqual(100)
-    // })
+        expect(resp).toEqual(100)
+    })
 
     it("works with arrays", async () => {
         const resp = rulify([1, 2])
@@ -41,12 +46,12 @@ describe("rulify", () => {
         expect(await resp[1].value()).toBe(2)
     })
 
-    // it("works with arrays of functions", async () => {
-    //     const resp = rulify([ { $fn: () => 1 }, { $fn: () => 2 }])
+    it("works with arrays of functions", async () => {
+        const resp = rulify([ { $fn: () => 1 }, { $fn: () => 2 }])
 
-    //     expect(await resp[0]).toBe(1)
-    //     expect(await resp[1]).toBe(2)
-    // })
+        expect(await resp[0].value()).toBe(1)
+        expect(await resp[1].value()).toBe(2)
+    })
 
     it("works with an object that has a then that is not a promise", async () => {
         const resp = rulify({ then: 123 })
@@ -54,11 +59,11 @@ describe("rulify", () => {
         expect(await resp.then.value()).toBe(123)
     })
 
-    // it("works with promises", async () => {
-    //     const resp = rulify({ a: { $fn: () => delayed(500) }})
+    it("works with promises", async () => {
+        const resp = rulify({ a: { $fn: () => delayed(500) }})
 
-    //     expect(await resp.a).toBe(500)
-    // })
+        expect(await resp.a.value()).toBe(500)
+    })
 
     // it("works with a chain of functions that return promises", async () => {
     //     const resp = rulify({
@@ -73,7 +78,7 @@ describe("rulify", () => {
     //         },
     //     })
 
-    //     expect(await resp.a.b.c).toBe(12321)
+    //     expect(await resp.a.b.c.value()).toBe(12321)
     // })
 
     // it("works with a chain of promises", async () => {
@@ -88,31 +93,60 @@ describe("rulify", () => {
     //     expect(await resp.a.b.c).toBe(12321)
     // })
 
-    // it("works with a chain of functions", async () => {
-    //     const resp = rulify({
-    //         a: { 
-    //             $fn: () => ({
-    //                 b: {
-    //                     $fn: () => ({
-    //                     c: {
-    //                         $fn: () => 12345
-    //                     }
-    //                     })
-    //                 },
-    //             }),
-    //         }
-    //     })
+    it("works with a chain of functions", async () => {
+        const resp = rulify({
+            a: { 
+                $fn: () => ({
+                    b: {
+                        $fn: () => ({
+                            c: {
+                                $fn: () => ({d: 12345})
+                            }
+                        })
+                    },
+                }),
+            }
+        })
 
-    //     expect(await resp.a.b.c).toBe(12345)
-    // })
+        debugger
 
-    // it("works with a function that returns a simple object", async () => {
-    //     const resp = rulify({
-    //         a: { $fn: () => 123 },
-    //     })
+        const respVal = await resp 
 
-    //     expect(await resp.a).toBe(123)
-    // })
+        debugger 
+
+        const a = resp.a
+        const aVal = await a
+
+        debugger
+
+        const b = a.b
+        const bVal = await b
+
+        debugger
+
+        const c = b.c
+        const cVal = await c
+
+        debugger 
+
+        const d = c.d
+        const dVal = await d
+
+        await new Promise(r => setTimeout(r, 100))
+
+        const valueFn = b.value
+        const result = valueFn()
+
+        expect(await result).toMatchObject({c: { d: 12345} })
+    }, 9999999)
+
+    it("works with a function that returns a simple object", async () => {
+        const resp = rulify({
+            a: { $fn: () => 123 },
+        })
+
+        expect(await resp.a.value()).toBe(123)
+    })
 
     // it("ensures that functions that aren't referenced aren't evaluated", async () => {
     //     let executed = false
