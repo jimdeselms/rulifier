@@ -13,7 +13,6 @@ export function rulify(...dataSources) {
     let handlers = {}
 
     const caches = {
-        proxyCache: new WeakMap(),
         resolvedValueCache: new WeakMap(),
     }
 
@@ -33,8 +32,6 @@ export function rulify(...dataSources) {
 
     // Set up the context
     // handlers: the set of handlers
-    // proxyCache: the set of proxied objects; if we proxify the same object
-    //   more than once, then we should return the same proxy.
     // resolvedValueCache: when we get values, if we've already resolved an object
     //   then we'll just return the resolved object so that we don't have to waste
     //   cycles.
@@ -43,7 +40,6 @@ export function rulify(...dataSources) {
     // values go out of scope
     const ctx = { 
         handlers,
-        proxyCache: new WeakMap(),
         resolvedValueCache: new WeakMap()
     }
 
@@ -60,16 +56,13 @@ function normalizeHandlers(handlers) {
     return Object.fromEntries(entries)
 }
 
+const TEST_LIST = []
+
 export function proxify(value, ctx) {
 
     // If this is already a proxy, then just return it.
     if (value[IS_RULIFIED]) {
         return value
-    }
-
-    // If we've already built a proxy for this object, then return it.
-    if (ctx.proxyCache.has(value)) {
-        return ctx.proxyCache.get(value)
     }
 
     let promisifiedObject = value
@@ -86,8 +79,6 @@ export function proxify(value, ctx) {
     proxyHandler.get = function (target, prop) {
         return get(target, prop, proxy, ctx)
     }
-
-    ctx.proxyCache.set(value, proxy)
 
     return proxy
 }
@@ -113,25 +104,25 @@ async function getAsync(target, prop, proxy, ctx) {
 }
 
 async function resolve(target, proxy, ctx) {
-    if (ctx.resolvedValueCache.has(proxy)) {
-        return ctx.resolvedValueCache.get(proxy)
-    }
-
     let value = await target
 
-    if (value === null || typeof value !== "object") {
-        return value
-    } else {
-        // Are we calling a handler? Then do it and pass back the result.
-        const h = getHandlerAndArgument(value, ctx.handlers)
-        if (h) {
-            // Proxify the argument so that we can resolve if it's also a rule reference.
-            const arg = await proxify(h.argument, ctx)
-            value = await h.handler(arg)
-        }
+    if (ctx.resolvedValueCache.has(value)) {
+        return ctx.resolvedValueCache.get(value)
     }
 
-    ctx.resolvedValueCache.set(target, value)
+    if (value !== null && (typeof value === "object" || typeof value === "function")) {
+        if (typeof value === "object") {
+            // Are we calling a handler? Then do it and pass back the result.
+            const h = getHandlerAndArgument(value, ctx.handlers)
+            if (h) {
+                // Proxify the argument so that we can resolve if it's also a rule reference.
+                const arg = await proxify(h.argument, ctx)
+                const resolvedValue = await h.handler(arg)
+                ctx.resolvedValueCache.set(value, resolvedValue)
+                return resolvedValue
+            }
+        }
+    }
 
     return value
 }
