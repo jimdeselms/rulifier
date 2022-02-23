@@ -1,4 +1,4 @@
-import { rulify } from "./index"
+import { rulify, evaluate } from "."
 import { delayed } from "./helpers.test"
 
 describe("predicates", () => {
@@ -8,7 +8,7 @@ describe("predicates", () => {
                 $and: [{ $fn: () => true }, { $fn: () => delayed(true) }, true],
             })
 
-            const result = await resp
+            const result = await evaluate(resp)
 
             expect(result).toBe(true)
         })
@@ -18,7 +18,7 @@ describe("predicates", () => {
                 $and: [{ $fn: () => delayed(false) }, { $fn: () => true }, true],
             })
 
-            const result = await resp
+            const result = await evaluate(resp)
 
             expect(result).toBe(false)
         })
@@ -35,7 +35,7 @@ describe("predicates", () => {
                 ]
             })
 
-            const result = await resp
+            const result = await evaluate(resp)
 
             expect(result).toBe(true)
         })
@@ -47,7 +47,7 @@ describe("predicates", () => {
                 $or: [delayed(false), delayed(false), { $fn: () => delayed(true) }],
             })
 
-            const result = await resp
+            const result = await evaluate(resp)
 
             expect(result).toBe(true)
         })
@@ -57,7 +57,7 @@ describe("predicates", () => {
                 $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
-            const result = await resp
+            const result = await evalute(resp)
 
             expect(result).toBe(false)
         })
@@ -65,44 +65,44 @@ describe("predicates", () => {
 
     describe("not", () => {
         it("negates the value", async () => {
-            expect(await rulify({ $not: true })).toBe(false)
-            expect(await rulify({ $not: false })).toBe(true)
-            expect(await rulify({ $not: delayed(1) })).toBe(false)
-            expect(await rulify({ $not: delayed(0) })).toBe(true)
+            expect(await evaluate(rulify({ $not: true }))).toBe(false)
+            expect(await evaluate(rulify({ $not: false }))).toBe(true)
+            expect(await evaluate(rulify({ $not: delayed(1) }))).toBe(false)
+            expect(await evaluate(rulify({ $not: delayed(0) }))).toBe(true)
         })
 
         it("returns false if everything is false", async () => {
-            const resp = rulify({
+            const resp = evaluate(rulify({
                 $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
-            })
+            }))
 
-            const result = await resp
+            const result = await evaluate(resp)
 
             expect(result).toBe(false)
         })
     })
 
     test("binary operators", async () => {
-        expect(await rulify({ $lt: [5, 10] })).toBe(true)
-        expect(await rulify({ $lt: [15, 10] })).toBe(false)
+        expect(await evaluate(rulify({ $lt: [5, 10] }))).toBe(true)
+        expect(await evaluate(rulify({ $lt: [15, 10] }))).toBe(false)
 
-        expect(await rulify({ $lte: [9, 10] })).toBe(true)
-        expect(await rulify({ $lte: [10, 10] })).toBe(true)
-        expect(await rulify({ $lte: delayed([11, 10]) })).toBe(false)
+        expect(await evaluate(rulify({ $lte: [9, 10] }))).toBe(true)
+        expect(await evaluate(rulify({ $lte: [10, 10] }))).toBe(true)
+        expect(await evaluate(rulify({ $lte: delayed([11, 10]) }))).toBe(false)
 
-        expect(await rulify({ $gt: [5, delayed(10)] })).toBe(false)
-        expect(await rulify({ $gt: [5, 10] })).toBe(false)
-        expect(await rulify({ $gt: [15, 10] })).toBe(true)
+        expect(await evaluate(rulify({ $gt: [5, delayed(10)] }))).toBe(false)
+        expect(await evaluate(rulify({ $gt: [5, 10] }))).toBe(false)
+        expect(await evaluate(rulify({ $gt: [15, 10] }))).toBe(true)
 
-        expect(await rulify({ $gte: [9, 10] })).toBe(false)
-        expect(await rulify({ $gte: [10, { $fn: () => 10 }] })).toBe(true)
-        expect(await rulify({ $gte: [11, 10] })).toBe(true)
+        expect(await evaluate(rulify({ $gte: [9, 10] }))).toBe(false)
+        expect(await evaluate(rulify({ $gte: [10, { $fn: () => 10 }] }))).toBe(true)
+        expect(await evaluate(rulify({ $gte: [11, 10] }))).toBe(true)
 
-        expect(await rulify({ $eq: [5, delayed(5)] })).toBe(true)
-        expect(await rulify({ $eq: [5, 10] })).toBe(false)
+        expect(await evaluate(rulify({ $eq: [5, delayed(5)] }))).toBe(true)
+        expect(await evaluate(rulify({ $eq: [5, 10] }))).toBe(false)
 
-        expect(await rulify({ $ne: [5, 5] })).toBe(false)
-        expect(await rulify({ $ne: [5, 10] })).toBe(true)
+        expect(await evaluate(rulify({ $ne: [5, 5] }))).toBe(false)
+        expect(await evaluate(rulify({ $ne: [5, 10] }))).toBe(true)
     })
 
     test("binary match", async () => {

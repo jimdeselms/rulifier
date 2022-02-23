@@ -1,9 +1,10 @@
+import { evaluate } from ".."
 import { sortNodes } from "./sortNodes"
 
 export async function $and(obj) {
-    for (const value of obj) {
+    for await (const value of obj) {
 //    for await (const value of sortNodes(await obj)) {
-        if (!(await value)) {
+        if (!(await evaluate(value))) {
             return false
         }
     }

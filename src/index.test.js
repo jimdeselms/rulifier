@@ -1,4 +1,4 @@
-import { rulify, evaluate } from "./index"
+import { rulify, evaluate, iterate } from "./index"
 import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
@@ -190,7 +190,6 @@ describe("rulify", () => {
     })
 
     it("knows about handlers", async () => {
-        debugger
         const resp = rulify({
             $handlers: {
                 capitalize: async (name) => (await evaluate(name)).toUpperCase(),
@@ -204,9 +203,6 @@ describe("rulify", () => {
     })
 
     it("a response can have more data source added to it", async () => {
-
-        debugger 
-
         const resp = rulify({ a: 1 })
         const resp2 = rulify(resp, { b: 2 })
         const resp3 = rulify(resp2, { c: 3 })
@@ -214,5 +210,19 @@ describe("rulify", () => {
         expect(await evaluate(resp3.a)).toBe(1)
         expect(await evaluate(resp3.b)).toBe(2)
         expect(await evaluate(resp3.c)).toBe(3)
+    })
+
+    it("a response can be enumerated without fully evaluating it", async () => {
+        const resp = rulify({ a: [1, 2, 3] })
+
+        const result = []
+
+        debugger
+
+        for await (let i of resp.a) {
+            result.push(await evaluate(i))
+        }
+
+        expect(result).toMatchObject([1, 2, 3])
     })
 })

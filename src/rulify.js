@@ -10,7 +10,7 @@ const PROXY_CONTEXT = Symbol.for("__PROXY_CONTEXT")
  */
 export function rulify(...dataSources) {
 
-    const root = {}
+    const merged = {}
     let handlers = {}
 
     const caches = {
@@ -29,7 +29,7 @@ export function rulify(...dataSources) {
             Object.assign(handlers, normalizeHandlers(dataSource.$handlers))
             delete dataSource.$handlers
         }
-        Object.assign(root, dataSource)
+        Object.assign(merged, dataSource)
     }
 
     Object.assign(handlers, builtinHandlers)
@@ -43,19 +43,17 @@ export function rulify(...dataSources) {
     // values go out of scope
     const ctx = { 
         handlers,
-        dataSource: root,
+        dataSource: merged,
         resolvedValueCache: new WeakMap()
     }
 
-    return proxify(root, ctx)
+    return proxify(merged, ctx)
 }
 
 export async function evaluate(proxy) {
     if (!proxy[PROXY_CONTEXT]) {
         throw new Error("Attemplt to call evaluate on an object that isn't rulified")
     }
-
-    debugger 
 
     return await materialize(proxy[RAW_VALUE], proxy[PROXY_CONTEXT])
 }
@@ -96,13 +94,26 @@ export function proxify(value, ctx) {
 }
 
 function get(target, prop, ctx) {
+
     if (prop === PROXY_CONTEXT) {
         return ctx
     } else if (prop === RAW_VALUE) {
         return target
+    } else if (prop == Symbol.asyncIterator) {
+        return () => iterate(target, ctx)
     }
 
     return proxify(getAsync(target, prop, ctx), ctx)
+}
+
+export async function* iterate(target, ctx) {
+    debugger
+
+    const resolved = await resolve(target, ctx)
+
+    for (const value of resolved) {
+        yield await proxify(value, ctx)
+    }
 }
 
 async function getAsync(target, prop, ctx) {
@@ -162,8 +173,6 @@ async function resolveHandler({ handler, argument }, ctx) {
 }
 
 async function materialize(value, ctx) {
-
-    debugger
     value = await resolve(value, ctx)
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {
