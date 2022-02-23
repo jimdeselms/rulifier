@@ -169,49 +169,53 @@ describe("rulify", () => {
         expect(executed).toBe(1)
     })
 
-    // it("ensures that when the proxy is rebuilt, resolved values will be cleared", async () => {
-    //     let executed = false
+    it("ensures that when the proxy is rebuilt, resolved values will be cleared", async () => {
+        let executed = false
 
-    //     const resp = rulify({
-    //         a: {
-    //             $fn: () => {
-    //                 executed = true
-    //                 return 5
-    //             }
-    //         }
-    //     })
+        const resp = rulify({
+            a: {
+                $fn: () => {
+                    executed = true
+                    return 5
+                }
+            }
+        })
 
-    //     expect(await resp.a).toBe(5)
-    //     expect(executed).toBe(true)
+        expect(await resp.a.value()).toBe(5)
+        expect(executed).toBe(true)
 
-    //     executed = false
+        executed = false
 
-    //     const resp2 = rulify(resp)
+        const resp2 = rulify(resp)
 
-    //     expect(await resp2.a).toBe(5)
-    //     expect(executed).toBe(true)
-    // })
+        expect(await resp2.a.value()).toBe(5)
+        expect(executed).toBe(true)
+    })
 
-    // it("knows about handlers", async () => {
-    //     const resp = rulify({
-    //         $handlers: {
-    //             capitalize: (name) => name.toUpperCase(),
-    //         },
-    //         name: {
-    //             $capitalize: "Fred",
-    //         },
-    //     })
+    it("knows about handlers", async () => {
+        debugger
+        const resp = rulify({
+            $handlers: {
+                capitalize: async (name) => (await name.value()).toUpperCase(),
+            },
+            name: {
+                $capitalize: "Fred",
+            },
+        })
 
-    //     expect(await resp.name).toBe("FRED")
-    // })
+        expect(await resp.name.value()).toBe("FRED")
+    })
 
-    // it("a response can have more data source added to it", async () => {
-    //     const resp = rulify({ a: 1 })
-    //     const resp2 = rulify(resp, { b: 2 })
-    //     const resp3 = rulify(resp2, { c: 3 })
+    it("a response can have more data source added to it", async () => {
 
-    //     expect(await resp3.a).toBe(1)
-    //     expect(await resp3.b).toBe(2)
-    //     expect(await resp3.c).toBe(3)
-    // })
+        debugger 
+
+        const resp = rulify({ a: 1 })
+        const resp2 = rulify(resp, { b: 2 })
+        const resp3 = rulify(resp2, { c: 3 })
+
+        expect(await resp3.a.value()).toBe(1)
+        expect(await resp3.b.value()).toBe(2)
+        expect(await resp3.c.value()).toBe(3)
+    })
 })
