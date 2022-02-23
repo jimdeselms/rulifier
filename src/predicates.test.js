@@ -105,13 +105,18 @@ describe("predicates", () => {
         expect(await evaluate(rulify({ $ne: [5, 10] }))).toBe(true)
     })
 
+    test("eq objects", async () => {
+        expect(await evaluate(rulify({ $eq: [{ a: 1 }, { a: 1 }] }))).toBe(true)
+        expect(await evaluate(rulify({ $eq: [{ a: 1, b: 2 }, { a: 1 }] }))).toBe(false)
+    })
+
     test("binary match", async () => {
         expect(
             await rulify(
                 {
                     $handlers: {
                         async $capitalize(str) {
-                            return (await str).toUpperCase()
+                            return (await evaluate(str)).toUpperCase()
                         },
                     },
                 },

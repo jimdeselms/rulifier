@@ -51,7 +51,7 @@ export async function eq(item1, item2, match, useRootDataSource) {
             }
         }
 
-        return false
+        return true
         
     } else {
         const i1Val = await evaluate(i1)
