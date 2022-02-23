@@ -2,7 +2,7 @@ import { rulify, evaluate } from "."
 import { delayed } from "./helpers.test"
 
 describe("predicates", () => {
-    describe("and", () => {
+    describe("$and", () => {
         it("returns true if everything is true", async () => {
             const resp = rulify({
                 $and: [{ $fn: () => true }, { $fn: () => delayed(true) }, true],
@@ -41,7 +41,7 @@ describe("predicates", () => {
         })
     })
 
-    describe("or", () => {
+    describe("$or", () => {
         it("returns true if one thing is true", async () => {
             const resp = rulify({
                 $or: [delayed(false), delayed(false), { $fn: () => delayed(true) }],
@@ -54,16 +54,16 @@ describe("predicates", () => {
 
         it("returns false if everything is false", async () => {
             const resp = rulify({
-                $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
+                $or: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
-            const result = await evalute(resp)
+            const result = await evaluate(resp)
 
             expect(result).toBe(false)
         })
     })
 
-    describe("not", () => {
+    describe("$not", () => {
         it("negates the value", async () => {
             expect(await evaluate(rulify({ $not: true }))).toBe(false)
             expect(await evaluate(rulify({ $not: false }))).toBe(true)
@@ -72,9 +72,9 @@ describe("predicates", () => {
         })
 
         it("returns false if everything is false", async () => {
-            const resp = evaluate(rulify({
+            const resp = rulify({
                 $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
-            }))
+            })
 
             const result = await evaluate(resp)
 

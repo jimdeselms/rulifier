@@ -1,3 +1,4 @@
+import { evaluate } from ".."
 import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../common"
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
@@ -16,13 +17,13 @@ export const $regex = (obj, opt) =>
     })
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
-    obj = await obj
+    obj = await evaluate(obj)
 
     if (Array.isArray(obj)) {
         // We're not in the root data source; just compare the two things in the array.
-        return predicate(await obj[0], await obj[1])
+        return predicate(obj[0], obj[1])
     } else {
         // In the root data source, we compare against a property of the root.
-        return (await predicate(await root[prop], await obj)) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
+        return (predicate(await evaluate(root[prop]), obj)) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
     }
 }

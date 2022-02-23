@@ -13,10 +13,6 @@ export function rulify(...dataSources) {
     const merged = {}
     let handlers = {}
 
-    const caches = {
-        resolvedValueCache: new WeakMap(),
-    }
-
     for (let dataSource of dataSources) {
         const proxyContext = dataSource[PROXY_CONTEXT]
         if (proxyContext) {
@@ -90,6 +86,11 @@ export function proxify(value, ctx) {
         return get(target, prop, ctx)
     }
 
+    // Make sure to set the proxy the first time through.
+    if (!ctx.proxy) {
+        ctx = { ...ctx, proxy }
+    }
+
     return proxy
 }
 
@@ -103,7 +104,8 @@ function get(target, prop, ctx) {
         return () => iterate(target, ctx)
     }
 
-    return proxify(getAsync(target, prop, ctx), ctx)
+    ctx = { ...ctx, prop }
+    return proxify(getAsync(target, ctx), ctx)
 }
 
 export async function* iterate(target, ctx) {
@@ -116,9 +118,23 @@ export async function* iterate(target, ctx) {
     }
 }
 
-async function getAsync(target, prop, ctx) {
+export async function getTypeof(obj) {
+    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    return typeof(resolved)
+}
+
+export async function getKeys(obj) {
+    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    if (typeof resolved !== "object") {
+        return undefined
+    } else {
+        return Object.keys(resolved)
+    }
+}
+
+async function getAsync(target, ctx) {
     const resolved = await resolve(target, ctx)
-    return resolved[prop]
+    return resolved[ctx.prop]
 }
 
 async function resolve(target, ctx) {
@@ -169,7 +185,8 @@ function getHandlerAndArgument(obj, handlers) {
 
 async function resolveHandler({ handler, argument }, ctx) {
     const arg = await proxify(argument, ctx)
-    return await handler(arg)
+
+    return await handler(arg, { root: ctx.proxy, prop: ctx.prop })
 }
 
 async function materialize(value, ctx) {

@@ -1,15 +1,63 @@
+import { evaluate, getTypeof, getKeys } from ".."
 import { ROOT_CONTEXT_TRUE, GET_WITH_NEW_ROOT, RAW_VALUE } from "../common"
 
-export async function $eq([item1, item2]) {
-    return eq(item1, item2, false)
+export async function $eq(obj, ctx) {
+    if (await evaluate(obj.length) === 2) {
+        return await eq(obj[0], obj[1], false, false)
+    } else {
+        return await eq(obj, await ctx.root, false, true)
+    }
 }
 
 export async function eq(item1, item2, match, useRootDataSource) {
+    debugger 
+
     const i1 = await item1
     const i2 = await item2
 
-    if (i1 === i2 || i1 === ROOT_CONTEXT_TRUE) {
+    if (i1 === i2) {
         return true
+    }
+
+    const i1Type = await getTypeof(i1)
+    const i2Type = await getTypeof(i2)
+
+    if (i1Type !== i2Type) {
+        return false
+    }
+
+    if (i1Type === "symbol") {
+        const i1Val = await evaluate(i1)
+        const i2Val = await evaluate(i2)
+
+        if (i1Val === i2Val || i1Val === ROOT_CONTEXT_TRUE) {
+            return true
+        }
+    } else if (i1Type === "function") {
+        return false
+    }
+
+    if (i1Type === "object") {
+        const i1Keys = await getKeys(i1)
+        const i2Keys = await getKeys(i2)
+
+        if (i1Keys.length !== i2Keys.length) {
+            return false
+        }
+
+        for (const key of i1Keys) {
+            if (!await eq(i1[key], i2[key], match, useRootDataSource)) {
+                return false
+            }
+        }
+
+        return false
+        
+    } else {
+        const i1Val = await evaluate(i1)
+        const i2Val = await evaluate(i2)
+
+        return i1Val === i2Val
     }
 
     // Are they at least the same type?
