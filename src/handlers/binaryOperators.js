@@ -17,6 +17,9 @@ export const $regex = (obj, opt) =>
     })
 
 async function evaluateBinary(obj, { root, prop }, predicate) {
+
+    debugger
+
     obj = await evaluate(obj)
 
     if (Array.isArray(obj)) {
@@ -24,6 +27,7 @@ async function evaluateBinary(obj, { root, prop }, predicate) {
         return predicate(obj[0], obj[1])
     } else {
         // In the root data source, we compare against a property of the root.
-        return (predicate(await evaluate(root[prop]), obj)) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
+        const other = await evaluate(root[prop])
+        return (predicate(other, obj)) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
     }
 }

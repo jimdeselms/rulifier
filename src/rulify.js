@@ -102,6 +102,9 @@ function get(target, prop, ctx) {
         return target
     } else if (prop == Symbol.asyncIterator) {
         return () => iterate(target, ctx)
+    } else if (prop == GET_WITH_NEW_ROOT) {
+        debugger
+        return (newRoot, newProp) => get(target, newProp, { ...ctx, root: newRoot[PROXY_CONTEXT].proxy })
     }
 
     ctx = { ...ctx, prop }

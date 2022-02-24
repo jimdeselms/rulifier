@@ -46,7 +46,9 @@ export async function eq(item1, item2, match, useRootDataSource) {
         }
 
         for (const key of i2Keys) {
-            if (!await eq(i1[key], i2[key], match, useRootDataSource)) {
+            debugger
+            const val1 = useRootDataSource ? i1[GET_WITH_NEW_ROOT](i2, key) : i1[key]
+            if (!await eq(val1, i2[key], match, useRootDataSource)) {
                 return false
             }
         }
