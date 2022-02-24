@@ -1,5 +1,5 @@
 import { evaluate, getKeys } from ".."
-import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE, MATERIALIZE_RAW } from "../common"
+import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../common"
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
 export const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)
@@ -24,7 +24,7 @@ async function evaluateBinary(obj, { root, prop, rootProp }, predicate) {
         return predicate(obj[0], obj[1])
     } else {
         debugger 
-        
+
         const keys = await getKeys(root)
 
         const lhs = await evaluate(root[rootProp])

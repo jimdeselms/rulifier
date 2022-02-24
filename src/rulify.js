@@ -1,5 +1,5 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, COST, MATERIALIZE_RAW } from "./common"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, COST } from "./common"
 import { calculateCost } from './calculateCost'
 
 const PROXY_CONTEXT = Symbol.for("__PROXY_CONTEXT")
@@ -101,7 +101,6 @@ function get(target, prop, ctx) {
         case GET_WITH_NEW_ROOT: 
             return (newRoot, newProp) => get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, root: newRoot[PROXY_CONTEXT].proxy })
         case Symbol.asyncIterator: return () => iterate(target, ctx)
-        case MATERIALIZE_RAW: return () => materialize(target, ctx, true)
     }
 
     ctx = { ...ctx, prop }

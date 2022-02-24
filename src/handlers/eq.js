@@ -1,5 +1,5 @@
 import { evaluate, getTypeof, getKeys } from ".."
-import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE, GET_WITH_NEW_ROOT, RAW_VALUE, MATERIALIZE_RAW } from "../common"
+import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE, GET_WITH_NEW_ROOT, RAW_VALUE } from "../common"
 
 
 export async function $eq(obj, ctx) {
