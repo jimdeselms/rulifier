@@ -112,7 +112,7 @@ describe("predicates", () => {
 
     test("binary match", async () => {
         expect(
-            await rulify(
+            await evaluate(rulify(
                 {
                     $handlers: {
                         async $capitalize(str) {
@@ -136,15 +136,15 @@ describe("predicates", () => {
                         },
                     ],
                 }
-            )
+            ))
         ).toBe(true)
 
         expect(
-            await rulify(
+            await evaluate(rulify(
                 {
                     $handlers: {
                         async $capitalize(str) {
-                            return (await str).toUpperCase()
+                            return (await evaluate(str)).toUpperCase()
                         },
                     },
                 },
@@ -164,7 +164,7 @@ describe("predicates", () => {
                         },
                     ],
                 }
-            )
+            ))
         ).toBe(false)
     })
 
@@ -224,7 +224,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
         it("returns false if the current value matches the regex", async () => {
@@ -237,7 +237,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(false)
+            expect(await evaluate(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches a regex string", async () => {
@@ -250,7 +250,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
         it("returns false if the current value does not match a regex string", async () => {
@@ -263,7 +263,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(false)
+            expect(await evaluate(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches a regex with parameters", async () => {
@@ -276,7 +276,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
         it("returns false if the current value does not match a regex with parameters", async () => {
@@ -289,7 +289,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(false)
+            expect(await evaluate(resp.value)).toBe(false)
         })
 
         it("true if in", async () => {
@@ -302,7 +302,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
         it("false if not in", async () => {
@@ -315,7 +315,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(false)
+            expect(await evaluate(resp.value)).toBe(false)
         })
 
         it("can match arrays", async () => {
@@ -328,20 +328,20 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
-        it("can't match arrays that are different", async () => {
+        it("can not match arrays that are different", async () => {
             const resp = rulify({
-                arr: [5, 10, 12],
+                arr: [5, 10, 15],
                 value: {
                     $match: {
-                        arr: [5, 10, 15],
+                        arr: [5, 10, 12],
                     },
                 },
             })
 
-            expect(await resp.value).toBe(false)
+            expect(await evaluate(resp.value)).toBe(false)
         })
 
         it("deep equality match true if objects match", async () => {
@@ -372,7 +372,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
         it("failed deep equality match if objects have differences", async () => {
@@ -403,7 +403,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(false)
+            expect(await evaluate(resp.value)).toBe(false)
         })
     })
 })

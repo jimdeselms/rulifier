@@ -151,6 +151,7 @@ async function resolve(target, ctx, raw) {
                 // resolve the same value, they'll both be waiting on the same
                 // promise.
                 const resolvedValuePromise = resolveHandler(h, ctx)
+
                 ctx.resolvedValueCache.set(value, resolvedValuePromise)
                 value = await resolvedValuePromise
             } else {
@@ -190,6 +191,10 @@ async function materialize(value, ctx, raw) {
     value = await resolve(value, ctx, raw)
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {
+        return value
+    }
+
+    if (value instanceof RegExp) {
         return value
     }
 

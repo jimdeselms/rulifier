@@ -30,6 +30,14 @@ export async function eq(item1, item2, match, useRootDataSource) {
 
     const i1Type = await getTypeof(i1)
 
+    if (i1Type === "string" && match && i2Type === "object") {
+        const i1Val = await evaluate(i1)
+        const i2Val = await evaluate(i2)
+        if (i2Val instanceof RegExp) {
+            return i2Val.test(i1Val) ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
+        }
+    }
+
     if (i1Type !== i2Type) {
         return false
     }
@@ -41,7 +49,7 @@ export async function eq(item1, item2, match, useRootDataSource) {
     if (i1Type === "object") {
         const i1Keys = await getKeys(i1)
         const i2Keys = await getKeys(i2)
-
+        
         if (!useRootDataSource && i1Keys.length !== i2Keys.length) {
             return false
         }
@@ -64,6 +72,9 @@ export async function eq(item1, item2, match, useRootDataSource) {
 
         return i1Val === i2Val
     }
+
+    return "Hello"
+}
 
     // // Are they at least the same type?
     // if (i1 === null || i2 === null) {
@@ -98,4 +109,3 @@ export async function eq(item1, item2, match, useRootDataSource) {
     // }
 
     // return true
-}
