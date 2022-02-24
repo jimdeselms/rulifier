@@ -181,7 +181,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
         it("returns true the current value is less than the given value", async () => {
@@ -196,7 +196,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await resp.value).toBe(true)
+            expect(await evaluate(resp.value)).toBe(true)
         })
 
         it("returns false the current value is not less than the given value", async () => {
