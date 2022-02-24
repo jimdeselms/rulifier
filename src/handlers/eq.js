@@ -1,5 +1,6 @@
 import { evaluate, getTypeof, getKeys } from ".."
-import { ROOT_CONTEXT_TRUE, GET_WITH_NEW_ROOT, RAW_VALUE } from "../common"
+import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE, GET_WITH_NEW_ROOT, RAW_VALUE, MATERIALIZE_RAW } from "../common"
+
 
 export async function $eq(obj, ctx) {
     if (await evaluate(obj.length) === 2) {
@@ -10,8 +11,6 @@ export async function $eq(obj, ctx) {
 }
 
 export async function eq(item1, item2, match, useRootDataSource) {
-    debugger 
-
     const i1 = await item1
     const i2 = await item2
 
@@ -19,21 +18,23 @@ export async function eq(item1, item2, match, useRootDataSource) {
         return true
     }
 
-    const i1Type = await getTypeof(i1)
     const i2Type = await getTypeof(i2)
+    if (i2Type === "symbol") {
+        const i2Val = await evaluate(i2)
+        if (i2Val === ROOT_CONTEXT_TRUE) {
+            return true
+        } else if (i2Val === ROOT_CONTEXT_FALSE) {
+            return false
+        }
+    }
+
+    const i1Type = await getTypeof(i1)
 
     if (i1Type !== i2Type) {
         return false
     }
 
-    if (i1Type === "symbol") {
-        const i1Val = await evaluate(i1)
-        const i2Val = await evaluate(i2)
-
-        if (i1Val === i2Val || i1Val === ROOT_CONTEXT_TRUE) {
-            return true
-        }
-    } else if (i1Type === "function") {
+    if (i1Type === "function") {
         return false
     }
 
@@ -47,8 +48,10 @@ export async function eq(item1, item2, match, useRootDataSource) {
 
         for (const key of i2Keys) {
             debugger
-            const val1 = useRootDataSource ? i1[GET_WITH_NEW_ROOT](i2, key) : i1[key]
-            if (!await eq(val1, i2[key], match, useRootDataSource)) {
+            const val2 = useRootDataSource ? await i2[GET_WITH_NEW_ROOT](i1, key) : i2[key]
+
+            const result = await eq(i1[key], val2, match, useRootDataSource)
+            if (result === false || result === ROOT_CONTEXT_FALSE) {
                 return false
             }
         }

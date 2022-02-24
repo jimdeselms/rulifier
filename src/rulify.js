@@ -1,5 +1,5 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, COST } from "./common"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, COST, MATERIALIZE_RAW } from "./common"
 import { calculateCost } from './calculateCost'
 
 const PROXY_CONTEXT = Symbol.for("__PROXY_CONTEXT")
@@ -95,16 +95,13 @@ export function proxify(value, ctx) {
 }
 
 function get(target, prop, ctx) {
-
-    if (prop === PROXY_CONTEXT) {
-        return ctx
-    } else if (prop === RAW_VALUE) {
-        return target
-    } else if (prop == Symbol.asyncIterator) {
-        return () => iterate(target, ctx)
-    } else if (prop == GET_WITH_NEW_ROOT) {
-        debugger
-        return (newRoot, newProp) => get(target, newProp, { ...ctx, root: newRoot[PROXY_CONTEXT].proxy })
+    switch (prop) {
+        case PROXY_CONTEXT: return ctx
+        case RAW_VALUE: return target
+        case GET_WITH_NEW_ROOT: 
+            return (newRoot, newProp) => get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, root: newRoot[PROXY_CONTEXT].proxy })
+        case Symbol.asyncIterator: return () => iterate(target, ctx)
+        case MATERIALIZE_RAW: return () => materialize(target, ctx, true)
     }
 
     ctx = { ...ctx, prop }
@@ -112,8 +109,6 @@ function get(target, prop, ctx) {
 }
 
 export async function* iterate(target, ctx) {
-    debugger
-
     const resolved = await resolve(target, ctx)
 
     for (const value of resolved) {
@@ -140,15 +135,15 @@ async function getAsync(target, ctx) {
     return resolved[ctx.prop]
 }
 
-async function resolve(target, ctx) {
+async function resolve(target, ctx, raw) {
     let value = await target
 
-    if (ctx.resolvedValueCache.has(value)) {
+    if (!raw && ctx.resolvedValueCache.has(value)) {
         return await ctx.resolvedValueCache.get(value)
     }
 
     if (value !== null && (typeof value === "object" || typeof value === "function")) {
-        if (typeof value === "object") {
+        if (!raw && typeof value === "object") {
             // Are we calling a handler? Then do it and pass back the result.
             const h = getHandlerAndArgument(value, ctx.handlers)
             if (h) {
@@ -188,12 +183,11 @@ function getHandlerAndArgument(obj, handlers) {
 
 async function resolveHandler({ handler, argument }, ctx) {
     const arg = await proxify(argument, ctx)
-
-    return await handler(arg, { root: ctx.proxy, prop: ctx.prop })
+    return await handler(arg, { root: ctx.proxy, prop: ctx.prop, rootProp: ctx.rootProp })
 }
 
-async function materialize(value, ctx) {
-    value = await resolve(value, ctx)
+async function materialize(value, ctx, raw) {
+    value = await resolve(value, ctx, raw)
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {
         return value
@@ -205,7 +199,7 @@ async function materialize(value, ctx) {
 
     for (const [k, v] of Object.entries(value)) {
         const resolved = await v
-        result[k] = await materialize(resolved, ctx)
+        result[k] = await materialize(resolved, ctx, raw)
     }
 
     return result

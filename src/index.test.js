@@ -217,8 +217,6 @@ describe("rulify", () => {
 
         const result = []
 
-        debugger
-
         for await (let i of resp.a) {
             result.push(await evaluate(i))
         }

@@ -199,17 +199,19 @@ describe("predicates", () => {
             expect(await evaluate(resp.value)).toBe(true)
         })
 
-        it("returns false the current value is not less than the given value", async () => {
+        it("returns false the current value is greater than the given value", async () => {
             const resp = rulify({
-                age: 35,
+                age: 37,
+                name: "Fred",
                 value: {
                     $match: {
-                        age: { $lt: 32 },
+                        name: "Fred",
+                        age: { $lt: 35 },
                     },
                 },
             })
 
-            expect(await resp.value).toBe(false)
+            expect(await evaluate(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches the regex", async () => {
