@@ -183,7 +183,8 @@ function getHandlerAndArgument(obj, handlers) {
 
 async function resolveHandler({ handler, argument }, ctx) {
     const arg = await proxify(argument, ctx)
-    return await handler(arg, { root: ctx.proxy, prop: ctx.prop, rootProp: ctx.rootProp })
+    const result = await handler(arg, { root: ctx.proxy, prop: ctx.prop, rootProp: ctx.rootProp })
+    return await resolve(result, ctx)
 }
 
 async function materialize(value, ctx, raw) {

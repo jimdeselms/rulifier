@@ -1,14 +1,14 @@
-import { rulify } from "./index"
+import { rulify, evaluate } from "./index"
 import { delayed } from "./helpers.test"
 
 describe("ref", () => {
     it("can understand a simple ref", async () => {
         const resp = await rulify({
             thing: 123,
-            value: { $ref: "thing" },
+            value: { $ref: "thing" }
         })
 
-        expect(await resp.value).toBe(123)
+        expect(await evaluate(resp.value)).toBe(123)
     })
 
     it("can understand a promise or function ref", async () => {
@@ -24,10 +24,10 @@ describe("ref", () => {
             value4: { $ref: "thing4" },
         })
 
-        expect(await resp.value1).toBe(1)
-        expect(await resp.value2).toBe(2)
-        expect(await resp.value3).toBe(3)
-        expect(await resp.value4).toBe(4)
+        expect(await evaluate(resp.value1)).toBe(1)
+        expect(await evaluate(resp.value2)).toBe(2)
+        expect(await evaluate(resp.value3)).toBe(3)
+        expect(await evaluate(resp.value4)).toBe(4)
     })
 
     it("can understand a ref that has a path", async () => {
@@ -41,7 +41,7 @@ describe("ref", () => {
             value: { $ref: "x.y.z" },
         })
 
-        expect(await resp.value).toBe("Hello")
+        expect(await evaluate(resp.value)).toBe("Hello")
     })
 
     it("can understand a ref to an array using numeric paths", async () => {
@@ -51,7 +51,7 @@ describe("ref", () => {
             value: { $ref: "x.2.3.1" },
         })
 
-        expect(await resp.value).toBe(7)
+        expect(await evaluate(resp.value)).toBe(7)
     })
 
     it("can understand a ref to an array using array index notation", async () => {
@@ -62,8 +62,8 @@ describe("ref", () => {
             value2: { $ref: "x[2][2]" },
         })
 
-        expect(await resp.value).toBe(7)
-        expect(await resp.value2).toBe(5)
+        expect(await evaluate(resp.value)).toBe(7)
+        expect(await evaluate(resp.value2)).toBe(5)
     })
 
     it("returns undefined if the thing isn't found", async () => {
@@ -71,16 +71,7 @@ describe("ref", () => {
             value: { $ref: "hello" },
         })
 
-        expect(await resp.value).toBeUndefined()
-    })
-
-    it("returns undefined if any step in a path returns undefined", async () => {
-        const resp = await rulify({
-            hello: { a: 1 },
-            value: { $ref: "hello.b.c" },
-        })
-
-        expect(await resp.value).toBeUndefined()
+        expect(await evaluate(resp.value)).toBeUndefined()
     })
 
     it("undefstands escaped dots and brackets in paths", async () => {
@@ -91,7 +82,7 @@ describe("ref", () => {
             value2: { $ref: "howdy\\[0].boo\\[1]" },
         })
 
-        expect(await resp.value1).toBe(1)
-        expect(await resp.value2).toBe(5)
+        expect(await evaluate(resp.value1)).toBe(1)
+        expect(await evaluate(resp.value2)).toBe(5)
     })
 })

@@ -1,14 +1,14 @@
-export async function $ref(obj, { root }) {
-    const path = parsePath(await obj)
+import { evaluate, getKeys } from ".."
 
-    let curr = await root
+export async function $ref(obj, { root }) {
+    const path = parsePath(await evaluate(obj))
+
+    let curr = root
     for (const key of path) {
-        if (curr === undefined) {
-            return undefined
-        }
-        curr = await curr[key]
+        curr = curr[key]
     }
-    return curr
+
+    return await evaluate(curr)
 }
 
 const ARRAY_INDEX_REGEX = /\[([0-9])+\]/g
