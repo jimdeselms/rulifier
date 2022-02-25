@@ -186,7 +186,14 @@ function getHandlerAndArgument(obj, handlers) {
 async function resolveHandler({ handler, argument }, ctx) {
     const arg = await proxify(argument, ctx)
     const proxifyFunc = (obj) => proxify(obj, ctx)
-    const result = await handler(arg, { root: ctx.proxy, prop: ctx.prop, rootProp: ctx.rootProp, proxify: proxifyFunc })
+    let result = await handler(arg, { root: ctx.proxy, prop: ctx.prop, rootProp: ctx.rootProp, proxify: proxifyFunc })
+
+    if (result !== null && typeof result === "object" && result[PROXY_CONTEXT]) {
+        result = await resolve(result[RAW_VALUE], ctx)
+    }
+
+    debugger
+
     return await resolve(result, ctx)
 }
 
