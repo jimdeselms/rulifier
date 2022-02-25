@@ -70,7 +70,7 @@ describe("switch", () => {
                     {
                         condition: false,
                         value: 1,
-                    },
+                    }
                 ],
             },
         })

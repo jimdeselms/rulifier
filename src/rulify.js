@@ -133,7 +133,7 @@ export async function getKeys(obj) {
 
 async function getAsync(target, ctx) {
     const resolved = await resolve(target, ctx)
-    return resolved[ctx.prop]
+    return resolved?.[ctx.prop]
 }
 
 async function resolve(target, ctx) {
