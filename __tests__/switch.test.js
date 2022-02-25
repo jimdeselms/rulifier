@@ -1,6 +1,5 @@
-import { rulify } from "./index"
+import { rulify, evaluate } from "../src"
 import { delayed } from "./helpers.test"
-import { evaluate } from "./rulify"
 
 describe("switch", () => {
     it("returns the first case to match the condition", async () => {

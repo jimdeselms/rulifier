@@ -1,4 +1,4 @@
-import { rulify, evaluate } from "."
+import { rulify, evaluate } from "../src"
 
 describe("if", () => {
     it("works in the true case", async () => {

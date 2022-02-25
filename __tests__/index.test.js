@@ -1,4 +1,4 @@
-import { rulify, evaluate, iterate } from "./index"
+import { rulify, evaluate, iterate } from "../src"
 import { delayed } from "./helpers.test"
 
 describe("rulify", () => {

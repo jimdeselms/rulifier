@@ -1,4 +1,4 @@
-import { rulify } from './index'
+import { rulify } from '../src'
 
 const CALCULATE_COST = Symbol.for("__CALCULATE_COST")
 
@@ -13,7 +13,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await obj.value).toBe(true)
+        expect(await evaluate(obj.value)).toBe(true)
 
         expect(messages.length).toBe(1)
     })

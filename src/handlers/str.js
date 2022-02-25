@@ -22,5 +22,5 @@ export async function $str(obj, { root, proxify }) {
         }
     }
 
-    return await result
+    return result
 }

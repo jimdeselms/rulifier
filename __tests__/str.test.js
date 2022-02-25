@@ -1,5 +1,4 @@
-import { rulify } from "./index"
-import { evaluate } from "./rulify"
+import { rulify, evaluate } from "../src"
 
 describe("str", () => {
     it("can understand a simple string interpolation", async () => {
