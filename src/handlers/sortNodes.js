@@ -1,28 +1,28 @@
-import { COST } from '../common'
+import { COST, RAW_VALUE } from '../common'
 
 export async function* sortNodes(nodes) {
 
     if (!nodes) { return }
-    
-    let proxies = []
-    for (const proxy of nodes) {
-        proxies.push(proxy)
+
+    const nodeValuePairs = []
+    for await (const node of nodes) {
+        nodeValuePairs.push([node, await node[RAW_VALUE]])
     }
 
-    while (proxies.length > 0) {
-        proxies.sort((n1, n2) => calcCost(n1) - calcCost(n2))
-        const value = await proxies[0]
-        yield await proxies[0]
-        proxies = proxies.slice(1)
+    while (nodeValuePairs.length > 0) {
+        nodeValuePairs.sort(calcCost)
+        yield nodeValuePairs[0][0]
+        nodeValuePairs.splice(0, 1)
     }
 }
 
-function calcCost(node) {
-    const type = typeof node
+function calcCost(nodeValuePair) {
+    const value = nodeValuePair[1]
+    const type = typeof value
     // A simple object is essentially free to evaluate.
-    if (node === null || (type !== "object" && type !== "function")) {
+    if (value === null || (type !== "object" && type !== "function")) {
         return 0
+    } else {
+        return 1
     }
-
-    return node[COST]
 }

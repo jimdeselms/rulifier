@@ -192,8 +192,6 @@ async function resolveHandler({ handler, argument }, ctx) {
         result = await resolve(result[RAW_VALUE], ctx)
     }
 
-    debugger
-
     return await resolve(result, ctx)
 }
 
