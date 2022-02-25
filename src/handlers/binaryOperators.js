@@ -23,10 +23,6 @@ async function evaluateBinary(obj, { root, prop, rootProp }, predicate) {
         // We're not in the root data source; just compare the two things in the array.
         return predicate(obj[0], obj[1])
     } else {
-        debugger 
-
-        const keys = await getKeys(root)
-
         const lhs = await evaluate(root[rootProp])
 
         // In the root data source, we compare against a property of the root.

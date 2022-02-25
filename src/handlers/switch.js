@@ -1,9 +1,11 @@
+import { evaluate } from '..'
+
 export async function $switch(obj) {
-    for (const currCase of (await obj.cases) ?? []) {
-        if (await currCase.condition) {
-            return currCase.value
+    for await (const currCase of obj.cases) {
+        if (await evaluate(currCase.condition)) {
+            return await evaluate(currCase.value)
         }
     }
 
-    return obj.default
+    return await evaluate(obj.default)
 }

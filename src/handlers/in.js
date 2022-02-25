@@ -3,8 +3,6 @@ import { evaluate } from ".."
 
 export async function $in(obj, { root, rootProp }) {
 
-    debugger
-
     const lhs = await evaluate(root[rootProp])
 
     for await (const entry of obj) {

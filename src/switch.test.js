@@ -1,5 +1,6 @@
 import { rulify } from "./index"
 import { delayed } from "./helpers.test"
+import { evaluate } from "./rulify"
 
 describe("switch", () => {
     it("returns the first case to match the condition", async () => {
@@ -18,7 +19,7 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(1)
+        expect(await evaluate(resp)).toEqual(1)
 
         resp = rulify({
             $switch: {
@@ -35,7 +36,7 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(2)
+        expect(await evaluate(resp)).toEqual(2)
     })
 
     it("if no cases are present, it returns the default", async () => {
@@ -45,7 +46,7 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(3)
+        expect(await evaluate(resp)).toEqual(3)
     })
 
     it("if a case has no condition, it is false", async () => {
@@ -60,7 +61,7 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(2)
+        expect(await evaluate(resp)).toEqual(2)
     })
 
     it("if a case has no matching case or default, it is undefined", async () => {
@@ -75,7 +76,7 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(undefined)
+        expect(await evaluate(resp)).toEqual(undefined)
     })
 
     it("can handle promises for conditions and values", async () => {
@@ -95,7 +96,7 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(1)
+        expect(await evaluate(resp)).toEqual(1)
 
         resp = rulify({
             $switch: {
@@ -113,7 +114,7 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(2)
+        expect(await evaluate(resp)).toEqual(2)
 
         resp = rulify({
             $switch: {
@@ -131,6 +132,6 @@ describe("switch", () => {
             },
         })
 
-        expect(await resp).toEqual(3)
+        expect(await evaluate(resp)).toEqual(3)
     })
 })

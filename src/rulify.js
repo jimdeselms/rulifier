@@ -110,8 +110,10 @@ function get(target, prop, ctx) {
 export async function* iterate(target, ctx) {
     const resolved = await resolve(target, ctx)
 
-    for (const value of resolved) {
-        yield await proxify(value, ctx)
+    if (typeof resolved === "object" && (resolved[Symbol.iterator] || resolved[Symbol.asyncIterator])) {
+        for (const value of resolved) {
+            yield await proxify(value, ctx)
+        }
     }
 }
 
