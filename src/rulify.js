@@ -136,15 +136,15 @@ async function getAsync(target, ctx) {
     return resolved[ctx.prop]
 }
 
-async function resolve(target, ctx, raw) {
+async function resolve(target, ctx) {
     let value = await target
 
-    if (!raw && ctx.resolvedValueCache.has(value)) {
+    if (ctx.resolvedValueCache.has(value)) {
         return await ctx.resolvedValueCache.get(value)
     }
 
     if (value !== null && (typeof value === "object" || typeof value === "function")) {
-        if (!raw && typeof value === "object") {
+        if (typeof value === "object") {
             // Are we calling a handler? Then do it and pass back the result.
             const h = getHandlerAndArgument(value, ctx.handlers)
             if (h) {
@@ -190,8 +190,8 @@ async function resolveHandler({ handler, argument }, ctx) {
     return await resolve(result, ctx)
 }
 
-async function materialize(value, ctx, raw) {
-    value = await resolve(value, ctx, raw)
+async function materialize(value, ctx) {
+    value = await resolve(value, ctx)
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {
         return value
@@ -207,7 +207,7 @@ async function materialize(value, ctx, raw) {
 
     for (const [k, v] of Object.entries(value)) {
         const resolved = await v
-        result[k] = await materialize(resolved, ctx, raw)
+        result[k] = await materialize(resolved, ctx)
     }
 
     return result
