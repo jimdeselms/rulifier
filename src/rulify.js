@@ -99,7 +99,7 @@ function get(target, prop, ctx) {
         case PROXY_CONTEXT: return ctx
         case RAW_VALUE: return target
         case GET_WITH_NEW_ROOT: 
-            return (newRoot, newProp) => get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, root: newRoot[PROXY_CONTEXT].proxy })
+            return (newRoot, newProp) => get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, proxy: newRoot })
         case Symbol.asyncIterator: return () => iterate(target, ctx)
     }
 
