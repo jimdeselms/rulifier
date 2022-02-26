@@ -1,4 +1,4 @@
-import { evaluate } from '..'
+import { evaluate } from ".."
 
 export async function $switch(obj) {
     for await (const currCase of obj.cases) {

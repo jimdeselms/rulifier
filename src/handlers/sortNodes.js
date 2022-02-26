@@ -1,8 +1,9 @@
-import { COST, RAW_VALUE, PROXY_CONTEXT } from '../common'
+import { COST, RAW_VALUE, PROXY_CONTEXT } from "../common"
 
 export async function* sortNodes(nodes) {
-
-    if (!nodes) { return }
+    if (!nodes) {
+        return
+    }
 
     const nodeValuePairs = []
     for await (const node of nodes) {
@@ -17,7 +18,6 @@ export async function* sortNodes(nodes) {
 }
 
 function calcCost(nodeValuePair) {
-
     const context = nodeValuePair[0][PROXY_CONTEXT]
     debugger
 

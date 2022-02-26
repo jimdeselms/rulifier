@@ -1,13 +1,12 @@
 import { builtinHandlers } from "./builtinHandlers"
 import { GET_WITH_NEW_ROOT, RAW_VALUE, COST, PROXY_CONTEXT } from "./common"
-import { calculateCost } from './calculateCost'
+import { calculateCost } from "./calculateCost"
 
 /**
  * @param  {...Record<any, any>} dataSources
  * @returns {any}
  */
 export function rulify(...dataSources) {
-
     const merged = {}
     let handlers = {}
 
@@ -32,13 +31,13 @@ export function rulify(...dataSources) {
     // handlers: the set of handlers
     // resolvedValueCache: In the resolution process, if we've already gotten a raw value
     // before, then we'll cache a promise that returns its resolution
-    // 
+    //
     // Note that the caches use weak maps so that they won't cause a memory leak as
     // values go out of scope
-    const ctx = { 
+    const ctx = {
         handlers,
         dataSource: merged,
-        resolvedValueCache: new WeakMap()
+        resolvedValueCache: new WeakMap(),
     }
 
     return proxify(merged, ctx)
@@ -63,7 +62,6 @@ function normalizeHandlers(handlers) {
 }
 
 export function proxify(value, ctx) {
-
     // If this is already a proxy, then just return it.
     if (value[PROXY_CONTEXT]) {
         return value
@@ -72,7 +70,11 @@ export function proxify(value, ctx) {
     let promisifiedObject = value
 
     // proxify always wraps promises.
-    if (promisifiedObject === null || typeof promisifiedObject !== "object" || typeof promisifiedObject?.then !== "function") {
+    if (
+        promisifiedObject === null ||
+        typeof promisifiedObject !== "object" ||
+        typeof promisifiedObject?.then !== "function"
+    ) {
         promisifiedObject = Promise.resolve(promisifiedObject)
     }
 
@@ -94,11 +96,15 @@ export function proxify(value, ctx) {
 
 function get(target, prop, ctx) {
     switch (prop) {
-        case PROXY_CONTEXT: return ctx
-        case RAW_VALUE: return target
-        case GET_WITH_NEW_ROOT: 
-            return (newRoot, newProp) => get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, proxy: newRoot })
-        case Symbol.asyncIterator: return () => iterate(target, ctx)
+        case PROXY_CONTEXT:
+            return ctx
+        case RAW_VALUE:
+            return target
+        case GET_WITH_NEW_ROOT:
+            return (newRoot, newProp) =>
+                get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, proxy: newRoot })
+        case Symbol.asyncIterator:
+            return () => iterate(target, ctx)
     }
 
     ctx = { ...ctx, prop }
@@ -117,7 +123,7 @@ export async function* iterate(target, ctx) {
 
 export async function getTypeof(obj) {
     const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
-    return typeof(resolved)
+    return typeof resolved
 }
 
 export async function getKeys(obj) {
@@ -146,7 +152,7 @@ async function resolve(target, ctx) {
             // Are we calling a handler? Then do it and pass back the result.
             const h = getHandlerAndArgument(value, ctx.handlers)
             if (h) {
-                // We'll cache the promise so that if another request tries to 
+                // We'll cache the promise so that if another request tries to
                 // resolve the same value, they'll both be waiting on the same
                 // promise.
                 const resolvedValuePromise = resolveHandler(h, ctx)
@@ -156,7 +162,7 @@ async function resolve(target, ctx) {
             } else {
                 // This might not be worth it; if we have a cache hit, the only
                 // thing we've saved is the type check and call to getHandlerAndArgument.
-                // 
+                //
                 // Later when we do a performance analysis, we can see if this
                 // actually speeds it up or not.
                 ctx.resolvedValueCache.set(value, Promise.resolve(value))
@@ -184,7 +190,15 @@ function getHandlerAndArgument(obj, handlers) {
 async function resolveHandler({ handler, argument }, ctx) {
     const arg = await proxify(argument, ctx)
     const proxifyFunc = (obj) => proxify(obj, ctx)
-    let result = await handler(arg, { root: ctx.proxy, prop: ctx.prop, rootProp: ctx.rootProp, proxify: proxifyFunc })
+    let result = await handler(arg, {
+        getComparisonProp() {
+            return ctx.proxy[ctx.rootProp]
+        },
+        root: ctx.proxy,
+        prop: ctx.prop,
+        rootProp: ctx.rootProp,
+        proxify: proxifyFunc,
+    })
 
     if (result !== null && typeof result === "object" && result[PROXY_CONTEXT]) {
         result = await resolve(result[RAW_VALUE], ctx)
@@ -204,9 +218,7 @@ async function materialize(value, ctx) {
         return value
     }
 
-    const result = Array.isArray(value)
-        ? []
-        : {}
+    const result = Array.isArray(value) ? [] : {}
 
     for (const [k, v] of Object.entries(value)) {
         const resolved = await v

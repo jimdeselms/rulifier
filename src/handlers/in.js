@@ -1,9 +1,8 @@
 import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../common"
 import { evaluate } from ".."
 
-export async function $in(obj, { root, rootProp }) {
-
-    const lhs = await evaluate(root[rootProp])
+export async function $in(obj, { getComparisonProp }) {
+    const lhs = await evaluate(getComparisonProp())
 
     for await (const entry of obj) {
         if ((await evaluate(entry)) === lhs) {

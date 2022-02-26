@@ -1,4 +1,4 @@
-import { RAW_VALUE, COST, CALCULATE_COST } from './common'
+import { RAW_VALUE, COST, CALCULATE_COST } from "./common"
 
 const DEFAULT_FUNCTION_COST = 10
 const DEFAULT_HANDLER_COST = 10
@@ -19,10 +19,8 @@ export function calculateCost(rawValue, handlers, caches) {
     let key, handler
 
     if (keys.length === 1 && (key = keys[0]) && (handler = handlers?.[key])) {
-
         return handler[COST] ?? handler[CALCULATE_COST]?.(rawValue[key]) ?? DEFAULT_HANDLER_COST
     }
-    
 
     return DEFAULT_NODE_COST
 }

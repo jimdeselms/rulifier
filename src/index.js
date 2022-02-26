@@ -1,1 +1,1 @@
-export { rulify, evaluate, iterate, getTypeof, getKeys } from './rulify'
+export { rulify, evaluate, iterate, getTypeof, getKeys } from "./rulify"
