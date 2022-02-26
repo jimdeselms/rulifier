@@ -1,7 +1,7 @@
 import { builtinHandlers } from "./builtinHandlers"
 import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT } from "./symbols"
-import { calculateCost } from "./calculateCost"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
+import { calculateCost } from "./calculateCost"
 
 /**
  * @param {...Record<any, any>} dataSources
@@ -44,12 +44,39 @@ export function rulify(...dataSources) {
     return proxify(merged, ctx)
 }
 
+/**
+ * Given a rulified object, converts it into a fully materialized object.
+ */
 export async function evaluate(proxy) {
     if (!proxy[PROXY_CONTEXT]) {
         throw new Error("Attemplt to call evaluate on an object that isn't rulified")
     }
 
     return await materialize(proxy[RAW_VALUE], proxy[PROXY_CONTEXT])
+}
+
+/**
+ * Returns the basic Javascript type of the object
+ * @param {any} obj 
+ * @returns {string}
+ */
+export async function getTypeof(obj) {
+    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    return typeof resolved
+}
+
+/**
+ * Returns the set of keys for the given object
+ * @param {any} obj 
+ * @returns {string[]}
+ */
+export async function getKeys(obj) {
+    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    if (typeof resolved !== "object") {
+        return undefined
+    } else {
+        return Object.keys(resolved)
+    }
 }
 
 function normalizeHandlers(handlers) {
@@ -62,7 +89,7 @@ function normalizeHandlers(handlers) {
     return Object.fromEntries(entries)
 }
 
-export function proxify(value, ctx) {
+function proxify(value, ctx) {
     // If this is already a proxy, then just return it.
     if (value[PROXY_CONTEXT]) {
         return value
@@ -112,36 +139,7 @@ function get(target, prop, ctx) {
     return proxify(getAsync(target, ctx), ctx)
 }
 
-async function* iterate(target, ctx) {
-    const resolved = await resolve(target, ctx)
-
-    if (typeof resolved === "object" && (resolved[Symbol.iterator] || resolved[Symbol.asyncIterator])) {
-        for (const value of resolved) {
-            yield await proxify(value, ctx)
-        }
-    }
-}
-
-export async function getTypeof(obj) {
-    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
-    return typeof resolved
-}
-
-export async function getKeys(obj) {
-    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
-    if (typeof resolved !== "object") {
-        return undefined
-    } else {
-        return Object.keys(resolved)
-    }
-}
-
-async function getAsync(target, ctx) {
-    const resolved = await resolve(target, ctx)
-    return resolved?.[ctx.prop]
-}
-
-async function resolve(target, ctx) {
+export async function resolve(target, ctx) {
     let value = await target
 
     if (ctx.resolvedValueCache.has(value)) {
@@ -181,6 +179,9 @@ async function resolveHandler({ handler, argument }, ctx) {
         getComparisonProp() {
             return ctx.proxy[ctx.rootProp]
         },
+        async calculateCost(obj) {
+            
+        },
         root: ctx.proxy,
         prop: ctx.prop,
         rootProp: ctx.rootProp,
@@ -192,6 +193,21 @@ async function resolveHandler({ handler, argument }, ctx) {
     }
 
     return await resolve(result, ctx)
+}
+
+async function* iterate(target, ctx) {
+    const resolved = await resolve(target, ctx)
+
+    if (typeof resolved === "object" && (resolved[Symbol.iterator] || resolved[Symbol.asyncIterator])) {
+        for (const value of resolved) {
+            yield await proxify(value, ctx)
+        }
+    }
+}
+
+async function getAsync(target, ctx) {
+    const resolved = await resolve(target, ctx)
+    return resolved?.[ctx.prop]
 }
 
 async function materialize(value, ctx) {

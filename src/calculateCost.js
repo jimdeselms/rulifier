@@ -1,10 +1,14 @@
-import { COST } from "./symbols"
+import { COST, PROXY_CONTEXT } from "./symbols"
 
 const DEFAULT_FUNCTION_COST = 10
 const DEFAULT_HANDLER_COST = 10
 const DEFAULT_NODE_COST = 1
 
-export function calculateCost(rawValue, handlers, caches) {
+export async function calculateCost(obj, ctx) {
+
+    if (obj[PROXY_CONTEXT]) {
+        obj = await resolve
+    }
     const type = typeof rawValue
 
     if (rawValue === null || (type !== "object" && type !== "function")) {
