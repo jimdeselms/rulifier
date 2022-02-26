@@ -1,9 +1,10 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, COST, PROXY_CONTEXT } from "./symbols"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT } from "./symbols"
 import { calculateCost } from "./calculateCost"
+import { getHandlerAndArgument } from "./getHandlerAndArgument"
 
 /**
- * @param  {...Record<any, any>} dataSources
+ * @param {...Record<any, any>} dataSources
  * @returns {any}
  */
 export function rulify(...dataSources) {
@@ -111,7 +112,7 @@ function get(target, prop, ctx) {
     return proxify(getAsync(target, ctx), ctx)
 }
 
-export async function* iterate(target, ctx) {
+async function* iterate(target, ctx) {
     const resolved = await resolve(target, ctx)
 
     if (typeof resolved === "object" && (resolved[Symbol.iterator] || resolved[Symbol.asyncIterator])) {
@@ -171,20 +172,6 @@ async function resolve(target, ctx) {
     }
 
     return value
-}
-
-function getHandlerAndArgument(obj, handlers) {
-    if (typeof obj !== "object") {
-        return undefined
-    }
-
-    const keys = Object.keys(obj)
-    let key, handler
-    if (keys.length === 1 && (key = keys[0])[0] === "$" && (handler = handlers[key])) {
-        return { handler, argument: obj[key] }
-    } else {
-        return undefined
-    }
 }
 
 async function resolveHandler({ handler, argument }, ctx) {

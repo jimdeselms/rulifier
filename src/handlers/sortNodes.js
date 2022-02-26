@@ -1,4 +1,4 @@
-import { COST, RAW_VALUE, PROXY_CONTEXT } from "../symbols"
+import { RAW_VALUE, PROXY_CONTEXT } from "../symbols"
 
 export async function* sortNodes(nodes) {
     if (!nodes) {

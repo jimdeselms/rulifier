@@ -1,6 +1,6 @@
 import { rulify } from '../src'
 
-const CALCULATE_COST = Symbol.for("__CALCULATE_COST")
+const COST = Symbol.for("__CALCULATE_COST")
 
 describe('calculateCost', () => {
     it('calculates the cost of nodes', async () => {
@@ -38,7 +38,7 @@ async function rulifyWithCalc(value) {
         return val1
     }
 
-    $calc[CALCULATE_COST] = (rawValue, handlers) => {
+    $calc[COST] = (rawValue, handlers) => {
         messages.push(rawValue.message ?? rawValue.value)
         return rawValue.cost
     }

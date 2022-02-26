@@ -1,5 +1,5 @@
 import { evaluate, getKeys } from ".."
-import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../symbols"
+import { TRUE, FALSE } from "../symbols"
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
 export const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)
@@ -27,6 +27,6 @@ async function evaluateBinary(obj, { getComparisonProp }, predicate) {
 
         // In the root data source, we compare against a property of the root.
         const result = predicate(lhs, obj)
-        return result ? ROOT_CONTEXT_TRUE : ROOT_CONTEXT_FALSE
+        return result ? TRUE : FALSE
     }
 }

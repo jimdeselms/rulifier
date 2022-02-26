@@ -1,4 +1,4 @@
-import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../symbols"
+import { TRUE, FALSE } from "../symbols"
 import { evaluate } from ".."
 
 export async function $in(obj, { getComparisonProp }) {
@@ -6,9 +6,9 @@ export async function $in(obj, { getComparisonProp }) {
 
     for await (const entry of obj) {
         if ((await evaluate(entry)) === lhs) {
-            return ROOT_CONTEXT_TRUE
+            return TRUE
         }
     }
 
-    return ROOT_CONTEXT_FALSE
+    return FALSE
 }

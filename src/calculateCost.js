@@ -1,4 +1,4 @@
-import { RAW_VALUE, COST, CALCULATE_COST } from "./symbols"
+import { COST } from "./symbols"
 
 const DEFAULT_FUNCTION_COST = 10
 const DEFAULT_HANDLER_COST = 10
@@ -12,14 +12,14 @@ export function calculateCost(rawValue, handlers, caches) {
     }
 
     if (typeof rawValue === "function") {
-        return rawValue[COST] ?? rawValue[CALCULATE_COST]?.() ?? DEFAULT_FUNCTION_COST
+        return rawValue[COST]?.() ?? DEFAULT_FUNCTION_COST
     }
 
     const keys = Object.keys(rawValue)
     let key, handler
 
     if (keys.length === 1 && (key = keys[0]) && (handler = handlers?.[key])) {
-        return handler[COST] ?? handler[CALCULATE_COST]?.(rawValue[key]) ?? DEFAULT_HANDLER_COST
+        return handler[COST]?.(rawValue[key]) ?? DEFAULT_HANDLER_COST
     }
 
     return DEFAULT_NODE_COST
