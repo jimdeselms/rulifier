@@ -1,4 +1,4 @@
-import { COST, RAW_VALUE } from '../common'
+import { COST, RAW_VALUE, PROXY_CONTEXT } from '../common'
 
 export async function* sortNodes(nodes) {
 
@@ -17,6 +17,10 @@ export async function* sortNodes(nodes) {
 }
 
 function calcCost(nodeValuePair) {
+
+    const context = nodeValuePair[0][PROXY_CONTEXT]
+    debugger
+
     const value = nodeValuePair[1]
     const type = typeof value
     // A simple object is essentially free to evaluate.

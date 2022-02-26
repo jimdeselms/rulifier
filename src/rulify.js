@@ -1,8 +1,6 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, COST } from "./common"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, COST, PROXY_CONTEXT } from "./common"
 import { calculateCost } from './calculateCost'
-
-const PROXY_CONTEXT = Symbol.for("__PROXY_CONTEXT")
 
 /**
  * @param  {...Record<any, any>} dataSources
