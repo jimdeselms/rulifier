@@ -1,4 +1,4 @@
-import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../common"
+import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../symbols"
 import { evaluate } from ".."
 
 export async function $in(obj, { getComparisonProp }) {

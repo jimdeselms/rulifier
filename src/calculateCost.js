@@ -1,4 +1,4 @@
-import { RAW_VALUE, COST, CALCULATE_COST } from "./common"
+import { RAW_VALUE, COST, CALCULATE_COST } from "./symbols"
 
 const DEFAULT_FUNCTION_COST = 10
 const DEFAULT_HANDLER_COST = 10

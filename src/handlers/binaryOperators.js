@@ -1,5 +1,5 @@
 import { evaluate, getKeys } from ".."
-import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../common"
+import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE } from "../symbols"
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
 export const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)

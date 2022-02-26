@@ -1,4 +1,4 @@
-import { COST, RAW_VALUE, PROXY_CONTEXT } from "../common"
+import { COST, RAW_VALUE, PROXY_CONTEXT } from "../symbols"
 
 export async function* sortNodes(nodes) {
     if (!nodes) {
@@ -19,7 +19,6 @@ export async function* sortNodes(nodes) {
 
 function calcCost(nodeValuePair) {
     const context = nodeValuePair[0][PROXY_CONTEXT]
-    debugger
 
     const value = nodeValuePair[1]
     const type = typeof value

@@ -1,5 +1,5 @@
 import { evaluate } from ".."
-import { COST } from "../common"
+import { COST } from "../symbols"
 
 export async function $if(obj) {
     const condition = await evaluate(obj.condition)

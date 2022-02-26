@@ -1,5 +1,5 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, COST, PROXY_CONTEXT } from "./common"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, COST, PROXY_CONTEXT } from "./symbols"
 import { calculateCost } from "./calculateCost"
 
 /**

@@ -1,5 +1,5 @@
 import { evaluate, getTypeof, getKeys } from ".."
-import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE, GET_WITH_NEW_ROOT, RAW_VALUE } from "../common"
+import { ROOT_CONTEXT_TRUE, ROOT_CONTEXT_FALSE, GET_WITH_NEW_ROOT, RAW_VALUE } from "../symbols"
 
 export async function $eq(obj, ctx) {
     if ((await evaluate(obj.length)) === 2) {
