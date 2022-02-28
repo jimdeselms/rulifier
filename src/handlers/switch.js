@@ -1,8 +1,6 @@
-import { evaluate } from ".."
-
-export async function $switch(obj) {
+export async function $switch(obj, api) {
     for await (const currCase of obj.cases) {
-        if (await evaluate(currCase.condition)) {
+        if (await api.evaluate(currCase.condition)) {
             return await currCase.value
         }
     }

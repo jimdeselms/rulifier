@@ -50,7 +50,7 @@ export function rulify(...dataSources) {
  */
 export async function evaluate(proxy) {
     if (!proxy[PROXY_CONTEXT]) {
-        throw new Error("Attemplt to call evaluate on an object that isn't rulified")
+        throw new Error("Attempt to call evaluate on an object that isn't rulified")
     }
 
     return await materialize(proxy[RAW_VALUE], proxy[PROXY_CONTEXT])
@@ -185,6 +185,9 @@ async function resolveHandler({ handler, argument }, ctx) {
         },
         root: ctx.proxy,
         proxify: proxifyFunc,
+        evaluate(obj) {
+            return evaluate(obj)
+        }
     }
     api.getRef = (str) => getRef(str,api)
 

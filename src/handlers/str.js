@@ -1,10 +1,7 @@
 const STR_INTERP_REGEX = /\\?\${([^}]+)}*/g
 
-import { evaluate } from ".."
-import { $ref } from "./ref"
-
 export async function $str(obj, api) {
-    let result = await evaluate(obj)
+    let result = await api.evaluate(obj)
 
     for (const match of result.matchAll(STR_INTERP_REGEX)) {
         const matchText = match[0]
