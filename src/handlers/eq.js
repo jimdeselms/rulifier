@@ -1,8 +1,8 @@
-import { evaluate, getTypeof, getKeys } from ".."
+import { realize, getTypeof, getKeys } from ".."
 import { TRUE, FALSE, GET_WITH_NEW_ROOT } from "../symbols"
 
 export async function $eq(obj, ctx) {
-    if ((await evaluate(obj.length)) === 2) {
+    if ((await realize(obj.length)) === 2) {
         return await eq(obj[0], obj[1], false, false)
     } else {
         return await eq(await ctx.root, obj, false, true)
@@ -19,7 +19,7 @@ export async function eq(item1, item2, match, useRootDataSource) {
 
     const i2Type = await getTypeof(i2)
     if (i2Type === "symbol") {
-        const i2Val = await evaluate(i2)
+        const i2Val = await realize(i2)
         if (i2Val === TRUE) {
             return true
         } else if (i2Val === FALSE) {
@@ -30,8 +30,8 @@ export async function eq(item1, item2, match, useRootDataSource) {
     const i1Type = await getTypeof(i1)
 
     if (i1Type === "string" && match && i2Type === "object") {
-        const i1Val = await evaluate(i1)
-        const i2Val = await evaluate(i2)
+        const i1Val = await realize(i1)
+        const i2Val = await realize(i2)
         if (i2Val instanceof RegExp) {
             return i2Val.test(i1Val) ? TRUE : FALSE
         }
@@ -64,8 +64,8 @@ export async function eq(item1, item2, match, useRootDataSource) {
 
         return true
     } else {
-        const i1Val = await evaluate(i1)
-        const i2Val = await evaluate(i2)
+        const i1Val = await realize(i1)
+        const i2Val = await realize(i2)
 
         return i1Val === i2Val
     }

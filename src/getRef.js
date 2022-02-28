@@ -1,13 +1,13 @@
 export async function getRef(str, api) {
     const obj = await api.proxify(str)
-    const path = parsePath(await api.evaluate(obj))
+    const path = parsePath(await api.realize(obj))
 
     let curr = api.root
     for (const key of path) {
         curr = curr[key]
     }
 
-    return await api.evaluate(curr)
+    return await api.realize(curr)
 }
 
 const ARRAY_INDEX_REGEX = /\[([0-9])+\]/g

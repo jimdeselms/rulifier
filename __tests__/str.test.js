@@ -1,4 +1,4 @@
-import { rulify, evaluate } from "../src"
+import { rulify, realize } from "../src"
 
 describe("str", () => {
     it("can understand a simple string interpolation", async () => {
@@ -7,7 +7,7 @@ describe("str", () => {
             value: { $str: "The value is ${thing}." },
         })
 
-        expect(await evaluate(resp.value)).toBe("The value is 123.")
+        expect(await realize(resp.value)).toBe("The value is 123.")
     })
 
     it("a null substitution is replaced by an empty string", async () => {
@@ -16,7 +16,7 @@ describe("str", () => {
             value: { $str: "No value here: (${thing})." },
         })
 
-        expect(await evaluate(resp.value)).toBe("No value here: ().")
+        expect(await realize(resp.value)).toBe("No value here: ().")
     })
 
     it("a undefined substitution is ignored", async () => {
@@ -25,7 +25,7 @@ describe("str", () => {
             value: { $str: "No replacement here: (${thing})." },
         })
 
-        expect(await evaluate(resp.value)).toBe("No replacement here: (${thing}).")
+        expect(await realize(resp.value)).toBe("No replacement here: (${thing}).")
     })
 
     it("a reference that isn't found is ignored", async () => {
@@ -33,7 +33,7 @@ describe("str", () => {
             value: { $str: "No replacement here: (${thing})." },
         })
 
-        expect(await evaluate(resp.value)).toBe("No replacement here: (${thing}).")
+        expect(await realize(resp.value)).toBe("No replacement here: (${thing}).")
     })
 
     it("can handle multiple replacements in the same string", async () => {
@@ -44,7 +44,7 @@ describe("str", () => {
             value: { $str: "${greeting}, ${customer}! Have a great ${today}!" },
         })
 
-        expect(await evaluate(resp.value)).toBe("Hello, Fred! Have a great Sunday!")
+        expect(await realize(resp.value)).toBe("Hello, Fred! Have a great Sunday!")
     })
 
     it("will escape substitutions that begin with a \\", async () => {
@@ -53,6 +53,6 @@ describe("str", () => {
             value: { $str: "\\${greeting}, world!" },
         })
 
-        expect(await evaluate(resp.value)).toBe("${greeting}, world!")
+        expect(await realize(resp.value)).toBe("${greeting}, world!")
     })
 })

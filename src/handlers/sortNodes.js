@@ -22,7 +22,7 @@ function calcCost(nodeValuePair) {
 
     const value = nodeValuePair[1]
     const type = typeof value
-    // A simple object is essentially free to evaluate.
+    // A simple object is essentially free to realize.
     if (value === null || (type !== "object" && type !== "function")) {
         return 0
     } else {

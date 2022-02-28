@@ -48,17 +48,17 @@ export function rulify(...dataSources) {
 /**
  * Given a rulified object, converts it into a fully materialized object.
  */
-export async function evaluate(proxy) {
+export async function realize(proxy) {
     if (!proxy[PROXY_CONTEXT]) {
-        throw new Error("Attempt to call evaluate on an object that isn't rulified")
+        throw new Error("Attempt to call realize on an object that isn't rulified")
     }
 
-    return await materialize(proxy[RAW_VALUE], proxy[PROXY_CONTEXT])
+    return await realizeInternal(proxy[RAW_VALUE], proxy[PROXY_CONTEXT])
 }
 
 /**
  * Returns the basic Javascript type of the object
- * @param {any} obj 
+ * @param {any} obj
  * @returns {string}
  */
 export async function getTypeof(obj) {
@@ -68,7 +68,7 @@ export async function getTypeof(obj) {
 
 /**
  * Returns the set of keys for the given object
- * @param {any} obj 
+ * @param {any} obj
  * @returns {string[]}
  */
 export async function getKeys(obj) {
@@ -180,16 +180,14 @@ async function resolveHandler({ handler, argument }, ctx) {
         getComparisonProp() {
             return ctx.proxy[ctx.rootProp]
         },
-        async calculateCost(obj) {
-            
-        },
+        async calculateCost(obj) {},
         root: ctx.proxy,
         proxify: proxifyFunc,
-        evaluate(obj) {
-            return evaluate(obj)
-        }
+        realize(obj) {
+            return realize(obj)
+        },
     }
-    api.getRef = (str) => getRef(str,api)
+    api.getRef = (str) => getRef(str, api)
 
     let result = await handler(arg, api)
 
@@ -215,7 +213,7 @@ async function getAsync(target, ctx) {
     return resolved?.[ctx.prop]
 }
 
-async function materialize(value, ctx) {
+async function realizeInternal(value, ctx) {
     value = await resolve(value, ctx)
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {
@@ -230,7 +228,7 @@ async function materialize(value, ctx) {
 
     for (const [k, v] of Object.entries(value)) {
         const resolved = await v
-        result[k] = await materialize(resolved, ctx)
+        result[k] = await realizeInternal(resolved, ctx)
     }
 
     return result

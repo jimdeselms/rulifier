@@ -6,11 +6,8 @@ const DEFAULT_HANDLER_COST = 10
 const DEFAULT_NODE_COST = 1
 
 export async function calculateCost(obj, ctx) {
-
     // We want to make sure that we've got the raw values.
-    const rawValue = obj[PROXY_CONTEXT]
-        ? (await obj)[RAW_VALUE]
-        : obj
+    const rawValue = obj[PROXY_CONTEXT] ? (await obj)[RAW_VALUE] : obj
 
     const type = typeof rawValue
 

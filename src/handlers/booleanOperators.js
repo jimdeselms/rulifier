@@ -3,7 +3,7 @@ import { sortNodes } from "./sortNodes"
 export async function $and(obj, api) {
     const sorted = await sortNodes(obj)
     for await (const value of sorted) {
-        if (!(await api.evaluate(value))) {
+        if (!(await api.realize(value))) {
             return false
         }
     }
@@ -13,7 +13,7 @@ export async function $and(obj, api) {
 export async function $or(obj, api) {
     const sorted = await sortNodes(obj)
     for await (const value of sorted) {
-        if (await api.evaluate(value)) {
+        if (await api.realize(value)) {
             return true
         }
     }
@@ -21,5 +21,5 @@ export async function $or(obj, api) {
 }
 
 export async function $not(obj, api) {
-    return !(await api.evaluate(obj))
+    return !(await api.realize(obj))
 }
