@@ -2,6 +2,7 @@ import { builtinHandlers } from "./builtinHandlers"
 import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 import { calculateCost } from "./calculateCost"
+import { getRef } from "./getRef"
 
 /**
  * @param {...Record<any, any>} dataSources
@@ -175,7 +176,7 @@ export async function resolve(target, ctx) {
 async function resolveHandler({ handler, argument }, ctx) {
     const arg = await proxify(argument, ctx)
     const proxifyFunc = (obj) => proxify(obj, ctx)
-    let result = await handler(arg, {
+    const api = {
         getComparisonProp() {
             return ctx.proxy[ctx.rootProp]
         },
@@ -184,7 +185,10 @@ async function resolveHandler({ handler, argument }, ctx) {
         },
         root: ctx.proxy,
         proxify: proxifyFunc,
-    })
+    }
+    api.getRef = (str) => getRef(str,api)
+
+    let result = await handler(arg, api)
 
     if (result !== null && typeof result === "object" && result[PROXY_CONTEXT]) {
         result = await resolve(result[RAW_VALUE], ctx)
