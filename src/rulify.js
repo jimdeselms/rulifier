@@ -183,8 +183,6 @@ async function resolveHandler({ handler, argument }, ctx) {
             
         },
         root: ctx.proxy,
-        prop: ctx.prop,
-        rootProp: ctx.rootProp,
         proxify: proxifyFunc,
     })
 

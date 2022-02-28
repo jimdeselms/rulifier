@@ -19,6 +19,11 @@ export async function calculateCost(obj, ctx) {
         return 0
     }
 
+    // Already in the cache? It's also a freebie.
+    if (ctx.resolvedValueCache.has(rawValue)) {
+        return 0
+    }
+
     // Try to get the cost off of the function; otherwise get the default.
     if (typeof rawValue === "function") {
         return rawValue[COST]?.() ?? DEFAULT_FUNCTION_COST
