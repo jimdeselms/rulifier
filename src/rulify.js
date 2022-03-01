@@ -1,5 +1,5 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE } from "./symbols"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 import { calculateCost } from "./calculateCost"
 import { getRef } from "./getRef"
@@ -81,6 +81,21 @@ export async function getKeys(obj) {
     }
 }
 
+/**
+ * Returns the length of an array, or undefined if the object is not an arary
+ * @param {any} obj
+ * @returns {string[]}
+ */
+ export async function getLength(obj) {
+    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    if (typeof resolved !== "object" || !Array.isArray(resolved)) {
+        return undefined
+    } else {
+        return resolved.length
+    }
+}
+
+
 function normalizeHandlers(handlers) {
     if (!handlers) {
         return undefined
@@ -135,6 +150,8 @@ function get(target, prop, ctx) {
                 get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, proxy: newRoot })
         case Symbol.asyncIterator:
             return () => iterate(target, ctx)
+        case ITERATE_RAW:
+            return () => iterateRaw(target, ctx)
     }
 
     ctx = { ...ctx, prop }
@@ -142,9 +159,6 @@ function get(target, prop, ctx) {
 }
 
 export async function resolve(target, ctx) {
-    if (ctx === undefined) {
-        debugger
-    }
     let value = await target
 
     if (ctx.resolvedValueCache.has(value)) {
@@ -221,6 +235,14 @@ async function* iterate(target, ctx) {
         for (const value of resolved) {
             yield await proxify(value, ctx)
         }
+    }
+}
+
+async function iterateRaw(target, ctx) {
+    const resolved = await resolve(target, ctx)
+
+    if (typeof resolved === "object" && (resolved[Symbol.iterator] || resolved[Symbol.asyncIterator])) {
+        return resolved
     }
 }
 

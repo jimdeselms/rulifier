@@ -10,7 +10,7 @@ export async function $and(obj, api) {
 
 export async function $or(obj, api) {
     const sorted = await api.sortNodesByCost(obj)
-    for await (const value of sorted) {
+    for (const value of sorted) {
         if (await api.realize(value)) {
             return true
         }
