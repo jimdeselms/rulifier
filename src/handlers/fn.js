@@ -1,8 +1,10 @@
-import { RAW_VALUE } from "../symbols"
+import { RAW_VALUE, COST } from "../symbols"
 
 export async function $fn(obj, api) {
     const value = (await api.getRawValue(obj))()
     return value
 }
 
-function ifCost(proxy) {}
+$fn[COST] = function fnCost(value, calculateCost) {
+    return calculateCost(value, calculateCost)
+}

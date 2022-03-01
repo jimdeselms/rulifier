@@ -106,6 +106,25 @@ describe('calculateCost', () => {
         expect(messages).toMatchObject(["first", "second", "third"])
         expect(getCostCalls()).toBe(3)
     })
+
+    it('calculates the cost on functions', async () => {
+        // In this case, all the nodes are false, but at least we execute them in
+        // order of cost
+        const values = []
+        const resp = rulify({
+            $or: [
+                funcWithCost(() => (values.push(20), false), 20),
+                funcWithCost(() => (values.push(5), false), 5),
+                funcWithCost(() => (values.push(10), false), 10)
+            ]
+        })
+
+        expect(await realize(resp)).toBe(false)
+
+        expect(values).toMatchObject([5, 10, 20])
+    })
+
+
 })
 
 function calc(cost, value=undefined, message=undefined) {
@@ -115,6 +134,16 @@ function calc(cost, value=undefined, message=undefined) {
             value,
             message
         }
+    }
+}
+
+function funcWithCost(func, cost) {
+    func[COST] = typeof cost === "number"
+        ? () => cost
+        : cost
+
+    return {
+        $fn: func
     }
 }
 
