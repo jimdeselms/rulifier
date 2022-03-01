@@ -16,14 +16,14 @@ export const $regex = (obj, opt) =>
         }
     })
 
-async function evaluateBinary(obj, { getComparisonProp }, predicate) {
+async function evaluateBinary(obj, api, predicate) {
     obj = await realize(obj)
 
     if (Array.isArray(obj)) {
         // We're not in the root data source; just compare the two things in the array.
         return predicate(obj[0], obj[1])
     } else {
-        const lhs = await realize(getComparisonProp())
+        const lhs = await realize(api.getComparisonProp())
 
         // In the root data source, we compare against a property of the root.
         const result = predicate(lhs, obj)

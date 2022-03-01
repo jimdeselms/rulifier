@@ -1,5 +1,5 @@
-import { calculateCost } from "../calculateCost"
-import { ITERATE_RAW } from "../symbols"
+import { calculateCost } from "./calculateCost"
+import { ITERATE_RAW } from "./symbols"
 
 export async function sortNodes(nodes, ctx, accessor = (x) => x) {
     const rawNodes = await nodes[ITERATE_RAW]()

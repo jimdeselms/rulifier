@@ -1,7 +1,7 @@
 import { RAW_VALUE } from "../symbols"
 
-export async function $fn(obj) {
-    const value = (await obj[RAW_VALUE])()
+export async function $fn(obj, api) {
+    const value = (await api.getRawValue(obj))()
     return value
 }
 

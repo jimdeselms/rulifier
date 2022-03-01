@@ -1,9 +1,7 @@
 import { builtinHandlers } from "./builtinHandlers"
 import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
-import { calculateCost } from "./calculateCost"
-import { getRef } from "./getRef"
-import { sortNodes } from "./handlers/sortNodes"
+import { HandlerApi } from './handlerApi'
 
 /**
  * @param {...Record<any, any>} dataSources
@@ -201,24 +199,7 @@ async function resolveHandler({ handler, argument }, ctx) {
         }
     }
 
-    const proxifyFunc = (obj) => proxify(obj, ctx)
-    const api = {
-        getComparisonProp() {
-            return ctx.proxy[ctx.rootProp]
-        },
-        async calculateCost(obj) {},
-        sortNodesByCost(arr, accessor) {
-            return sortNodes(arr, ctx, accessor)
-        },
-        root: ctx.proxy,
-        proxify: proxifyFunc,
-        realize(obj) {
-            return realize(obj)
-        },
-    }
-    api.getRef = (str) => getRef(str, api)
-
-    let result = await handler(arg, api)
+    let result = await handler(arg, new HandlerApi(ctx, realize))
 
     if (result !== null && typeof result === "object" && result[PROXY_CONTEXT]) {
         result = await resolve(result[RAW_VALUE], ctx)
