@@ -56,6 +56,56 @@ describe('calculateCost', () => {
         expect(messages).toMatchObject(["first"])
         expect(getCostCalls()).toBe(0)
     })
+
+    it('sorts nodes for and', async () => {
+        // In this case, all the nodes are false, but at least we execute them in
+        // order of cost
+        const { obj, messages, getCostCalls } = await rulifyWithCalc({
+           value: {
+               $and: [ 
+                   calc(10, true, "third"),
+                   calc(5, true, "second"),
+                   calc(1, true, "first")
+               ]
+           }
+        })
+
+        expect(await realize(obj.value)).toBe(true)
+
+        expect(messages).toMatchObject(["first", "second", "third"])
+        expect(getCostCalls()).toBe(3)
+    })
+
+    it('sorts cases for switch', async () => {
+        // In this case, all the nodes are false, but at least we execute them in
+        // order of cost
+        const { obj, messages, getCostCalls } = await rulifyWithCalc({
+           value: {
+               $switch: {
+                    cases: [
+                        {
+                            condition: calc(5, false, "second"),
+                            value: "dontcare"
+                        },
+                        {
+                            condition: calc(10, false, "third"),
+                            value: "dontcare"
+                        },
+                        {
+                            condition: calc(1, false, "first"),
+                            value: "dontcare"
+                        }
+                    ],
+                    default: 123
+                }
+           }
+        })
+
+        expect(await realize(obj.value)).toBe(123)
+
+        expect(messages).toMatchObject(["first", "second", "third"])
+        expect(getCostCalls()).toBe(3)
+    })
 })
 
 function calc(cost, value=undefined, message=undefined) {
@@ -79,12 +129,9 @@ async function rulifyWithCalc(value) {
     }
 
     $calc[COST] = (rawValue, handlers) => {
-        debugger
         costCalls++
         return rawValue.cost
     }
-
-    debugger
 
     return {
         obj: await rulify({ 

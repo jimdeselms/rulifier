@@ -208,8 +208,8 @@ async function resolveHandler({ handler, argument }, ctx) {
             return ctx.proxy[ctx.rootProp]
         },
         async calculateCost(obj) {},
-        sortNodesByCost(arr) {
-            return sortNodes(arr, ctx)
+        sortNodesByCost(arr, accessor) {
+            return sortNodes(arr, ctx, accessor)
         },
         root: ctx.proxy,
         proxify: proxifyFunc,

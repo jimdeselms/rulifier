@@ -53,6 +53,7 @@ export async function eq(item1, item2, match, useRootDataSource) {
             return false
         }
 
+        // TODO: We should figure out how to sort these based on cost
         for (const key of i2Keys) {
             const val2 = useRootDataSource ? await i2[GET_WITH_NEW_ROOT](i1, key) : i2[key]
 
