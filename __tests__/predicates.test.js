@@ -39,6 +39,18 @@ describe("predicates", () => {
 
             expect(result).toBe(true)
         })
+
+        it("returns true if there are no options", async () => {
+            // And is if every one of its options is true. If there are no options,
+            // then it is true. (This is the same behavior as Scheme.)
+            const resp = rulify({
+                $and: [],
+            })
+
+            const result = await realize(resp)
+
+            expect(result).toBe(true)
+        })
     })
 
     describe("$or", () => {
@@ -55,6 +67,18 @@ describe("predicates", () => {
         it("returns false if everything is false", async () => {
             const resp = rulify({
                 $or: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
+            })
+
+            const result = await realize(resp)
+
+            expect(result).toBe(false)
+        })
+
+        it("returns false if there are no options", async () => {
+            // Or is true if any of its options are false, so, if there are no options,
+            // it is false. (This is the same behavior as Scheme.)
+            const resp = rulify({
+                $or: [],
             })
 
             const result = await realize(resp)

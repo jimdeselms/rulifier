@@ -241,9 +241,15 @@ async function* iterate(target, ctx) {
 async function iterateRaw(target, ctx) {
     const resolved = await resolve(target, ctx)
 
+    if (resolved === undefined || resolved === null) {
+        return []
+    }
+
     if (typeof resolved === "object" && (resolved[Symbol.iterator] || resolved[Symbol.asyncIterator])) {
         return resolved
     }
+
+    return undefined
 }
 
 async function getAsync(target, ctx) {

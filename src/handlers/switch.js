@@ -1,5 +1,6 @@
 export async function $switch(obj, api) {
-    for await (const currCase of obj.cases) {
+    const sorted = await api.sortNodesByCost(obj.cases)
+    for await (const currCase of sorted) {
         if (await api.realize(currCase.condition)) {
             return await currCase.value
         }
