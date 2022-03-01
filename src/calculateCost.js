@@ -22,8 +22,10 @@ export function calculateCost(rawValue, ctx) {
     // If this is a handler, then we'll try to calculate the cost of the handler
     // if it has a cost function. Otherwise we'll return the default.
     const handlerAndArg = getHandlerAndArgument(rawValue, ctx.handlers)
+    const calculateCostFn = (rawValue) => calculateCost(rawValue, ctx)
+
     if (handlerAndArg) {
-        return handlerAndArg.handler[COST]?.(handlerAndArg.argument) ?? DEFAULT_HANDLER_COST
+        return handlerAndArg.handler[COST]?.(handlerAndArg.argument, calculateCostFn) ?? DEFAULT_HANDLER_COST
     }
 
     // This is just a boring node; we'll return a default value.

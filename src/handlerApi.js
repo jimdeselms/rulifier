@@ -21,9 +21,7 @@ export class HandlerApi {
         return getRawValue(obj)
     }
 
-    async calculateCost(obj) {}
-
-    sortNodesByCost(arr, accessor) {
+    sortNodesByCost(arr, accessor=(obj)=>obj) {
         return sortNodes(arr, this.#ctx, accessor)
     }
 
