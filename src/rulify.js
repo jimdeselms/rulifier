@@ -86,7 +86,7 @@ export async function getKeys(obj) {
  * @param {any} obj
  * @returns {string[]}
  */
- export async function getLength(obj) {
+export async function getLength(obj) {
     const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
     if (typeof resolved !== "object" || !Array.isArray(resolved)) {
         return undefined
@@ -94,7 +94,6 @@ export async function getKeys(obj) {
         return resolved.length
     }
 }
-
 
 function normalizeHandlers(handlers) {
     if (!handlers) {
@@ -198,7 +197,7 @@ async function resolveHandler({ handler, argument }, ctx) {
     // The function is only invoked when the route is fully realized.
     if (handler === ROUTE) {
         return {
-            $route: arg
+            $route: arg,
         }
     }
 
@@ -268,16 +267,16 @@ async function getAsync(target, ctx) {
         return {
             $route: {
                 fn: arg,
-                path: [ctx.prop]
-            }
-          }
+                path: [ctx.prop],
+            },
+        }
     } else {
         const previousPath = arg.path
         return {
             $route: {
                 fn: arg.fn,
-                path: [...previousPath, ctx.prop]
-            }
+                path: [...previousPath, ctx.prop],
+            },
         }
     }
 }
@@ -300,9 +299,10 @@ async function realizeInternal(value, ctx) {
         const route = await value.$route[RAW_VALUE]
 
         // If we've never accessed a property off of the route, then we're just accessing the route path.
-        const result = typeof route === "function"
-            ? await realizeInternal(await route([]), ctx)
-            : await realizeInternal(await route.fn(route.path), ctx)
+        const result =
+            typeof route === "function"
+                ? await realizeInternal(await route([]), ctx)
+                : await realizeInternal(await route.fn(route.path), ctx)
 
         return result
     }

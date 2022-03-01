@@ -15,7 +15,7 @@ export function getHandlerAndArgument(obj, handlers) {
 }
 
 function getHandler(key, handlers) {
-    // Special case: since $route isn't really possible to write as a typtical handler, 
+    // Special case: since $route isn't really possible to write as a typtical handler,
     // we return this symbol to flag the special case.
     if (key === "$route") {
         return ROUTE
