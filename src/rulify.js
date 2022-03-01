@@ -1,5 +1,5 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT } from "./symbols"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 import { calculateCost } from "./calculateCost"
 import { getRef } from "./getRef"
@@ -141,6 +141,9 @@ function get(target, prop, ctx) {
 }
 
 export async function resolve(target, ctx) {
+    if (ctx === undefined) {
+        debugger
+    }
     let value = await target
 
     if (ctx.resolvedValueCache.has(value)) {
@@ -175,6 +178,15 @@ export async function resolve(target, ctx) {
 
 async function resolveHandler({ handler, argument }, ctx) {
     const arg = await proxify(argument, ctx)
+
+    // If this is $route, then we don't actually resolve it here.
+    // The function is only invoked when the route is fully realized.
+    if (handler === ROUTE) {
+        return {
+            $route: arg
+        }
+    }
+
     const proxifyFunc = (obj) => proxify(obj, ctx)
     const api = {
         getComparisonProp() {
@@ -210,7 +222,32 @@ async function* iterate(target, ctx) {
 
 async function getAsync(target, ctx) {
     const resolved = await resolve(target, ctx)
-    return resolved?.[ctx.prop]
+
+    const handler = getHandlerAndArgument(resolved, ctx.handlers)
+    // Normal case; we just get the given property
+    if (handler?.handler !== ROUTE) {
+        return resolved?.[ctx.prop]
+    }
+
+    // Special case: if we're getting something from a route, then we add the property to the path.
+    const arg = await handler.argument[RAW_VALUE]
+
+    if (typeof arg === "function") {
+        return {
+            $route: {
+                fn: arg,
+                path: [ctx.prop]
+            }
+          }
+    } else {
+        const previousPath = arg.path
+        return {
+            $route: {
+                fn: arg.fn,
+                path: [...previousPath, ctx.prop]
+            }
+        }
+    }
 }
 
 async function realizeInternal(value, ctx) {
@@ -225,6 +262,18 @@ async function realizeInternal(value, ctx) {
     }
 
     const result = Array.isArray(value) ? [] : {}
+
+    // Special case. If we've got a route, then we want to call its function and pass the given route.
+    if (value.$route && Object.keys(value).length === 1) {
+        const route = await value.$route[RAW_VALUE]
+
+        // If we've never accessed a property off of the route, then we're just accessing the route path.
+        const result = typeof route === "function"
+            ? await realizeInternal(await route([]), ctx)
+            : await realizeInternal(await route.fn(route.path), ctx)
+
+        return result
+    }
 
     for (const [k, v] of Object.entries(value)) {
         const resolved = await v
