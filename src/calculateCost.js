@@ -1,4 +1,4 @@
-import { COST, PROXY_CONTEXT } from "./symbols"
+import { COST, PROXY_CONTEXT, RAW_VALUE } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 
 const DEFAULT_FUNCTION_COST = 10

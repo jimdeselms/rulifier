@@ -3,6 +3,7 @@ import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 import { calculateCost } from "./calculateCost"
 import { getRef } from "./getRef"
+import { sortNodes } from "./handlers/sortNodes"
 
 /**
  * @param {...Record<any, any>} dataSources
@@ -193,6 +194,9 @@ async function resolveHandler({ handler, argument }, ctx) {
             return ctx.proxy[ctx.rootProp]
         },
         async calculateCost(obj) {},
+        sortNodesByCost(arr) {
+            return sortNodes(arr, ctx)
+        },
         root: ctx.proxy,
         proxify: proxifyFunc,
         realize(obj) {

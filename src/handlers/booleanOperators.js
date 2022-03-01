@@ -1,7 +1,5 @@
-import { sortNodes } from "./sortNodes"
-
 export async function $and(obj, api) {
-    const sorted = await sortNodes(obj)
+    const sorted = await api.sortNodesByCost(obj)
     for await (const value of sorted) {
         if (!(await api.realize(value))) {
             return false
@@ -11,7 +9,7 @@ export async function $and(obj, api) {
 }
 
 export async function $or(obj, api) {
-    const sorted = await sortNodes(obj)
+    const sorted = await api.sortNodesByCost(obj)
     for await (const value of sorted) {
         if (await api.realize(value)) {
             return true

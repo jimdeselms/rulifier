@@ -1,31 +1,25 @@
 import { RAW_VALUE, PROXY_CONTEXT } from "../symbols"
+import { calculateCost } from "../calculateCost"
 
-export async function* sortNodes(nodes) {
+export async function* sortNodes(nodes, ctx) {
     if (!nodes) {
         return
     }
 
-    const nodeValuePairs = []
+    // TODO - don't sort if there's only one item.
+
+    const nodeCostPairs = []
     for await (const node of nodes) {
-        nodeValuePairs.push([node, await node[RAW_VALUE]])
+        nodeCostPairs.push([node, await calculateCost(node, ctx)])
     }
 
-    while (nodeValuePairs.length > 0) {
-        nodeValuePairs.sort(calcCost)
-        yield nodeValuePairs[0][0]
-        nodeValuePairs.splice(0, 1)
+    while (nodeCostPairs.length > 0) {
+        nodeCostPairs.sort(compareCost)
+        yield nodeCostPairs[0][0]
+        nodeCostPairs.splice(0, 1)
     }
 }
 
-function calcCost(nodeValuePair) {
-    const context = nodeValuePair[0][PROXY_CONTEXT]
-
-    const value = nodeValuePair[1]
-    const type = typeof value
-    // A simple object is essentially free to realize.
-    if (value === null || (type !== "object" && type !== "function")) {
-        return 0
-    } else {
-        return 1
-    }
+function compareCost(nodeCostPair1, nodeCostPair2) {
+    return nodeCostPair1[1] - nodeCostPair2[1]
 }
