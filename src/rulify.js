@@ -130,7 +130,7 @@ function proxify(value, ctx) {
 
     // Make sure to set the proxy the first time through.
     if (!ctx.proxy) {
-        ctx = { ...ctx, proxy }
+        ctx = { ...ctx, proxy, comparisonProxy: proxy }
     }
 
     return proxy
@@ -144,7 +144,7 @@ function get(target, prop, ctx) {
             return target
         case GET_WITH_NEW_ROOT:
             return (newRoot, newProp) =>
-                get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, proxy: newRoot })
+                get(target, newProp, { ...ctx, prop: newProp, rootProp: newProp, comparisonProxy: newRoot })
         case Symbol.asyncIterator:
             return () => iterate(target, ctx)
         case ITERATE_RAW:

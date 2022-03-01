@@ -14,7 +14,7 @@ export class HandlerApi {
     }
 
     getComparisonProp() {
-        return this.#ctx.proxy[this.#ctx.rootProp]
+        return this.#ctx.comparisonProxy[this.#ctx.rootProp]
     }
     
     getRawValue(obj) {
