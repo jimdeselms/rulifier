@@ -308,8 +308,7 @@ async function realizeInternal(value, ctx) {
     }
 
     for (const [k, v] of Object.entries(value)) {
-        const resolved = await v
-        result[k] = await realizeInternal(resolved, ctx)
+        result[k] = await realizeInternal(await v, ctx)
     }
 
     return result
