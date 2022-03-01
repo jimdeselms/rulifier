@@ -22,7 +22,6 @@ describe("errorHandling", () => {
 
 function rulifyWithThrow(value) {
     async function $throw(obj, api) {
-        debugger
         const realized = await api.realize(obj)
         throw realized
     }

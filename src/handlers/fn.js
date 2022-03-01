@@ -1,4 +1,4 @@
-import { RAW_VALUE, COST } from "../symbols"
+import { COST } from "../symbols"
 
 export async function $fn(obj, api) {
     const value = (await api.getRawValue(obj))()

@@ -1,7 +1,7 @@
 import { builtinHandlers } from "./builtinHandlers"
 import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
-import { HandlerApi } from './handlerApi'
+import { HandlerApi } from "./handlerApi"
 
 /**
  * @param {...Record<any, any>} dataSources

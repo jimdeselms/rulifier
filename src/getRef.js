@@ -1,5 +1,4 @@
 export async function getRef(str, api) {
-//    const obj = await api.proxify(str)
     const path = parsePath(str)
 
     let curr = api.root

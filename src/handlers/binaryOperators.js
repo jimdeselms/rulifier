@@ -1,4 +1,4 @@
-import { realize, getKeys } from ".."
+import { realize } from ".."
 import { TRUE, FALSE } from "../symbols"
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
