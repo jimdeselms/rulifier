@@ -225,13 +225,20 @@ describe("rulify", () => {
     })
 
     it("will not blow up if the object has a cycle, but not the value", async () => {
-        // TODO - We also need to determine exactly what happens if there is a cycle in the requested 
-        // value itself. I'd expect this to just be an exception.
         const hasCycle = { value: 1 }
         hasCycle.hasCycle = hasCycle
 
         const resp = rulify(hasCycle)
 
         expect(await realize(resp.hasCycle.hasCycle.value)).toBe(1)
+    })
+
+    it("throws an error if a cycle is detecting when realizing a value", async () => {
+        const hasCycle = { value: 1 }
+        hasCycle.hasCycle = hasCycle
+
+        const resp = rulify(hasCycle)
+
+        expect(() => realize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
 })

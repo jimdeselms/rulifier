@@ -272,12 +272,23 @@ async function getAsync(target, ctx) {
     }
 }
 
-async function realizeInternal(value, ctx) {
+async function realizeInternal(value, ctx, visited) {
+    visited = visited ?? new Set()
+
     value = await resolve(value, ctx)
+
+    debugger
+
+    if (visited.has(value)) {
+        throw new Error("Cycle detected")
+    }
+
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {
         return value
     }
+
+    visited.add(value)
 
     if (value instanceof RegExp) {
         return value
@@ -292,14 +303,15 @@ async function realizeInternal(value, ctx) {
         // If we've never accessed a property off of the route, then we're just accessing the route path.
         const result =
             typeof route === "function"
-                ? await realizeInternal(await route([]), ctx)
-                : await realizeInternal(await route.fn(route.path), ctx)
+                ? await realizeInternal(await route([]), ctx, visited)
+                : await realizeInternal(await route.fn(route.path), ctx, visited)
 
+        visited.add(result)
         return result
     }
 
     for (const [k, v] of Object.entries(value)) {
-        result[k] = await realizeInternal(await v, ctx)
+        result[k] = await realizeInternal(await v, ctx, visited)
     }
 
     return result
