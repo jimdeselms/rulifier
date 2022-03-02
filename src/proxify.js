@@ -54,8 +54,11 @@ function get(target, prop, ctx) {
     return proxify(getAsync(target, ctx), ctx)
 }
 
-export async function resolve(target, ctx) {
+export async function resolve(target, ctx, visited = new Set()) {
     let value = await target
+    if (visited.has(value)) {
+        throw new Error("Cycle detected")
+    }
 
     if (ctx.resolvedValueCache.has(value)) {
         return await ctx.resolvedValueCache.get(value)
@@ -63,13 +66,15 @@ export async function resolve(target, ctx) {
 
     if (value !== null && (typeof value === "object" || typeof value === "function")) {
         if (typeof value === "object") {
+            visited.add(value)
+
             // Are we calling a handler? Then do it and pass back the result.
             const h = getHandlerAndArgument(value, ctx.handlers)
             if (h) {
                 // We'll cache the promise so that if another request tries to
                 // resolve the same value, they'll both be waiting on the same
                 // promise.
-                const resolvedValuePromise = resolveHandler(h, ctx)
+                const resolvedValuePromise = resolveHandler(h, ctx, visited)
 
                 ctx.resolvedValueCache.set(value, resolvedValuePromise)
                 value = await resolvedValuePromise
@@ -87,7 +92,7 @@ export async function resolve(target, ctx) {
     return value
 }
 
-async function resolveHandler({ handler, argument }, ctx) {
+async function resolveHandler({ handler, argument }, ctx, visited) {
     const arg = await proxify(argument, ctx)
 
     // If this is $route, then we don't actually resolve it here.
@@ -98,13 +103,13 @@ async function resolveHandler({ handler, argument }, ctx) {
         }
     }
 
-    let result = await handler(arg, new HandlerApi(ctx))
+    let result = await handler(arg, new HandlerApi(ctx, visited))
 
     if (result !== null && typeof result === "object" && result[PROXY_CONTEXT]) {
-        result = await resolve(result[RAW_VALUE], ctx)
+        result = await resolve(result[RAW_VALUE], ctx, visited)
     }
 
-    return await resolve(result, ctx)
+    return await resolve(result, ctx, visited)
 }
 
 async function* iterate(target, ctx) {
@@ -162,12 +167,7 @@ async function getAsync(target, ctx) {
 }
 
 export async function materializeInternal(value, ctx, visited) {
-    visited = visited ?? new Set()
-
-    value = await resolve(value, ctx)
-    if (visited.has(value)) {
-        throw new Error("Cycle detected")
-    }
+    value = await resolve(value, ctx, visited)
 
     const type = typeof value
     if (value === null || (type !== "object" && type !== "function")) {

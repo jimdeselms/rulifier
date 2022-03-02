@@ -9,7 +9,6 @@ const MAX_BREADTH_PER_NODE = 25
 const MAX_DEPTH = 3
 
 export function calculateCost(rawValue, ctx, depth = 0) {
-    // TODO - Make sure that we can throw an error if there's a cycle.
     const type = typeof rawValue
 
     // Primitive types are essentially free
@@ -54,7 +53,7 @@ export function calculateCost(rawValue, ctx, depth = 0) {
     let totalCost = 0
 
     for (let i = 0; i < iterations; i++) {
-        totalCost += calculateCost(values[i], ctx, depth+1)
+        totalCost += calculateCost(values[i], ctx, depth + 1)
     }
     return totalCost
 }

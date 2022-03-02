@@ -5,10 +5,12 @@ import { materialize, getTypeof, getKeys, getLength } from "."
 
 export class HandlerApi {
     #ctx
+    #visited
     root
 
-    constructor(ctx) {
+    constructor(ctx, visited) {
         this.#ctx = ctx
+        this.#visited = visited
         this.root = ctx.proxy
     }
 
@@ -21,14 +23,16 @@ export class HandlerApi {
     }
 
     getRef(str) {
-        return getRef(str, this)
+        return getRef(str, this, this.#visited)
+    }
+
+    materialize(obj) {
+        return materialize(obj, this.#visited)
     }
 }
 
 // These public functions are included in the API as a courtesy
-HandlerApi.prototype.materialize = materialize
 HandlerApi.prototype.getTypeof = getTypeof
 HandlerApi.prototype.getKeys = getKeys
 HandlerApi.prototype.getLength = getLength
 HandlerApi.prototype.getRawValue = getRawValue
-

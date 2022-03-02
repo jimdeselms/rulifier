@@ -241,4 +241,22 @@ describe("rulify", () => {
 
         expect(() => materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
+
+    it("throws an error if a cycle in a handler", async () => {
+        const hasCycle = {}
+        hasCycle.$or = [hasCycle]
+
+        const resp = rulify(hasCycle)
+
+        await expect(() => materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
+    })
+
+    it("throws an error if a cycle when calculating cost", async () => {
+        const hasCycle = {}
+        hasCycle.$or = [hasCycle, hasCycle, hasCycle]
+
+        const resp = rulify(hasCycle)
+
+        await expect(() => materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
+    })
 })

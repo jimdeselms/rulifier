@@ -3,6 +3,7 @@ import { PROXY_CONTEXT, COST } from "./symbols"
 import { proxify } from "./proxify"
 
 /**
+ * Given a set of data sources, return an object whose fields can be properties
  * @param {...Record<any, any>} dataSources
  * @returns {any}
  */

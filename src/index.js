@@ -4,10 +4,12 @@ import { PROXY_CONTEXT, RAW_VALUE } from "./symbols"
 
 /**
  * Given a rulified object, converts it into a fully materialized object.
+ * @param {any}
+ * @returns {any}
  */
-export async function materialize(obj) {
+export async function materialize(obj, visited = new Set()) {
     const ctx = getProxyContext(obj)
-    return ctx ? await materializeInternal(obj[RAW_VALUE], ctx) : obj
+    return ctx ? await materializeInternal(obj[RAW_VALUE], ctx, visited) : obj
 }
 
 /**
@@ -21,9 +23,10 @@ export async function getTypeof(obj) {
 }
 
 /**
- * Returns the set of keys for the given object
+ * Returns the set of keys for the given object, or undefined if the object isn't
+ * a type that has keys
  * @param {any} obj
- * @returns {string[]}
+ * @returns {string[] | undefined}
  */
 export async function getKeys(obj) {
     const resolved = await resolveSafe(obj)
@@ -38,7 +41,7 @@ export async function getKeys(obj) {
 /**
  * Returns the length of an array, or undefined if the object is not an arary
  * @param {any} obj
- * @returns {string[]}
+ * @returns {string[] | undefined}
  */
 export async function getLength(obj) {
     const resolved = await resolveSafe(obj)
