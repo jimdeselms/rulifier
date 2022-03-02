@@ -3,8 +3,13 @@ import { getHandlerAndArgument } from "./getHandlerAndArgument"
 
 const DEFAULT_HANDLER_COST = 10
 const DEFAULT_FUNCTION_COST = 10
+const DEFAULT_NODE_COST = 2
 
-export function calculateCost(rawValue, ctx) {
+const MAX_BREADTH_PER_NODE = 25
+const MAX_DEPTH = 3
+
+export function calculateCost(rawValue, ctx, depth = 0) {
+    // TODO - Make sure that we can throw an error if there's a cycle.
     const type = typeof rawValue
 
     // Primitive types are essentially free
@@ -33,9 +38,23 @@ export function calculateCost(rawValue, ctx) {
         return handlerAndArg.handler[COST]?.(handlerAndArg.argument, calculateCostFn) ?? DEFAULT_HANDLER_COST
     }
 
-    // Go through each of the values and sum up its cost
-    // TODO:
-    // * Make sure we don't blow up on cycles
-    // * Limit this so that if the object is very big, we don't take too long.
-    return Object.values(rawValue).reduce((prev, curr) => prev + calculateCost(curr, ctx), 0)
+    // Don't go too deep.
+    if (depth >= MAX_DEPTH) {
+        return DEFAULT_NODE_COST
+    }
+
+    // We'll calculate the cost of each of the values in the object,
+    // but we'll limit this so that the act of calculating the cost
+    // doesn't take too much time.
+    //
+    // TODO - make these limits configurable
+    const values = Object.values(rawValue)
+    const iterations = Math.min(values.length, MAX_BREADTH_PER_NODE)
+
+    let totalCost = 0
+
+    for (let i = 0; i < iterations; i++) {
+        totalCost += calculateCost(values[i], ctx, depth+1)
+    }
+    return totalCost
 }
