@@ -1,4 +1,4 @@
-import { rulify, realize } from "../src"
+import { rulify, materialize } from "../src"
 import { delayed } from "./helpers.test"
 
 describe("predicates", () => {
@@ -8,7 +8,7 @@ describe("predicates", () => {
                 $and: [{ $fn: () => true }, { $fn: () => delayed(true) }, true],
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(true)
         })
@@ -18,7 +18,7 @@ describe("predicates", () => {
                 $and: [{ $fn: () => delayed(false) }, { $fn: () => true }, true],
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(false)
         })
@@ -35,7 +35,7 @@ describe("predicates", () => {
                 ]
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(true)
         })
@@ -47,7 +47,7 @@ describe("predicates", () => {
                 $and: [],
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(true)
         })
@@ -59,7 +59,7 @@ describe("predicates", () => {
                 $or: [delayed(false), delayed(false), { $fn: () => delayed(true) }],
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(true)
         })
@@ -69,7 +69,7 @@ describe("predicates", () => {
                 $or: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(false)
         })
@@ -81,7 +81,7 @@ describe("predicates", () => {
                 $or: [],
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(false)
         })
@@ -89,10 +89,10 @@ describe("predicates", () => {
 
     describe("$not", () => {
         it("negates the value", async () => {
-            expect(await realize(rulify({ $not: true }))).toBe(false)
-            expect(await realize(rulify({ $not: false }))).toBe(true)
-            expect(await realize(rulify({ $not: delayed(1) }))).toBe(false)
-            expect(await realize(rulify({ $not: delayed(0) }))).toBe(true)
+            expect(await materialize(rulify({ $not: true }))).toBe(false)
+            expect(await materialize(rulify({ $not: false }))).toBe(true)
+            expect(await materialize(rulify({ $not: delayed(1) }))).toBe(false)
+            expect(await materialize(rulify({ $not: delayed(0) }))).toBe(true)
         })
 
         it("returns false if everything is false", async () => {
@@ -100,47 +100,47 @@ describe("predicates", () => {
                 $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
-            const result = await realize(resp)
+            const result = await materialize(resp)
 
             expect(result).toBe(false)
         })
     })
 
     test("binary operators", async () => {
-        expect(await realize(rulify({ $lt: [5, 10] }))).toBe(true)
-        expect(await realize(rulify({ $lt: [15, 10] }))).toBe(false)
+        expect(await materialize(rulify({ $lt: [5, 10] }))).toBe(true)
+        expect(await materialize(rulify({ $lt: [15, 10] }))).toBe(false)
 
-        expect(await realize(rulify({ $lte: [9, 10] }))).toBe(true)
-        expect(await realize(rulify({ $lte: [10, 10] }))).toBe(true)
-        expect(await realize(rulify({ $lte: delayed([11, 10]) }))).toBe(false)
+        expect(await materialize(rulify({ $lte: [9, 10] }))).toBe(true)
+        expect(await materialize(rulify({ $lte: [10, 10] }))).toBe(true)
+        expect(await materialize(rulify({ $lte: delayed([11, 10]) }))).toBe(false)
 
-        expect(await realize(rulify({ $gt: [5, delayed(10)] }))).toBe(false)
-        expect(await realize(rulify({ $gt: [5, 10] }))).toBe(false)
-        expect(await realize(rulify({ $gt: [15, 10] }))).toBe(true)
+        expect(await materialize(rulify({ $gt: [5, delayed(10)] }))).toBe(false)
+        expect(await materialize(rulify({ $gt: [5, 10] }))).toBe(false)
+        expect(await materialize(rulify({ $gt: [15, 10] }))).toBe(true)
 
-        expect(await realize(rulify({ $gte: [9, 10] }))).toBe(false)
-        expect(await realize(rulify({ $gte: [10, { $fn: () => 10 }] }))).toBe(true)
-        expect(await realize(rulify({ $gte: [11, 10] }))).toBe(true)
+        expect(await materialize(rulify({ $gte: [9, 10] }))).toBe(false)
+        expect(await materialize(rulify({ $gte: [10, { $fn: () => 10 }] }))).toBe(true)
+        expect(await materialize(rulify({ $gte: [11, 10] }))).toBe(true)
 
-        expect(await realize(rulify({ $eq: [5, delayed(5)] }))).toBe(true)
-        expect(await realize(rulify({ $eq: [5, 10] }))).toBe(false)
+        expect(await materialize(rulify({ $eq: [5, delayed(5)] }))).toBe(true)
+        expect(await materialize(rulify({ $eq: [5, 10] }))).toBe(false)
 
-        expect(await realize(rulify({ $ne: [5, 5] }))).toBe(false)
-        expect(await realize(rulify({ $ne: [5, 10] }))).toBe(true)
+        expect(await materialize(rulify({ $ne: [5, 5] }))).toBe(false)
+        expect(await materialize(rulify({ $ne: [5, 10] }))).toBe(true)
     })
 
     test("eq objects", async () => {
-        expect(await realize(rulify({ $eq: [{ a: 1 }, { a: 1 }] }))).toBe(true)
-        expect(await realize(rulify({ $eq: [{ a: 1, b: 2 }, { a: 1 }] }))).toBe(false)
+        expect(await materialize(rulify({ $eq: [{ a: 1 }, { a: 1 }] }))).toBe(true)
+        expect(await materialize(rulify({ $eq: [{ a: 1, b: 2 }, { a: 1 }] }))).toBe(false)
     })
 
     test("binary match", async () => {
         expect(
-            await realize(rulify(
+            await materialize(rulify(
                 {
                     $handlers: {
                         async $capitalize(str) {
-                            return (await realize(str)).toUpperCase()
+                            return (await materialize(str)).toUpperCase()
                         },
                     },
                 },
@@ -164,11 +164,11 @@ describe("predicates", () => {
         ).toBe(true)
 
         expect(
-            await realize(rulify(
+            await materialize(rulify(
                 {
                     $handlers: {
                         async $capitalize(str) {
-                            return (await realize(str)).toUpperCase()
+                            return (await materialize(str)).toUpperCase()
                         },
                     },
                 },
@@ -205,7 +205,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("returns true the current value is less than the given value", async () => {
@@ -220,7 +220,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("returns false the current value is greater than the given value", async () => {
@@ -235,7 +235,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(false)
+            expect(await materialize(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches the regex", async () => {
@@ -248,7 +248,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("returns false if the current value matches the regex", async () => {
@@ -261,7 +261,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(false)
+            expect(await materialize(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches a regex string", async () => {
@@ -274,7 +274,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("returns false if the current value does not match a regex string", async () => {
@@ -287,7 +287,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(false)
+            expect(await materialize(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches a regex with parameters", async () => {
@@ -300,7 +300,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("returns false if the current value does not match a regex with parameters", async () => {
@@ -313,7 +313,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(false)
+            expect(await materialize(resp.value)).toBe(false)
         })
 
         it("true if in", async () => {
@@ -326,7 +326,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("false if not in", async () => {
@@ -339,7 +339,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(false)
+            expect(await materialize(resp.value)).toBe(false)
         })
 
         it("can match arrays", async () => {
@@ -352,7 +352,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("can not match arrays that are different", async () => {
@@ -365,7 +365,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(false)
+            expect(await materialize(resp.value)).toBe(false)
         })
 
         it("deep equality match true if objects match", async () => {
@@ -396,7 +396,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(true)
+            expect(await materialize(resp.value)).toBe(true)
         })
 
         it("failed deep equality match if objects have differences", async () => {
@@ -427,7 +427,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await realize(resp.value)).toBe(false)
+            expect(await materialize(resp.value)).toBe(false)
         })
     })
 })

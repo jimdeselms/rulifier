@@ -1,4 +1,4 @@
-import { rulify, realize } from '../src'
+import { rulify, materialize } from '../src'
 import { COST } from '../src/symbols'
 
 describe('calculateCost', () => {
@@ -15,7 +15,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await realize(obj.value)).toBe(false)
+        expect(await materialize(obj.value)).toBe(false)
 
         expect(messages).toMatchObject(["first", "second", "third"])
         expect(getCostCalls()).toBe(3)
@@ -34,7 +34,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await realize(obj.value)).toBe(true)
+        expect(await materialize(obj.value)).toBe(true)
 
         expect(messages).toMatchObject(["first"])
         expect(getCostCalls()).toBe(3)
@@ -51,7 +51,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await realize(obj.value)).toBe(true)
+        expect(await materialize(obj.value)).toBe(true)
 
         expect(messages).toMatchObject(["first"])
         expect(getCostCalls()).toBe(0)
@@ -70,7 +70,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await realize(obj.value)).toBe(true)
+        expect(await materialize(obj.value)).toBe(true)
 
         expect(messages).toMatchObject(["first", "second", "third"])
         expect(getCostCalls()).toBe(3)
@@ -101,7 +101,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await realize(obj.value)).toBe(123)
+        expect(await materialize(obj.value)).toBe(123)
 
         expect(messages).toMatchObject(["first", "second", "third"])
         expect(getCostCalls()).toBe(3)
@@ -119,7 +119,7 @@ describe('calculateCost', () => {
             ]
         })
 
-        expect(await realize(resp)).toBe(false)
+        expect(await materialize(resp)).toBe(false)
 
         expect(values).toMatchObject([5, 10, 20])
     })
@@ -152,9 +152,9 @@ async function rulifyWithCalc(value) {
     let costCalls = 0
 
     async function calc(obj, api) {
-        const realized = await api.realize(obj)
-        messages.push(realized.message ?? realized.value)
-        return realized.value
+        const materialized = await api.materialize(obj)
+        messages.push(materialized.message ?? materialized.value)
+        return materialized.value
     }
 
     function calcCost(rawValue) {

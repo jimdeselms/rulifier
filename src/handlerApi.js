@@ -1,16 +1,15 @@
 import { getRawValue } from "./getRawValue"
 import { getRef } from "./getRef"
 import { sortNodes } from "./sortNodes"
+import { materialize } from "."
 
 export class HandlerApi {
     #ctx
     root
-    #realize
 
-    constructor(ctx, realize) {
+    constructor(ctx) {
         this.#ctx = ctx
         this.root = ctx.proxy
-        this.#realize = realize
     }
 
     getComparisonProp() {
@@ -25,8 +24,8 @@ export class HandlerApi {
         return sortNodes(arr, this.#ctx, accessor)
     }
 
-    realize(obj) {
-        return this.#realize(obj)
+    materialize(obj) {
+        return materialize(obj)
     }
 
     getRef(str) {

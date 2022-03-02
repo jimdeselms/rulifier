@@ -1,29 +1,29 @@
-import { rulify, realize } from "../src"
+import { rulify, materialize } from "../src"
 import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
 
     it("simplest case", async () => {
         const resp = rulify({ a: 5 })
-        expect(await realize(resp.a)).toBe(5)
+        expect(await materialize(resp.a)).toBe(5)
     })
 
     it("simple chain", async () => {
         const resp = rulify({ a: { b: 5 } })
 
-        expect(await realize(resp.a.b)).toBe(5)
+        expect(await materialize(resp.a.b)).toBe(5)
     })
 
     it("can handle merged objects, and later objects replace earlier ones", async () => {
         const resp = rulify({ a: { b: { c: 3 } } })
 
-        expect(await realize(resp.a.b.c)).toBe(3)
+        expect(await materialize(resp.a.b.c)).toBe(3)
     })
 
-    it("can realize a non-leaf node", async () => {
+    it("can materialize a non-leaf node", async () => {
         const resp = rulify({ a: { b: { c: 3 } } })
 
-        expect(await realize(resp.a.b)).toMatchObject({ c: 3 })
+        expect(await materialize(resp.a.b)).toMatchObject({ c: 3 })
     })
 
     it("is harmless to await intermediate results", async () => {
@@ -32,46 +32,46 @@ describe("rulify", () => {
         const b = await resp.a.b
         const c = resp.a.b.c
 
-        expect(await realize(b)).toMatchObject({ c: 3 })
-        expect(await realize(b.c)).toBe(3)
-        expect(await realize(c)).toBe(3)
+        expect(await materialize(b)).toMatchObject({ c: 3 })
+        expect(await materialize(b.c)).toBe(3)
+        expect(await materialize(c)).toBe(3)
     })
 
     it("can handle a thing that resolves to a function", async () => {
         const resp = rulify({ $fn: () => 100 })
 
-        expect(await realize(resp)).toEqual(100)
+        expect(await materialize(resp)).toEqual(100)
     })
 
     it("works with arrays of simple values", async () => {
         const resp = rulify({ arr: [1, 2] })
 
-        expect(await realize(resp.arr[0])).toBe(1)
-//        expect(await realize(resp.arr[1])).toBe(2)
+        expect(await materialize(resp.arr[0])).toBe(1)
+//        expect(await materialize(resp.arr[1])).toBe(2)
     })
 
-    it("can realize an array", async () => {
+    it("can materialize an array", async () => {
         const resp = rulify({ a: [1, 2] })
-        expect(await realize(resp.a)).toMatchObject([1, 2])
+        expect(await materialize(resp.a)).toMatchObject([1, 2])
     })
 
     it("works with arrays of functions", async () => {
         const resp = rulify({ a: [ { $fn: () => 1 }, { $fn: () => 2 }] })
 
-        expect(await realize(resp.a[0])).toBe(1)
-        expect(await realize(resp.a[1])).toBe(2)
+        expect(await materialize(resp.a[0])).toBe(1)
+        expect(await materialize(resp.a[1])).toBe(2)
     })
 
     it("works with an object that has a then that is not a promise", async () => {
         const resp = rulify({ then: 123 })
 
-        expect(await realize(resp.then)).toBe(123)
+        expect(await materialize(resp.then)).toBe(123)
     })
 
     it("works with promises", async () => {
         const resp = rulify({ a: { $fn: () => delayed(500) }})
 
-        expect(await realize(resp.a)).toBe(500)
+        expect(await materialize(resp.a)).toBe(500)
     })
 
     it("works with a chain of functions that return promises", async () => {
@@ -87,13 +87,13 @@ describe("rulify", () => {
             },
         })
 
-        expect(await realize(resp.a.b.c)).toBe(12321)
+        expect(await materialize(resp.a.b.c)).toBe(12321)
     })
 
     it("can directly proxify a promise", async () => {
         const resp = rulify({ a: Promise.resolve(5) })
 
-        expect(await realize(resp.a)).toBe(5)
+        expect(await materialize(resp.a)).toBe(5)
     })
 
     it("works with a chain of promises", async () => {
@@ -105,8 +105,8 @@ describe("rulify", () => {
             }),
         })
 
-        expect(await realize(resp.a.b)).toMatchObject({c: 12321})
-        expect(await realize(resp.a.b.c)).toBe(12321)
+        expect(await materialize(resp.a.b)).toMatchObject({c: 12321})
+        expect(await materialize(resp.a.b.c)).toBe(12321)
     })
 
     it("works with a chain of functions", async () => {
@@ -124,9 +124,9 @@ describe("rulify", () => {
             }
         })
 
-        expect(await realize(resp.a.b)).toMatchObject({c: { d: 12345} })
-        expect(await realize(resp.a.b.c)).toMatchObject({ d: 12345 })
-        expect(await realize(resp.a.b.c.d)).toBe(12345)
+        expect(await materialize(resp.a.b)).toMatchObject({c: { d: 12345} })
+        expect(await materialize(resp.a.b.c)).toMatchObject({ d: 12345 })
+        expect(await materialize(resp.a.b.c.d)).toBe(12345)
     })
 
     it("ensures that functions that are not referenced are not evaluated", async () => {
@@ -139,7 +139,7 @@ describe("rulify", () => {
             }},
         })
 
-        expect(await realize(resp.a)).toBe(123)
+        expect(await materialize(resp.a)).toBe(123)
         expect(executed).toBe(false)
     })
 
@@ -159,9 +159,9 @@ describe("rulify", () => {
             }
         })
 
-        expect(await realize(resp.a.b)).toBe(1)
-        expect(await realize(resp.a.c)).toBe(2)
-        expect(await realize(resp.a.d)).toBe(3)
+        expect(await materialize(resp.a.b)).toBe(1)
+        expect(await materialize(resp.a.c)).toBe(2)
+        expect(await materialize(resp.a.d)).toBe(3)
 
         expect(executed).toBe(1)
     })
@@ -178,28 +178,28 @@ describe("rulify", () => {
             }
         })
 
-        expect(await realize(resp.a)).toBe(5)
+        expect(await materialize(resp.a)).toBe(5)
         expect(executed).toBe(true)
 
         executed = false
 
         const resp2 = rulify(resp)
 
-        expect(await realize(resp2.a)).toBe(5)
+        expect(await materialize(resp2.a)).toBe(5)
         expect(executed).toBe(true)
     })
 
     it("knows about handlers", async () => {
         const resp = rulify({
             $handlers: {
-                capitalize: async (name) => (await realize(name)).toUpperCase(),
+                capitalize: async (name) => (await materialize(name)).toUpperCase(),
             },
             name: {
                 $capitalize: "Fred",
             },
         })
 
-        expect(await realize(resp.name)).toBe("FRED")
+        expect(await materialize(resp.name)).toBe("FRED")
     })
 
     it("a response can have more data source added to it", async () => {
@@ -207,9 +207,9 @@ describe("rulify", () => {
         const resp2 = rulify(resp, { b: 2 })
         const resp3 = rulify(resp2, { c: 3 })
 
-        expect(await realize(resp3.a)).toBe(1)
-        expect(await realize(resp3.b)).toBe(2)
-        expect(await realize(resp3.c)).toBe(3)
+        expect(await materialize(resp3.a)).toBe(1)
+        expect(await materialize(resp3.b)).toBe(2)
+        expect(await materialize(resp3.c)).toBe(3)
     })
 
     it("a response can be enumerated without fully evaluating it", async () => {
@@ -218,7 +218,7 @@ describe("rulify", () => {
         const result = []
 
         for await (let i of resp.a) {
-            result.push(await realize(i))
+            result.push(await materialize(i))
         }
 
         expect(result).toMatchObject([1, 2, 3])
@@ -230,7 +230,7 @@ describe("rulify", () => {
 
         const resp = rulify(hasCycle)
 
-        expect(await realize(resp.hasCycle.hasCycle.value)).toBe(1)
+        expect(await materialize(resp.hasCycle.hasCycle.value)).toBe(1)
     })
 
     it("throws an error if a cycle is detecting when realizing a value", async () => {
@@ -239,6 +239,6 @@ describe("rulify", () => {
 
         const resp = rulify(hasCycle)
 
-        expect(() => realize(resp.hasCycle.hasCycle)).rejects.toThrow()
+        expect(() => materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
 })

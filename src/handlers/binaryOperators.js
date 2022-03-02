@@ -1,4 +1,4 @@
-import { realize } from ".."
+import { materialize } from ".."
 import { TRUE, FALSE } from "../symbols"
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
@@ -17,13 +17,13 @@ export const $regex = (obj, opt) =>
     })
 
 async function evaluateBinary(obj, api, predicate) {
-    obj = await realize(obj)
+    obj = await materialize(obj)
 
     if (Array.isArray(obj)) {
         // We're not in the root data source; just compare the two things in the array.
         return predicate(obj[0], obj[1])
     } else {
-        const lhs = await realize(api.getComparisonProp())
+        const lhs = await materialize(api.getComparisonProp())
 
         // In the root data source, we compare against a property of the root.
         const result = predicate(lhs, obj)

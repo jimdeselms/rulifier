@@ -1,4 +1,4 @@
-import { rulify, realize } from "../src"
+import { rulify, materialize } from "../src"
 import { delayed } from "./helpers.test"
 
 describe("route", () => {
@@ -7,7 +7,7 @@ describe("route", () => {
             $route: returnPath
         })
 
-        expect(await realize(resp)).toMatchObject([])
+        expect(await materialize(resp)).toMatchObject([])
     })
 
     it("can return a route with one accessor", async () => {
@@ -15,7 +15,7 @@ describe("route", () => {
             $route: returnPath
         })
 
-        expect(await realize(resp.a)).toMatchObject(['a'])
+        expect(await materialize(resp.a)).toMatchObject(['a'])
     })
 
     it("can return a route with multiple accessors", async () => {
@@ -23,7 +23,7 @@ describe("route", () => {
             $route: returnPath
         })
 
-        expect(await realize(resp.a.b.c)).toMatchObject(['a', 'b', 'c'])
+        expect(await materialize(resp.a.b.c)).toMatchObject(['a', 'b', 'c'])
     })
 
     it("can return a route with symbol accessors", async () => {
@@ -31,7 +31,7 @@ describe("route", () => {
             $route: returnPath
         })
 
-        expect(await realize(resp[Symbol.for("A")][Symbol.for("B")])).toMatchObject([Symbol.for("A"), Symbol.for("B")])
+        expect(await materialize(resp[Symbol.for("A")][Symbol.for("B")])).toMatchObject([Symbol.for("A"), Symbol.for("B")])
     })
 
     it("can return a route with numeric accessors", async () => {
@@ -39,8 +39,8 @@ describe("route", () => {
             $route: returnPath
         })
 
-        expect(await realize(resp[0][1])).toMatchObject(["0", "1"])
-        expect(await realize(resp["0"]["1"])).toMatchObject(["0", "1"])
+        expect(await materialize(resp[0][1])).toMatchObject(["0", "1"])
+        expect(await materialize(resp["0"]["1"])).toMatchObject(["0", "1"])
     })
 })
 

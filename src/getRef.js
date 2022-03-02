@@ -6,7 +6,7 @@ export async function getRef(str, api) {
         curr = curr[key]
     }
 
-    return await api.realize(curr)
+    return await api.materialize(curr)
 }
 
 const ARRAY_INDEX_REGEX = /\[([0-9])+\]/g

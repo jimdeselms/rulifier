@@ -1,4 +1,4 @@
-import { rulify, realize } from "../src"
+import { rulify, materialize } from "../src"
 
 describe("if", () => {
     it("works in the true case", async () => {
@@ -10,7 +10,7 @@ describe("if", () => {
             },
         })
 
-        expect(await realize(resp)).toBe(1)
+        expect(await materialize(resp)).toBe(1)
     })
 
     it("works in the false case", async () => {
@@ -22,6 +22,6 @@ describe("if", () => {
             },
         })
 
-        expect(await realize(resp)).toBe(2)
+        expect(await materialize(resp)).toBe(2)
     })
 })
