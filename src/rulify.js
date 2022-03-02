@@ -47,12 +47,11 @@ export function rulify(...dataSources) {
 /**
  * Given a rulified object, converts it into a fully materialized object.
  */
-export async function realize(proxy) {
-    if (!proxy[PROXY_CONTEXT]) {
-        throw new Error("Attempt to call realize on an object that isn't rulified")
-    }
-
-    return await realizeInternal(proxy[RAW_VALUE], proxy[PROXY_CONTEXT])
+export async function realize(obj) {
+    const ctx = getProxyContext(obj)
+    return ctx
+        ? await realizeInternal(obj[RAW_VALUE], ctx)
+        : obj
 }
 
 /**
@@ -61,7 +60,7 @@ export async function realize(proxy) {
  * @returns {string}
  */
 export async function getTypeof(obj) {
-    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    const resolved = await resolveSafe(obj)
     return typeof resolved
 }
 
@@ -71,7 +70,8 @@ export async function getTypeof(obj) {
  * @returns {string[]}
  */
 export async function getKeys(obj) {
-    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    const resolved = await resolveSafe(obj)
+
     if (typeof resolved !== "object") {
         return undefined
     } else {
@@ -85,12 +85,25 @@ export async function getKeys(obj) {
  * @returns {string[]}
  */
 export async function getLength(obj) {
-    const resolved = await resolve(obj[RAW_VALUE], obj[PROXY_CONTEXT])
+    const resolved = await resolveSafe(obj)
+
     if (typeof resolved !== "object" || !Array.isArray(resolved)) {
         return undefined
     } else {
         return resolved.length
     }
+}
+
+async function resolveSafe(obj) {
+    debugger
+    const ctx = getProxyContext(obj)
+    return ctx
+        ? await resolve(obj[RAW_VALUE], ctx)
+        : obj
+}
+
+function getProxyContext(obj) {
+    return obj !== null && (typeof(obj) === "object" || typeof(obj) === "function") && obj[PROXY_CONTEXT]
 }
 
 function normalizeHandlers(handlers) {
