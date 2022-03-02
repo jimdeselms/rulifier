@@ -1,5 +1,5 @@
 import { builtinHandlers } from "./builtinHandlers"
-import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
+import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW, COST } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 import { HandlerApi } from "./handlerApi"
 
@@ -98,9 +98,19 @@ function normalizeHandlers(handlers) {
         return undefined
     }
 
-    const entries = Object.entries(handlers).map(([k, v]) => [k[0] === "$" ? k : "$" + k, v])
+    const entries = Object.entries(handlers).map(([k, v]) => [k[0] === "$" ? k : "$" + k, normalizeHandlerFunction(v)])
 
     return Object.fromEntries(entries)
+}
+
+function normalizeHandlerFunction(func) {
+    if (typeof func === "function") {
+        return func
+    } else {
+        const newFunc = func.fn
+        newFunc[COST] = func.cost
+        return newFunc
+    }
 }
 
 function proxify(value, ctx) {

@@ -151,20 +151,20 @@ async function rulifyWithCalc(value) {
     const messages = []
     let costCalls = 0
 
-    async function $calc(obj, api) {
+    async function calc(obj, api) {
         const realized = await api.realize(obj)
         messages.push(realized.message ?? realized.value)
         return realized.value
     }
 
-    $calc[COST] = (rawValue, handlers) => {
+    function calcCost(rawValue) {
         costCalls++
         return rawValue.cost
     }
 
     return {
         obj: await rulify({ 
-            $handlers: { $calc }
+            $handlers: { $calc: { fn: calc, cost: calcCost } }
             , ...value 
         }),
         messages,
