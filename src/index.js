@@ -15,7 +15,7 @@ export async function materialize(obj, visited = new Set()) {
 /**
  * Returns the basic Javascript type of the object
  * @param {any} obj
- * @returns {string}
+ * @returns {Promise<string>}
  */
 export async function getTypeof(obj) {
     const resolved = await resolveSafe(obj)
@@ -26,7 +26,7 @@ export async function getTypeof(obj) {
  * Returns the set of keys for the given object, or undefined if the object isn't
  * a type that has keys
  * @param {any} obj
- * @returns {string[] | undefined}
+ * @returns {Promise<string[] | undefined>}
  */
 export async function getKeys(obj) {
     const resolved = await resolveSafe(obj)
@@ -41,7 +41,7 @@ export async function getKeys(obj) {
 /**
  * Returns the length of an array, or undefined if the object is not an arary
  * @param {any} obj
- * @returns {string[] | undefined}
+ * @returns {Promise<string[] | undefined>}
  */
 export async function getLength(obj) {
     const resolved = await resolveSafe(obj)

@@ -3,9 +3,10 @@ import { PROXY_CONTEXT, COST } from "./symbols"
 import { proxify } from "./proxify"
 
 /**
- * Given a set of data sources, return an object whose fields can be properties
+ * Given a set of data sources with objects and handlers, returns an object that merges the given objects
+ * so that they can be materialized by invoking the referenced handlers
  * @param {...Record<any, any>} dataSources
- * @returns {any}
+ * @returns {Record<any, any>}
  */
 export function rulify(...dataSources) {
     const merged = {}
