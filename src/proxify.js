@@ -165,9 +165,6 @@ export async function materializeInternal(value, ctx, visited) {
     visited = visited ?? new Set()
 
     value = await resolve(value, ctx)
-
-    debugger
-
     if (visited.has(value)) {
         throw new Error("Cycle detected")
     }

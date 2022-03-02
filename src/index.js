@@ -51,7 +51,6 @@ export async function getLength(obj) {
 }
 
 async function resolveSafe(obj) {
-    debugger
     const ctx = getProxyContext(obj)
     return ctx ? await resolve(obj[RAW_VALUE], ctx) : obj
 }

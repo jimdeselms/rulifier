@@ -1,4 +1,5 @@
 import { materialize, getTypeof, getKeys } from ".."
+import { sortKeysForComparison } from "../sortNodes"
 import { TRUE, FALSE, GET_WITH_NEW_ROOT } from "../symbols"
 
 export async function $eq(obj, ctx) {
@@ -53,8 +54,9 @@ export async function eq(item1, item2, match, useRootDataSource) {
             return false
         }
 
-        // TODO: Is it worth it to figure out how to sort these by cost?
-        for (const key of i2Keys) {
+        const sortedKeys = await sortKeysForComparison(i2Keys, i1, i2)
+
+        for (const key of sortedKeys) {
             const val2 = useRootDataSource ? await i2[GET_WITH_NEW_ROOT](i1, key) : i2[key]
 
             const result = await eq(i1[key], val2, match, useRootDataSource)

@@ -1,7 +1,7 @@
 import { getRawValue } from "./getRawValue"
 import { getRef } from "./getRef"
 import { sortNodes } from "./sortNodes"
-import { materialize } from "."
+import { materialize, getTypeof, getKeys, getLength } from "."
 
 export class HandlerApi {
     #ctx
@@ -16,19 +16,19 @@ export class HandlerApi {
         return this.#ctx.comparisonProxy[this.#ctx.rootProp]
     }
 
-    getRawValue(obj) {
-        return getRawValue(obj)
-    }
-
     sortNodesByCost(arr, accessor = (obj) => obj) {
         return sortNodes(arr, this.#ctx, accessor)
-    }
-
-    materialize(obj) {
-        return materialize(obj)
     }
 
     getRef(str) {
         return getRef(str, this)
     }
 }
+
+// These public functions are included in the API as a courtesy
+HandlerApi.prototype.materialize = materialize
+HandlerApi.prototype.getTypeof = getTypeof
+HandlerApi.prototype.getKeys = getKeys
+HandlerApi.prototype.getLength = getLength
+HandlerApi.prototype.getRawValue = getRawValue
+

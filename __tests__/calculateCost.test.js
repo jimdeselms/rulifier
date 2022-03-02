@@ -124,7 +124,55 @@ describe('calculateCost', () => {
         expect(values).toMatchObject([5, 10, 20])
     })
 
+    it('calculates the cost when comparing objects', async () => {
+        // In this case, all the nodes are false, but at least we execute them in
+        // order of cost
+        const { obj, messages } = await rulifyWithCalc({
+            value: {
+                $eq: [
+                    { 
+                        name: calc(10, "Fred", "second"),
+                        age: calc(1, 20, "first")
+                    },
+                    { 
+                        name: calc(10, "Fred", "second"),
+                        age: calc(1, 20, "first")
+                    }
+                ]
+            }
+         })
 
+         expect(await materialize(obj.value)).toBe(true)
+
+         expect(messages).toMatchObject(["first", "first", "second", "second"])
+     })
+
+     it('sums the costs of both values when calculating costs when comparing objects', async () => {
+        // In this case, all the nodes are false, but at least we execute them in
+        // order of cost
+        const { obj, messages } = await rulifyWithCalc({
+            value: {
+                $eq: [
+                    { 
+                        name: calc(5, "Fred", "first"),
+                        age: calc(10, 20, "fourth"),
+                        city: calc(15, "Springfield", "third"),
+                        zipCode: calc(1, 20, "second")
+                    },
+                    { 
+                        name: calc(5, "Fred", "first"),
+                        age: calc(9, 20, "fourth"),
+                        city: calc(2, "Springfield", "third"),
+                        zipCode: calc(10, 20, "second")
+                    }
+                ]
+            }
+         })
+
+         expect(await materialize(obj.value)).toBe(true)
+ 
+         expect(messages).toMatchObject(["first", "first", "second", "second", "third", "third", "fourth", "fourth"])
+     })
 })
 
 function calc(cost, value=undefined, message=undefined) {

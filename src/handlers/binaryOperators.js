@@ -1,5 +1,5 @@
-import { materialize } from ".."
 import { TRUE, FALSE } from "../symbols"
+import { materialize } from ".."
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
 export const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)
