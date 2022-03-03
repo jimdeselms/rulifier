@@ -1,6 +1,6 @@
 {
   "name": "@jimdeselms/rulifier",
-  "version": "0.0.1-pre.6",
+  "version": "0.0.1-pre.7",
   "description": "A lightweight rule engine designed for speed and ease of use",
   "files": [
     "dist/"
@@ -23,7 +23,8 @@
   "scripts": {
     "test": "jest",
     "prettier": "prettier --write src",
-    "build": "rimraf ./dist && rollup -c ./rollup.config.js"
+    "build": "rimraf ./dist && rollup -c ./rollup.config.js",
+    "prepare": "npm run build"
   },
   "author": "Jim DeSelms",
   "license": "ISC",
