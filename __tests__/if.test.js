@@ -1,27 +1,36 @@
-const { rulify, materialize } = require("../src")
+const { Rulifier } = require("../src")
 
 describe("if", () => {
     it("works in the true case", async () => {
-        const resp = rulify({
-            $if: {
-                condition: true,
-                then: 1,
-                else: 2,
-            },
-        })
+        const rulifier = new Rulifier({ dataSources: [
+            {
+                $if: {
+                    condition: true,
+                    then: 1,
+                    else: 2,
+                }
+            }
+        ]})
 
-        expect(await materialize(resp)).toBe(1)
+        const resp = rulifier.applyContext()
+
+        expect(await rulifier.materialize(resp)).toBe(1)
     })
 
     it("works in the false case", async () => {
-        const resp = rulify({
-            $if: {
-                condition: { $fn: () => false },
-                then: 1,
-                else: 2,
-            },
-        })
 
-        expect(await materialize(resp)).toBe(2)
+        const rulifier = new Rulifier({ dataSources: [
+            {
+                $if: {
+                    condition: { $fn: () => false },
+                    then: 1,
+                    else: 2,
+                },
+            }
+        ]})
+
+        const resp = rulifier.applyContext()
+
+        expect(await rulifier.materialize(resp)).toBe(2)
     })
 })

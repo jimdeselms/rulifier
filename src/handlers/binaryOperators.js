@@ -1,4 +1,5 @@
-const { TRUE, FALSE } = require("../symbols")
+const { TRUE, FALSE, COST } = require("../symbols")
+const { DEFAULT_UNKNOWN_COST } = require("../calculateCost")
 const { materialize } = require("../methods")
 
 const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
@@ -30,6 +31,21 @@ async function evaluateBinary(obj, api, predicate) {
         return result ? TRUE : FALSE
     }
 }
+
+function binaryOperatorCost(value, calculateCost) {
+    if (Array.isArray(value)) {
+        return calculateCost(value[0]) + calculateCost(value[1])
+    } else {
+        return calculateCost(value) + DEFAULT_UNKNOWN_COST
+    }
+}
+
+$lt[COST] = binaryOperatorCost
+$lte[COST] = binaryOperatorCost
+$gt[COST] = binaryOperatorCost
+$gte[COST] = binaryOperatorCost
+$ne[COST] = binaryOperatorCost
+$regex[COST] = binaryOperatorCost
 
 module.exports = {
     $lt,

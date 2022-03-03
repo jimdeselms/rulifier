@@ -1,12 +1,16 @@
 const { COST } = require("./symbols")
 const { getHandlerAndArgument } = require("./getHandlerAndArgument")
 
-const DEFAULT_HANDLER_COST = 10
-const DEFAULT_FUNCTION_COST = 10
+const DEFAULT_HANDLER_COST = 1
+const DEFAULT_FUNCTION_COST = 1
 const DEFAULT_NODE_COST = 2
 
 const MAX_BREADTH_PER_NODE = 25
 const MAX_DEPTH = 3
+
+// This is a helper for handlers that have to calculate the cost of unknown things. 
+// We'll assume that these things are kind of expensive.
+module.exports.DEFAULT_UNKNOWN_COST = 10
 
 module.exports.calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
     const type = typeof rawValue
@@ -34,7 +38,7 @@ module.exports.calculateCost = function calculateCost(rawValue, ctx, depth = 0) 
     const handlerAndArg = getHandlerAndArgument(rawValue, ctx.handlers)
 
     if (handlerAndArg) {
-        return handlerAndArg.handler[COST]?.(handlerAndArg.argument, calculateCostFn) ?? DEFAULT_HANDLER_COST
+        return handlerAndArg.handler[COST]?.(handlerAndArg.argument, calculateCostFn) ?? calculateCostFn(handlerAndArg.argument)
     }
 
     // Don't go too deep.
@@ -50,7 +54,8 @@ module.exports.calculateCost = function calculateCost(rawValue, ctx, depth = 0) 
     const values = Object.values(rawValue)
     const iterations = Math.min(values.length, MAX_BREADTH_PER_NODE)
 
-    let totalCost = 0
+    // Each node that we traverse starts with a value of 1.
+    let totalCost = values.length
 
     for (let i = 0; i < iterations; i++) {
         totalCost += calculateCost(values[i], ctx, depth + 1)

@@ -1,6 +1,7 @@
 const { materialize, getTypeof, getKeys } = require("../methods")
 const { sortKeysForComparison } = require("../sortNodes")
-const { TRUE, FALSE, GET_WITH_NEW_ROOT } = require("../symbols")
+const { TRUE, FALSE, GET_WITH_NEW_ROOT, COST } = require("../symbols")
+const { DEFAULT_UNKNOWN_COST } = require("../calculateCost")
 
 async function $eq(obj, ctx) {
     if ((await materialize(obj.length)) === 2) {
@@ -72,8 +73,14 @@ async function eq(item1, item2, match, useRootDataSource) {
 
         return i1Val === i2Val
     }
+}
 
-    return "Hello"
+$eq[COST] = function eqCost(value, calculateCost) {
+    if (Array.isArray(value)) {
+        return calculateCost(value)
+    } else {
+        return calculateCost(value) + DEFAULT_UNKNOWN_COST
+    }
 }
 
 module.exports = { eq, $eq }
