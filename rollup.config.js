@@ -1,11 +1,11 @@
-import minify from 'rollup-plugin-babel-minify'
-import cleanup from 'rollup-plugin-cleanup'
 import commonjs from '@rollup/plugin-commonjs'
+import minify from 'rollup-plugin-babel-minify'
+import { terser } from 'rollup-plugin-terser'
 
 export default [
     {
         input: "src/index.js",
-        plugins: [commonjs(), minify(), cleanup()],
+        plugins: [commonjs(), minify(), terser()],
         output: {
             sourcemap: true,
             file: "dist/index.esm.js",
@@ -14,7 +14,7 @@ export default [
     },
     {
         input: "src/index.js",
-        plugins: [commonjs(), minify(), cleanup()],
+        plugins: [commonjs(), minify(), terser()],
         output: {
             name: "Rulifier",
             sourcemap: true,
