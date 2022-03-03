@@ -33,7 +33,7 @@ class Rulifier {
     }
 
     getLength(obj) {
-        return getLenght(obj)
+        return getLength(obj)
     }
 }
 
