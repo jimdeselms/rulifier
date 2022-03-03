@@ -1,7 +1,8 @@
 import { getRawValue } from "./getRawValue"
 import { getRef } from "./getRef"
 import { sortNodes } from "./sortNodes"
-import { materialize, getTypeof, getKeys, getLength } from "."
+
+import { materialize, getTypeof, getKeys, getLength } from './methods'
 
 export class HandlerApi {
     #ctx
@@ -25,7 +26,7 @@ export class HandlerApi {
 
     /**
      * Sorts a list of items by their cost; useful for scenarios where you would like to process a list of items,
-     * one at a time, but stopping before you get to the end, such as when searching a list for an item that matches some
+     * one at a time, but stopping before you get to the end, such as when seanprching a list for an item that matches some
      * criteria
      * @param {any[]} array An array of items to sort
      * @param {(item: any) => any} accessor Optional function to get the field that will determine the cost of an item in the list
@@ -53,10 +54,45 @@ export class HandlerApi {
     materialize(obj) {
         return materialize(obj, this.#visited)
     }
-}
 
-// These public functions are included in the API as a courtesy
-HandlerApi.prototype.getTypeof = getTypeof
-HandlerApi.prototype.getKeys = getKeys
-HandlerApi.prototype.getLength = getLength
-HandlerApi.prototype.getRawValue = getRawValue
+    /**
+     * Given a rulified object, returns the raw value with its unevaluated rules.
+     * 
+     * If the object is not rulified, then it just returns the object
+     * @param {any} obj 
+     * @returns {Promise<any>}
+     */
+    getRawValue(obj) {
+        return getRawValue(obj)
+    }
+
+    // These pass-throughs are provided as a convenience
+
+    /**
+     * Returns the basic Javascript type of the object
+     * @param {any} obj
+     * @returns {Promise<string>}
+     */
+    getTypeof(obj) {
+        return getTypeof(obj)
+    }
+
+    /**
+     * Returns the set of keys for the given object, or undefined if the object isn't
+     * a type that has keys
+     * @param {any} obj
+     * @returns {Promise<string[] | undefined>}
+     */
+    getKeys(obj) {
+        return getKeys(obj)
+    }
+
+    /**
+     * Returns the length of an array, or undefined if the object is not an arary
+     * @param {any} obj
+     * @returns {Promise<string[] | undefined>}
+     */
+    getLength(obj) {
+        return getLength(obj)
+    }
+}

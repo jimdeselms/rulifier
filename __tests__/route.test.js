@@ -1,5 +1,4 @@
 import { rulify, materialize } from "../src"
-import { delayed } from "./helpers.test"
 
 describe("route", () => {
     it("can return the root route", async () => {

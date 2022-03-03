@@ -1,7 +1,10 @@
 import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 import { HandlerApi } from "./handlerApi"
+import * as METHODS from "./methods"
 
+METHODS.initInternalFunctions({ materializeInternal, resolve })
+ 
 export function proxify(value, ctx) {
     // If this is already a proxy, then just return it.
     if (value[PROXY_CONTEXT]) {

@@ -1,4 +1,4 @@
-import { rulify, materialize } from '../src'
+import { rulify, materialize } from "../src"
 import { COST } from '../src/symbols'
 
 describe('calculateCost', () => {

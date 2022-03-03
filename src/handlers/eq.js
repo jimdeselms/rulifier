@@ -1,4 +1,4 @@
-import { materialize, getTypeof, getKeys } from ".."
+import { materialize, getTypeof, getKeys } from "../methods"
 import { sortKeysForComparison } from "../sortNodes"
 import { TRUE, FALSE, GET_WITH_NEW_ROOT } from "../symbols"
 
