@@ -20,7 +20,6 @@ $match[COST] = function matchCost(value, calculateCost) {
     }
 }
 
-
 module.exports = {
-    $match
+    $match,
 }

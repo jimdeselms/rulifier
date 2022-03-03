@@ -30,5 +30,5 @@ $str[COST] = function strCost(value, calculateCost) {
 }
 
 module.exports = {
-    $str
+    $str,
 }

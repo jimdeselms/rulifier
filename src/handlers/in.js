@@ -13,5 +13,5 @@ async function $in(obj, api) {
 }
 
 module.exports = {
-    $in
+    $in,
 }

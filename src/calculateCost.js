@@ -8,7 +8,7 @@ const DEFAULT_NODE_COST = 2
 const MAX_BREADTH_PER_NODE = 25
 const MAX_DEPTH = 3
 
-// This is a helper for handlers that have to calculate the cost of unknown things. 
+// This is a helper for handlers that have to calculate the cost of unknown things.
 // We'll assume that these things are kind of expensive.
 module.exports.DEFAULT_UNKNOWN_COST = 10
 
@@ -38,7 +38,10 @@ module.exports.calculateCost = function calculateCost(rawValue, ctx, depth = 0) 
     const handlerAndArg = getHandlerAndArgument(rawValue, ctx.handlers)
 
     if (handlerAndArg) {
-        return handlerAndArg.handler[COST]?.(handlerAndArg.argument, calculateCostFn) ?? calculateCostFn(handlerAndArg.argument)
+        return (
+            handlerAndArg.handler[COST]?.(handlerAndArg.argument, calculateCostFn) ??
+            calculateCostFn(handlerAndArg.argument)
+        )
     }
 
     // Don't go too deep.

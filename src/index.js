@@ -15,7 +15,7 @@ class Rulifier {
         return materialize(obj)
     }
 
-    applyContext(dataSource={}) {
+    applyContext(dataSource = {}) {
         return rulify(this.#root, dataSource)
     }
 

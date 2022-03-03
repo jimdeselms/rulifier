@@ -10,5 +10,5 @@ $ref[COST] = function refCost(value, calculateCost) {
 }
 
 module.exports = {
-    $ref
+    $ref,
 }
