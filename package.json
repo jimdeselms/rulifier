@@ -2,16 +2,23 @@
   "name": "rulifier",
   "version": "0.0.1-pre.1",
   "description": "A lightweight rule engine designed for speed and ease of use",
-  "files": "dist/**",
-  "type": "module",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
+  "files": [
+    "dist/"
+  ],
   "devDependencies": {
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
     "rollup": "^2.67.2",
     "rollup-plugin-babel-minify": "^10.0.0",
     "rollup-plugin-cleanup": "^3.2.1"
+  },
+  "module": ".dist/index.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index-esm.js",
+      "require": "./dist/index-umd.js"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "test": "jest",

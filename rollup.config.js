@@ -8,16 +8,6 @@ export default [
         plugins: [commonjs(), minify(), cleanup()],
         output: {
             sourcemap: true,
-            exports: "default",
-            file: "dist/index.cjs.js",
-            format: "cjs"
-        }
-    },
-    {
-        input: "src/index.js",
-        plugins: [commonjs(), minify(), cleanup()],
-        output: {
-            sourcemap: true,
             file: "dist/index.esm.js",
             format: "esm"
         }
