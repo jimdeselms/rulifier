@@ -1,30 +1,33 @@
-const { rulify, materialize } = require("../src")
+const { Rulifier } = require("../src")
 const { delayed } = require("./helpers.test")
 
 describe("predicates", () => {
     describe("$and", () => {
         it("returns true if everything is true", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $and: [{ $fn: () => true }, { $fn: () => delayed(true) }, true],
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(true)
         })
 
         it("returns false if anything is false", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $and: [{ $fn: () => delayed(false) }, { $fn: () => true }, true],
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(false)
         })
 
         it("can handle nested ands", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $and: [
                     { 
                         $fn: () => ({ $and: [true, { $fn: () => true }] })
@@ -35,7 +38,7 @@ describe("predicates", () => {
                 ]
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(true)
         })
@@ -43,11 +46,12 @@ describe("predicates", () => {
         it("returns true if there are no options", async () => {
             // And is if every one of its options is true. If there are no options,
             // then it is true. (This is the same behavior as Scheme.)
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $and: [],
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(true)
         })
@@ -55,21 +59,23 @@ describe("predicates", () => {
 
     describe("$or", () => {
         it("returns true if one thing is true", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $or: [delayed(false), delayed(false), { $fn: () => delayed(true) }],
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(true)
         })
 
         it("returns false if everything is false", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $or: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(false)
         })
@@ -77,11 +83,12 @@ describe("predicates", () => {
         it("returns false if there are no options", async () => {
             // Or is true if any of its options are false, so, if there are no options,
             // it is false. (This is the same behavior as Scheme.)
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $or: [],
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(false)
         })
@@ -89,61 +96,67 @@ describe("predicates", () => {
 
     describe("$not", () => {
         it("negates the value", async () => {
-            expect(await materialize(rulify({ $not: true }))).toBe(false)
-            expect(await materialize(rulify({ $not: false }))).toBe(true)
-            expect(await materialize(rulify({ $not: delayed(1) }))).toBe(false)
-            expect(await materialize(rulify({ $not: delayed(0) }))).toBe(true)
+            const rulifier = new Rulifier()
+            expect(await rulifier.materialize(rulifier.applyContext({ $not: true }))).toBe(false)
+            expect(await rulifier.materialize(rulifier.applyContext({ $not: false }))).toBe(true)
+            expect(await rulifier.materialize(rulifier.applyContext({ $not: delayed(1) }))).toBe(false)
+            expect(await rulifier.materialize(rulifier.applyContext({ $not: delayed(0) }))).toBe(true)
         })
 
         it("returns false if everything is false", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 $and: [delayed(false), delayed(false), { $fn: () => delayed(false) }],
             })
 
-            const result = await materialize(resp)
+            const result = await rulifier.materialize(resp)
 
             expect(result).toBe(false)
         })
     })
 
     test("binary operators", async () => {
-        expect(await materialize(rulify({ $lt: [5, 10] }))).toBe(true)
-        expect(await materialize(rulify({ $lt: [15, 10] }))).toBe(false)
+        const rulifier = new Rulifier()
 
-        expect(await materialize(rulify({ $lte: [9, 10] }))).toBe(true)
-        expect(await materialize(rulify({ $lte: [10, 10] }))).toBe(true)
-        expect(await materialize(rulify({ $lte: delayed([11, 10]) }))).toBe(false)
+        expect(await rulifier.materialize(rulifier.applyContext({ $lt: [5, 10] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $lt: [15, 10] }))).toBe(false)
 
-        expect(await materialize(rulify({ $gt: [5, delayed(10)] }))).toBe(false)
-        expect(await materialize(rulify({ $gt: [5, 10] }))).toBe(false)
-        expect(await materialize(rulify({ $gt: [15, 10] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $lte: [9, 10] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $lte: [10, 10] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $lte: delayed([11, 10]) }))).toBe(false)
 
-        expect(await materialize(rulify({ $gte: [9, 10] }))).toBe(false)
-        expect(await materialize(rulify({ $gte: [10, { $fn: () => 10 }] }))).toBe(true)
-        expect(await materialize(rulify({ $gte: [11, 10] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $gt: [5, delayed(10)] }))).toBe(false)
+        expect(await rulifier.materialize(rulifier.applyContext({ $gt: [5, 10] }))).toBe(false)
+        expect(await rulifier.materialize(rulifier.applyContext({ $gt: [15, 10] }))).toBe(true)
 
-        expect(await materialize(rulify({ $eq: [5, delayed(5)] }))).toBe(true)
-        expect(await materialize(rulify({ $eq: [5, 10] }))).toBe(false)
+        expect(await rulifier.materialize(rulifier.applyContext({ $gte: [9, 10] }))).toBe(false)
+        expect(await rulifier.materialize(rulifier.applyContext({ $gte: [10, { $fn: () => 10 }] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $gte: [11, 10] }))).toBe(true)
 
-        expect(await materialize(rulify({ $ne: [5, 5] }))).toBe(false)
-        expect(await materialize(rulify({ $ne: [5, 10] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $eq: [5, delayed(5)] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $eq: [5, 10] }))).toBe(false)
+
+        expect(await rulifier.materialize(rulifier.applyContext({ $ne: [5, 5] }))).toBe(false)
+        expect(await rulifier.materialize(rulifier.applyContext({ $ne: [5, 10] }))).toBe(true)
     })
 
     test("eq objects", async () => {
-        expect(await materialize(rulify({ $eq: [{ a: 1 }, { a: 1 }] }))).toBe(true)
-        expect(await materialize(rulify({ $eq: [{ a: 1, b: 2 }, { a: 1 }] }))).toBe(false)
+        const rulifier = new Rulifier()
+        expect(await rulifier.materialize(rulifier.applyContext({ $eq: [{ a: 1 }, { a: 1 }] }))).toBe(true)
+        expect(await rulifier.materialize(rulifier.applyContext({ $eq: [{ a: 1, b: 2 }, { a: 1 }] }))).toBe(false)
     })
 
     test("binary match", async () => {
+        const rulifier = new Rulifier({
+            handlers: {
+                async $capitalize(str, api) {
+                    return (await api.materialize(str)).toUpperCase()
+                }
+            }
+        })
+
         expect(
-            await materialize(rulify(
-                {
-                    $handlers: {
-                        async $capitalize(str) {
-                            return (await materialize(str)).toUpperCase()
-                        },
-                    },
-                },
+            await rulifier.materialize(rulifier.applyContext(
                 {
                     $match: [
                         {
@@ -164,14 +177,7 @@ describe("predicates", () => {
         ).toBe(true)
 
         expect(
-            await materialize(rulify(
-                {
-                    $handlers: {
-                        async $capitalize(str) {
-                            return (await materialize(str)).toUpperCase()
-                        },
-                    },
-                },
+            await rulifier.materialize(rulifier.applyContext(
                 {
                     $match: [
                         {
@@ -194,7 +200,8 @@ describe("predicates", () => {
 
     describe("match", () => {
         it("understands simple rules", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 name: "Jim",
                 age: 29,
                 value: {
@@ -205,11 +212,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("returns true the current value is less than the given value", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 age: 32,
                 name: "Fred",
                 value: {
@@ -220,11 +228,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("returns false the current value is greater than the given value", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 age: 37,
                 name: "Fred",
                 value: {
@@ -235,11 +244,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(false)
+            expect(await rulifier.materialize(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches the regex", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 name: "FRED",
                 value: {
                     $match: {
@@ -248,11 +258,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("returns false if the current value matches the regex", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 name: "Bill",
                 value: {
                     $match: {
@@ -261,11 +272,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(false)
+            expect(await rulifier.materialize(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches a regex string", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 name: "Fred",
                 value: {
                     $match: {
@@ -274,11 +286,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("returns false if the current value does not match a regex string", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 name: "Bill",
                 value: {
                     $match: {
@@ -287,11 +300,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(false)
+            expect(await rulifier.materialize(resp.value)).toBe(false)
         })
 
         it("returns true if the current value matches a regex with parameters", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 name: "Fred",
                 value: {
                     $match: {
@@ -300,11 +314,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("returns false if the current value does not match a regex with parameters", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 name: "Bill",
                 value: {
                     $match: {
@@ -313,11 +328,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(false)
+            expect(await rulifier.materialize(resp.value)).toBe(false)
         })
 
         it("true if in", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 age: 35,
                 value: {
                     $match: {
@@ -326,11 +342,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("false if not in", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 age: 34,
                 value: {
                     $match: {
@@ -339,11 +356,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(false)
+            expect(await rulifier.materialize(resp.value)).toBe(false)
         })
 
         it("can match arrays", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 arr: [5, 10, 15],
                 value: {
                     $match: {
@@ -352,11 +370,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("can not match arrays that are different", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 arr: [5, 10, 15],
                 value: {
                     $match: {
@@ -365,11 +384,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(false)
+            expect(await rulifier.materialize(resp.value)).toBe(false)
         })
 
         it("deep equality match true if objects match", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 thing: {
                     color: "Blue",
                     details: {
@@ -396,11 +416,12 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(true)
+            expect(await rulifier.materialize(resp.value)).toBe(true)
         })
 
         it("failed deep equality match if objects have differences", async () => {
-            const resp = rulify({
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
                 thing: {
                     color: "Blue",
                     details: {
@@ -427,7 +448,7 @@ describe("predicates", () => {
                 },
             })
 
-            expect(await materialize(resp.value)).toBe(false)
+            expect(await rulifier.materialize(resp.value)).toBe(false)
         })
     })
 })

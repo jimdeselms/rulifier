@@ -6,9 +6,14 @@ class Rulifier {
     #root
 
     constructor(opts) {
+        opts = opts ?? {}
         this.#opts = opts
 
-        this.#root = rulify(...opts.dataSources, { $handlers: opts.handlers })
+        const dataSources = opts.dataSources
+            ? Array.isArray(opts.dataSources) ? opts.dataSources : [ opts.dataSources ]
+            : []
+
+        this.#root = rulify(...dataSources, { $handlers: opts.handlers })
     }
 
     materialize(obj) {
@@ -33,10 +38,5 @@ class Rulifier {
 }
 
 module.exports = {
-    Rulifier,
-    rulify,
-    materialize,
-    getTypeof,
-    getKeys,
-    getLength,
+    Rulifier
 }

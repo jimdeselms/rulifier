@@ -1,9 +1,10 @@
-const { rulify, materialize } = require("../src")
+const { Rulifier } = require("../src")
 const { delayed } = require("./helpers.test")
 
 describe("switch", () => {
     it("returns the first case to match the condition", async () => {
-        let resp = rulify({
+        const rulifier = new Rulifier()
+        let resp = rulifier.applyContext({
             $switch: {
                 cases: [
                     {
@@ -18,9 +19,9 @@ describe("switch", () => {
             },
         })
 
-        expect(await materialize(resp)).toEqual(1)
+        expect(await rulifier.materialize(resp)).toEqual(1)
 
-        resp = rulify({
+        resp = rulifier.applyContext({
             $switch: {
                 cases: [
                     {
@@ -35,21 +36,23 @@ describe("switch", () => {
             },
         })
 
-        expect(await materialize(resp)).toEqual(2)
+        expect(await rulifier.materialize(resp)).toEqual(2)
     })
 
     it("if no cases are present, it returns the default", async () => {
-        let resp = rulify({
+        const rulifier = new Rulifier()
+        let resp = rulifier.applyContext({
             $switch: {
                 default: 3,
             },
         })
 
-        expect(await materialize(resp)).toEqual(3)
+        expect(await rulifier.materialize(resp)).toEqual(3)
     })
 
     it("if a case has no condition, it is false", async () => {
-        let resp = rulify({
+        const rulifier = new Rulifier()
+        let resp = rulifier.applyContext({
             $switch: {
                 cases: [
                     {
@@ -60,11 +63,12 @@ describe("switch", () => {
             },
         })
 
-        expect(await materialize(resp)).toEqual(2)
+        expect(await rulifier.materialize(resp)).toEqual(2)
     })
 
     it("if a case has no matching case or default, it is undefined", async () => {
-        let resp = rulify({
+        const rulifier = new Rulifier()
+        let resp = rulifier.applyContext({
             $switch: {
                 cases: [
                     {
@@ -75,11 +79,12 @@ describe("switch", () => {
             },
         })
 
-        expect(await materialize(resp)).toEqual(undefined)
+        expect(await rulifier.materialize(resp)).toEqual(undefined)
     })
 
     it("can handle promises for conditions and values", async () => {
-        let resp = rulify({
+        const rulifier = new Rulifier()
+        let resp = rulifier.applyContext({
             $switch: {
                 cases: [
                     {
@@ -95,9 +100,9 @@ describe("switch", () => {
             },
         })
 
-        expect(await materialize(resp)).toEqual(1)
+        expect(await rulifier.materialize(resp)).toEqual(1)
 
-        resp = rulify({
+        resp = rulifier.applyContext({
             $switch: {
                 cases: [
                     {
@@ -113,9 +118,9 @@ describe("switch", () => {
             },
         })
 
-        expect(await materialize(resp)).toEqual(2)
+        expect(await rulifier.materialize(resp)).toEqual(2)
 
-        resp = rulify({
+        resp = rulifier.applyContext({
             $switch: {
                 cases: [
                     {
@@ -131,6 +136,6 @@ describe("switch", () => {
             },
         })
 
-        expect(await materialize(resp)).toEqual(3)
+        expect(await rulifier.materialize(resp)).toEqual(3)
     })
 })

@@ -1,11 +1,11 @@
-const { rulify, materialize } = require("../src")
+const { Rulifier } = require("../src")
 const { COST } = require('../src/symbols')
 
 describe('calculateCost', () => {
     it('calculates the cost of nodes and executes cheapest first', async () => {
         // In this case, all the nodes are false, but at least we execute them in
         // order of cost
-        const { obj, messages, getCostCalls } = await rulifyWithCalc({
+        const { obj, rulifier, messages, getCostCalls } = await rulifyWithCalc({
            value: {
                $or: [ 
                    calc(10, false, "third"),
@@ -15,7 +15,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await materialize(obj.value)).toBe(false)
+        expect(await rulifier.materialize(obj.value)).toBe(false)
 
         expect(messages).toMatchObject(["first", "second", "third"])
         expect(getCostCalls()).toBe(3)
@@ -24,7 +24,7 @@ describe('calculateCost', () => {
     it('short circuits if a cheaper node is true', async () => {
         // In this case, since the first is cheapest -- and true -- it short circuits
         // so that the other nodes don't have to be evaluated
-        const { obj, messages, getCostCalls } = await rulifyWithCalc({
+        const { obj, rulifier, messages, getCostCalls } = await rulifyWithCalc({
            value: {
                $or: [ 
                    calc(10, false, "third"),
@@ -34,7 +34,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await materialize(obj.value)).toBe(true)
+        expect(await rulifier.materialize(obj.value)).toBe(true)
 
         expect(messages).toMatchObject(["first"])
         expect(getCostCalls()).toBe(3)
@@ -43,7 +43,7 @@ describe('calculateCost', () => {
     it('does not bother sorting if there is only one value', async () => {
         // In this case, since the first is cheapest -- and true -- it short circuits
         // so that the other nodes don't have to be evaluated
-        const { obj, messages, getCostCalls } = await rulifyWithCalc({
+        const { obj, rulifier, messages, getCostCalls } = await rulifyWithCalc({
            value: {
                $or: [ 
                    calc(1, true, "first")
@@ -51,7 +51,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await materialize(obj.value)).toBe(true)
+        expect(await rulifier.materialize(obj.value)).toBe(true)
 
         expect(messages).toMatchObject(["first"])
         expect(getCostCalls()).toBe(0)
@@ -60,7 +60,7 @@ describe('calculateCost', () => {
     it('sorts nodes for and', async () => {
         // In this case, all the nodes are false, but at least we execute them in
         // order of cost
-        const { obj, messages, getCostCalls } = await rulifyWithCalc({
+        const { obj, rulifier, messages, getCostCalls } = await rulifyWithCalc({
            value: {
                $and: [ 
                    calc(10, true, "third"),
@@ -70,7 +70,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await materialize(obj.value)).toBe(true)
+        expect(await rulifier.materialize(obj.value)).toBe(true)
 
         expect(messages).toMatchObject(["first", "second", "third"])
         expect(getCostCalls()).toBe(3)
@@ -79,7 +79,7 @@ describe('calculateCost', () => {
     it('sorts cases for switch', async () => {
         // In this case, all the nodes are false, but at least we execute them in
         // order of cost
-        const { obj, messages, getCostCalls } = await rulifyWithCalc({
+        const { obj, rulifier, messages, getCostCalls } = await rulifyWithCalc({
            value: {
                $switch: {
                     cases: [
@@ -101,7 +101,7 @@ describe('calculateCost', () => {
            }
         })
 
-        expect(await materialize(obj.value)).toBe(123)
+        expect(await rulifier.materialize(obj.value)).toBe(123)
 
         expect(messages).toMatchObject(["first", "second", "third"])
         expect(getCostCalls()).toBe(3)
@@ -111,15 +111,21 @@ describe('calculateCost', () => {
         // In this case, all the nodes are false, but at least we execute them in
         // order of cost
         const values = []
-        const resp = rulify({
-            $or: [
-                funcWithCost(() => (values.push(20), false), 20),
-                funcWithCost(() => (values.push(5), false), 5),
-                funcWithCost(() => (values.push(10), false), 10)
+        const rulifier = new Rulifier({
+            dataSources: [
+                {
+                    $or: [
+                        funcWithCost(() => (values.push(20), false), 20),
+                        funcWithCost(() => (values.push(5), false), 5),
+                        funcWithCost(() => (values.push(10), false), 10)
+                    ]
+                }
             ]
         })
 
-        expect(await materialize(resp)).toBe(false)
+        const resp = rulifier.applyContext()
+
+        expect(await rulifier.materialize(resp)).toBe(false)
 
         expect(values).toMatchObject([5, 10, 20])
     })
@@ -127,7 +133,7 @@ describe('calculateCost', () => {
     it('calculates the cost when comparing objects', async () => {
         // In this case, all the nodes are false, but at least we execute them in
         // order of cost
-        const { obj, messages } = await rulifyWithCalc({
+        const { obj, rulifier, messages } = await rulifyWithCalc({
             value: {
                 $eq: [
                     { 
@@ -142,7 +148,7 @@ describe('calculateCost', () => {
             }
          })
 
-         expect(await materialize(obj.value)).toBe(true)
+         expect(await rulifier.materialize(obj.value)).toBe(true)
 
          expect(messages).toMatchObject(["first", "first", "second", "second"])
      })
@@ -150,7 +156,7 @@ describe('calculateCost', () => {
      it('sums the costs of both values when calculating costs when comparing objects', async () => {
         // In this case, all the nodes are false, but at least we execute them in
         // order of cost
-        const { obj, messages } = await rulifyWithCalc({
+        const { obj, rulifier, messages } = await rulifyWithCalc({
             value: {
                 $eq: [
                     { 
@@ -169,7 +175,7 @@ describe('calculateCost', () => {
             }
          })
 
-         expect(await materialize(obj.value)).toBe(true)
+         expect(await rulifier.materialize(obj.value)).toBe(true)
  
          expect(messages).toMatchObject(["first", "first", "second", "second", "third", "third", "fourth", "fourth"])
      })
@@ -209,12 +215,19 @@ async function rulifyWithCalc(value) {
         costCalls++
         return rawValue.cost
     }
+    
+    const rulifier = new Rulifier({
+        dataSources: [ value ],
+        handlers: { 
+            $calc: { fn: calc, cost: calcCost }
+        }
+    })
+
+    const obj = rulifier.applyContext({})
 
     return {
-        obj: await rulify({ 
-            $handlers: { $calc: { fn: calc, cost: calcCost } }
-            , ...value 
-        }),
+        obj,
+        rulifier,
         messages,
         getCostCalls() { return costCalls }
     }
