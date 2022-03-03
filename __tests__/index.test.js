@@ -239,7 +239,7 @@ describe("rulify", () => {
 
         const resp = rulify(hasCycle)
 
-        expect(() => materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
+        await expect(() => materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
 
     it("throws an error if a cycle in a handler", async () => {

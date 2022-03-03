@@ -4,13 +4,23 @@ describe("errorHandling", () => {
     it("will bubble up an exception if a handler throws an exception", async () => {
         const resp = rulifyWithThrow({ err: { $throw: "ERROR" }})
 
-        expect(() => materialize(resp.err)).rejects.toThrow("ERROR")
+        try {
+            await materialize(resp.err)
+            throw new Error("Expected to throw")
+        } catch (err) {
+            expect(err).toBe("ERROR")
+        }
     })
 
     it("will throw an exception if the root object handler an exception", async () => {
         const resp = rulifyWithThrow({ $throw: "ERROR" })
 
-        expect(() => materialize(resp)).rejects.toThrow("ERROR")
+        try {
+            await materialize(resp)
+            throw new Error("Expected to throw")
+        } catch(err) {
+            expect(err).toBe("ERROR")
+        }
     })
 
     it("will not throw an exception if you don't reference a handler that would throw an exception", async () => {
