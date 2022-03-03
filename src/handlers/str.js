@@ -1,6 +1,6 @@
 const STR_INTERP_REGEX = /\\?\${([^}]+)}*/g
 
-export async function $str(obj, api) {
+module.exports.$str = async function $str(obj, api) {
     let result = await api.materialize(obj)
 
     for (const match of result.matchAll(STR_INTERP_REGEX)) {

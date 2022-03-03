@@ -1,6 +1,6 @@
-import { COST } from "../symbols"
+const { COST } = require("../symbols")
 
-export async function $if(obj, api) {
+async function $if(obj, api) {
     const condition = await api.materialize(obj.condition)
     return condition ? obj.then : obj.else
 }
@@ -8,3 +8,5 @@ export async function $if(obj, api) {
 $if[COST] = function ifCost(value) {
     return
 }
+
+module.exports = { $if }

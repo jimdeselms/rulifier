@@ -1,6 +1,6 @@
-import { RAW_VALUE } from "./symbols"
+const { RAW_VALUE } = require("./symbols")
 
-export async function getRawValue(obj) {
+module.exports.getRawValue = async function getRawValue(obj) {
     const value = await obj
 
     if (!value || typeof obj !== "object") {

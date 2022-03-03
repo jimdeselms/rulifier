@@ -1,9 +1,9 @@
-import { PROXY_CONTEXT, RAW_VALUE } from "./symbols"
+const { PROXY_CONTEXT, RAW_VALUE } = require("./symbols")
 
 let materializeInternal, resolve
 
 // In order to avoid a circular reference, we'll have the proxify module initialize these.
-export function initInternalFunctions(funcs) {
+module.exports.initInternalFunctions = function initInternalFunctions(funcs) {
     materializeInternal = funcs.materializeInternal
     resolve = funcs.resolve
 }
@@ -13,7 +13,7 @@ export function initInternalFunctions(funcs) {
  * @param {any}
  * @returns {any}
  */
-export async function materialize(obj, visited = new Set()) {
+module.exports.materialize = async function materialize(obj, visited = new Set()) {
     const ctx = getProxyContext(obj)
     return ctx ? await materializeInternal(obj[RAW_VALUE], ctx, visited) : obj
 }
@@ -23,7 +23,7 @@ export async function materialize(obj, visited = new Set()) {
  * @param {any} obj
  * @returns {Promise<string>}
  */
-export async function getTypeof(obj) {
+module.exports.getTypeof = async function getTypeof(obj) {
     const resolved = await resolveSafe(obj)
     return typeof resolved
 }
@@ -34,7 +34,7 @@ export async function getTypeof(obj) {
  * @param {any} obj
  * @returns {Promise<string[] | undefined>}
  */
-export async function getKeys(obj) {
+module.exports.getKeys = async function getKeys(obj) {
     const resolved = await resolveSafe(obj)
 
     if (typeof resolved !== "object") {
@@ -49,7 +49,7 @@ export async function getKeys(obj) {
  * @param {any} obj
  * @returns {Promise<string[] | undefined>}
  */
-export async function getLength(obj) {
+module.exports.getLength = async function getLength(obj) {
     const resolved = await resolveSafe(obj)
 
     if (typeof resolved !== "object" || !Array.isArray(resolved)) {

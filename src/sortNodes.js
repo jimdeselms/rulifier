@@ -1,7 +1,7 @@
-import { calculateCost } from "./calculateCost"
-import { ITERATE_RAW, RAW_VALUE, PROXY_CONTEXT } from "./symbols"
+const { calculateCost } = require("./calculateCost")
+const { ITERATE_RAW, RAW_VALUE, PROXY_CONTEXT } = require("./symbols")
 
-export async function sortNodes(nodes, ctx, accessor = (x) => x) {
+module.exports.sortNodes = async function sortNodes(nodes, ctx, accessor = (x) => x) {
     const rawNodes = await nodes[ITERATE_RAW]()
 
     if (rawNodes.length >= 2) {
@@ -15,7 +15,7 @@ export async function sortNodes(nodes, ctx, accessor = (x) => x) {
     }
 }
 
-export async function sortKeysForComparison(keys, obj1, obj2) {
+module.exports.sortKeysForComparison = async function sortKeysForComparison(keys, obj1, obj2) {
     const ctx = obj1[PROXY_CONTEXT]
 
     if (keys.length >= 2) {

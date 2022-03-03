@@ -1,4 +1,4 @@
-import { rulify, materialize } from "../src"
+const { rulify, materialize } = require("../src")
 
 describe("errorHandling", () => {
     it("will bubble up an exception if a handler throws an exception", async () => {

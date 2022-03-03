@@ -1,13 +1,13 @@
-import { TRUE, FALSE } from "../symbols"
-import { materialize } from "../methods"
+const { TRUE, FALSE } = require("../symbols")
+const { materialize } = require("../methods")
 
-export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
-export const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)
-export const $gt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x > y)
-export const $gte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x >= y)
-export const $ne = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x !== y)
+const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
+const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)
+const $gt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x > y)
+const $gte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x >= y)
+const $ne = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x !== y)
 
-export const $regex = (obj, opt) =>
+const $regex = (obj, opt) =>
     evaluateBinary(obj, opt, (x, y) => {
         if (typeof y === "string") {
             return new RegExp(y).test(x)
@@ -29,4 +29,13 @@ async function evaluateBinary(obj, api, predicate) {
         const result = predicate(lhs, obj)
         return result ? TRUE : FALSE
     }
+}
+
+module.exports = {
+    $lt,
+    $lte,
+    $gt,
+    $gte,
+    $ne,
+    $regex,
 }

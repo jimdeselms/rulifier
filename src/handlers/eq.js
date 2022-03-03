@@ -1,8 +1,8 @@
-import { materialize, getTypeof, getKeys } from "../methods"
-import { sortKeysForComparison } from "../sortNodes"
-import { TRUE, FALSE, GET_WITH_NEW_ROOT } from "../symbols"
+const { materialize, getTypeof, getKeys } = require("../methods")
+const { sortKeysForComparison } = require("../sortNodes")
+const { TRUE, FALSE, GET_WITH_NEW_ROOT } = require("../symbols")
 
-export async function $eq(obj, ctx) {
+async function $eq(obj, ctx) {
     if ((await materialize(obj.length)) === 2) {
         return await eq(obj[0], obj[1], false, false)
     } else {
@@ -10,7 +10,7 @@ export async function $eq(obj, ctx) {
     }
 }
 
-export async function eq(item1, item2, match, useRootDataSource) {
+async function eq(item1, item2, match, useRootDataSource) {
     const i1 = await item1
     const i2 = await item2
 
@@ -75,3 +75,5 @@ export async function eq(item1, item2, match, useRootDataSource) {
 
     return "Hello"
 }
+
+module.exports = { eq, $eq }

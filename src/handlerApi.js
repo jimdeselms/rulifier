@@ -1,10 +1,10 @@
-import { getRawValue } from "./getRawValue"
-import { getRef } from "./getRef"
-import { sortNodes } from "./sortNodes"
+const { getRawValue } = require("./getRawValue")
+const { getRef } = require("./getRef")
+const { sortNodes } = require("./sortNodes")
 
-import { materialize, getTypeof, getKeys, getLength } from './methods'
+const { materialize, getTypeof, getKeys, getLength } = require("./methods")
 
-export class HandlerApi {
+module.exports.HandlerApi = class HandlerApi {
     #ctx
     #visited
     root
@@ -57,9 +57,9 @@ export class HandlerApi {
 
     /**
      * Given a rulified object, returns the raw value with its unevaluated rules.
-     * 
+     *
      * If the object is not rulified, then it just returns the object
-     * @param {any} obj 
+     * @param {any} obj
      * @returns {Promise<any>}
      */
     getRawValue(obj) {

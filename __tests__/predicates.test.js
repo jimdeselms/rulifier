@@ -1,5 +1,5 @@
-import { rulify, materialize } from "../src"
-import { delayed } from "./helpers.test"
+const { rulify, materialize } = require("../src")
+const { delayed } = require("./helpers.test")
 
 describe("predicates", () => {
     describe("$and", () => {

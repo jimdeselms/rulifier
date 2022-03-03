@@ -1,5 +1,5 @@
-import { COST } from "./symbols"
-import { getHandlerAndArgument } from "./getHandlerAndArgument"
+const { COST } = require("./symbols")
+const { getHandlerAndArgument } = require("./getHandlerAndArgument")
 
 const DEFAULT_HANDLER_COST = 10
 const DEFAULT_FUNCTION_COST = 10
@@ -8,7 +8,7 @@ const DEFAULT_NODE_COST = 2
 const MAX_BREADTH_PER_NODE = 25
 const MAX_DEPTH = 3
 
-export function calculateCost(rawValue, ctx, depth = 0) {
+module.exports.calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
     const type = typeof rawValue
 
     // Primitive types are essentially free

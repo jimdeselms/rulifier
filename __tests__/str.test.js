@@ -1,4 +1,4 @@
-import { rulify, materialize } from "../src"
+const { rulify, materialize } = require("../src")
 
 describe("str", () => {
     it("can understand a simple string interpolation", async () => {

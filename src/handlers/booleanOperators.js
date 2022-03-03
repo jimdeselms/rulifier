@@ -1,4 +1,4 @@
-export async function $and(obj, api) {
+async function $and(obj, api) {
     const sorted = await api.sortNodesByCost(obj)
     for (const value of sorted) {
         if (!(await api.materialize(value))) {
@@ -8,7 +8,7 @@ export async function $and(obj, api) {
     return true
 }
 
-export async function $or(obj, api) {
+async function $or(obj, api) {
     const sorted = await api.sortNodesByCost(obj)
     for (const value of sorted) {
         if (await api.materialize(value)) {
@@ -18,6 +18,12 @@ export async function $or(obj, api) {
     return false
 }
 
-export async function $not(obj, api) {
+async function $not(obj, api) {
     return !(await api.materialize(obj))
+}
+
+module.exports = {
+    $and,
+    $or,
+    $not,
 }

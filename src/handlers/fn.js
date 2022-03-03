@@ -1,6 +1,6 @@
-import { COST } from "../symbols"
+const { COST } = require("../symbols")
 
-export async function $fn(obj, api) {
+async function $fn(obj, api) {
     const value = (await api.getRawValue(obj))()
     return value
 }
@@ -8,3 +8,5 @@ export async function $fn(obj, api) {
 $fn[COST] = function fnCost(value, calculateCost) {
     return calculateCost(value, calculateCost)
 }
+
+module.exports = { $fn }

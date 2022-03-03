@@ -1,6 +1,6 @@
-import { eq } from "./eq"
+const { eq } = require("./eq")
 
-export async function $match(obj, api) {
+module.exports.$match = async function $match(obj, api) {
     if ((await api.materialize(obj.length)) === 2) {
         return await eq(obj[0], obj[1], true, false)
     } else {

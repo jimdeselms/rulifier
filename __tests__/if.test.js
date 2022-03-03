@@ -1,4 +1,4 @@
-import { rulify, materialize } from "../src"
+const { rulify, materialize } = require("../src")
 
 describe("if", () => {
     it("works in the true case", async () => {

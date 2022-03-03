@@ -1,11 +1,11 @@
-import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
-import { getHandlerAndArgument } from "./getHandlerAndArgument"
-import { HandlerApi } from "./handlerApi"
-import * as METHODS from "./methods"
+const { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } = require("./symbols")
+const { getHandlerAndArgument } = require("./getHandlerAndArgument")
+const { HandlerApi } = require("./handlerApi")
+const METHODS = require("./methods")
 
 METHODS.initInternalFunctions({ materializeInternal, resolve })
- 
-export function proxify(value, ctx) {
+
+function proxify(value, ctx) {
     // If this is already a proxy, then just return it.
     if (value[PROXY_CONTEXT]) {
         return value
@@ -57,7 +57,7 @@ function get(target, prop, ctx) {
     return proxify(getAsync(target, ctx), ctx)
 }
 
-export async function resolve(target, ctx, visited = new Set()) {
+async function resolve(target, ctx, visited = new Set()) {
     let value = await target
     if (visited.has(value)) {
         throw new Error("Cycle detected")
@@ -169,7 +169,7 @@ async function getAsync(target, ctx) {
     }
 }
 
-export async function materializeInternal(value, ctx, visited) {
+async function materializeInternal(value, ctx, visited) {
     value = await resolve(value, ctx, visited)
 
     const type = typeof value
@@ -204,4 +204,10 @@ export async function materializeInternal(value, ctx, visited) {
     }
 
     return result
+}
+
+module.exports = {
+    materializeInternal,
+    proxify,
+    resolve,
 }

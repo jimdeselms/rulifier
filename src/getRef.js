@@ -1,4 +1,4 @@
-export async function getRef(str, api) {
+module.exports.getRef = async function getRef(str, api) {
     const path = parsePath(str)
 
     let curr = api.root

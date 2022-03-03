@@ -1,4 +1,4 @@
-import { rulify, materialize } from "../src"
+const { rulify, materialize } = require("../src")
 
 describe("route", () => {
     it("can return the root route", async () => {

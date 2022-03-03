@@ -1,5 +1,5 @@
-import { rulify, materialize } from "../src"
-import { COST } from '../src/symbols'
+const { rulify, materialize } = require("../src")
+const { COST } = require('../src/symbols')
 
 describe('calculateCost', () => {
     it('calculates the cost of nodes and executes cheapest first', async () => {

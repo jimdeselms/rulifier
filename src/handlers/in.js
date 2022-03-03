@@ -1,6 +1,6 @@
-import { TRUE, FALSE } from "../symbols"
+const { TRUE, FALSE } = require("../symbols")
 
-export async function $in(obj, api) {
+module.exports.$in = async function $in(obj, api) {
     const lhs = await api.materialize(api.getComparisonProp())
 
     for await (const entry of obj) {
