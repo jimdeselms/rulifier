@@ -291,4 +291,36 @@ describe("rulify", () => {
 
         await expect(() => rulifier.materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
+    
+    it("When materializing the same expression, the handler is only evaluated once.", async () => {
+        let calls = 0
+
+        const r = new Rulifier({
+            dataSources: [
+                {
+                    value: {
+                        $log: {
+                            a: {
+                                b: 1
+                            }
+                        }
+                    }
+                }
+            ],
+            handlers: {
+                $log(value) {
+                    calls++
+                    return value
+                }
+            }
+        })
+
+        const foo = r.applyContext()
+
+        await r.materialize(foo)
+        await r.materialize(foo.a)
+        await r.materialize(foo.a.b)
+
+        expect(calls).toBe(1)
+    })
 })
