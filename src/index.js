@@ -42,4 +42,4 @@ class Rulifier {
     }
 }
 
-module.exports = Rulifier
+module.exports = { Rulifier }
