@@ -1,9 +1,7 @@
-import commonjs from '@rollup/plugin-commonjs'
-
 export default [
     {
         input: "src/index.js",
-        plugins: [commonjs()],
+        plugins: [],
         output: {
             file: "dist/index.esm.js",
             sourcemap: true,
@@ -12,7 +10,7 @@ export default [
     },
     {
         input: "src/index.js",
-        plugins: [commonjs()],
+        plugins: [],
         output: {
             name: "rulifier",
             file: "dist/index.umd.js",

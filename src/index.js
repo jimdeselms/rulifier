@@ -13,7 +13,7 @@ export class Rulifier {
             ? Array.isArray(opts.dataSources) ? opts.dataSources : [ opts.dataSources ]
             : []
 
-        this.#root = rulify(...dataSources, { $handlers: opts.handlers })
+        this.#root = rulify(dataSources, opts.handlers)
     }
 
     /**
@@ -26,7 +26,7 @@ export class Rulifier {
     }
 
     applyContext(dataSource = {}) {
-        return rulify(this.#root, dataSource)
+        return rulify([this.#root, dataSource])
     }
 
     getTypeof(obj) {

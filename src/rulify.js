@@ -8,26 +8,23 @@ import { proxify } from "./proxify"
  * @param {...Record<any, any>} dataSources
  * @returns {Record<any, any>}
  */
-export function rulify(...dataSources) {
+export function rulify(dataSources, handlers={}) {
     const merged = {}
-    let handlers = {}
+    let mergedHandlers = {}
 
     for (let dataSource of dataSources) {
         const proxyContext = dataSource[PROXY_CONTEXT]
         if (proxyContext) {
             // If the thing is "already rulfied", then we want to grab the
             // raw value and re-proxify it.
-            Object.assign(handlers, proxyContext.handlers)
+            Object.assign(mergedHandlers, proxyContext.handlers)
 
             dataSource = proxyContext.dataSource
-        } else {
-            Object.assign(handlers, normalizeHandlers(dataSource.$handlers))
-            delete dataSource.$handlers
         }
         Object.assign(merged, dataSource)
     }
 
-    Object.assign(handlers, builtinHandlers)
+    Object.assign(mergedHandlers, normalizeHandlers(handlers), builtinHandlers)
 
     // Set up the context
     // handlers: the set of handlers
@@ -37,7 +34,7 @@ export function rulify(...dataSources) {
     // Note that the caches use weak maps so that they won't cause a memory leak as
     // values go out of scope
     const ctx = {
-        handlers,
+        handlers: mergedHandlers,
         dataSource: merged,
         resolvedValueCache: new WeakMap(),
     }

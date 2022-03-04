@@ -3,11 +3,11 @@
   "version": "0.0.1-pre.12",
   "description": "A lightweight rule engine designed for speed and ease of use",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "typings": "./index.d.ts",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.0.2",
     "cp": "^0.2.0",
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
@@ -28,8 +28,7 @@
     "test": "jest",
     "prettier": "prettier --write src",
     "build": "rimraf ./dist && rollup -c ./rollup.config.js",
-    "build:ts": "tsc",
-    "prepare": "npm run build && npm run build:ts"
+    "prepare": "npm run build"
   },
   "jest": {
     "preset": "rollup-jest"

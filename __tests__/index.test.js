@@ -1,4 +1,4 @@
-import { Rulifier, rulify } from "../src"
+import { Rulifier } from "../src"
 import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
@@ -208,11 +208,13 @@ describe("rulify", () => {
     })
 
     it("knows about handlers", async () => {
-        const rulifier = new Rulifier()
-        const resp = rulifier.applyContext({
-            $handlers: {
+        const rulifier = new Rulifier({
+            handlers: {
                 capitalize: async (name) => (await rulifier.materialize(name)).toUpperCase(),
-            },
+            }
+        })
+
+        const resp = rulifier.applyContext({
             name: {
                 $capitalize: "Fred",
             },
