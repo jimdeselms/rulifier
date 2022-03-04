@@ -1,15 +1,15 @@
-const { $eq } = require("./handlers/eq")
-const { $fn } = require("./handlers/fn")
-const { $if } = require("./handlers/if")
-const { $in } = require("./handlers/in")
-const { $match } = require("./handlers/match")
-const { $ref } = require("./handlers/ref")
-const { $str } = require("./handlers/str")
-const { $switch } = require("./handlers/switch")
-const { $and, $or, $not } = require("./handlers/booleanOperators")
-const { $lt, $gt, $lte, $gte, $ne, $regex } = require("./handlers/binaryOperators")
+import { $eq } from "./handlers/eq"
+import { $fn } from "./handlers/fn"
+import { $if } from "./handlers/if"
+import { $in } from "./handlers/in"
+import { $match } from "./handlers/match"
+import { $ref } from "./handlers/ref"
+import { $str } from "./handlers/str"
+import { $switch } from "./handlers/switch"
+import { $and, $or, $not } from "./handlers/booleanOperators"
+import { $lt, $gt, $lte, $gte, $ne, $regex } from "./handlers/binaryOperators"
 
-const builtinHandlers = {
+export const builtinHandlers = {
     async $handlers() {
         throw new Error("handlers can only be defined at the root of a data source")
     },
@@ -36,5 +36,3 @@ const builtinHandlers = {
 
     $fn,
 }
-
-module.exports.builtinHandlers = builtinHandlers

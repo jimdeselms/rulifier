@@ -1,4 +1,4 @@
-async function delayed(response) {
+export async function delayed(response) {
     await new Promise((r) => setTimeout(r, 1))
     return response
 }
@@ -8,7 +8,3 @@ describe("testHelpers", () => {
         await delayed()
     })
 })
-
-module.exports = {
-    delayed
-}

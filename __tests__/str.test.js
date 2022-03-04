@@ -1,4 +1,4 @@
-const { Rulifier } = require("../src")
+import { Rulifier } from "../src"
 
 describe("str", () => {
     it("can understand a simple string interpolation", async () => {

@@ -1,6 +1,6 @@
-const { builtinHandlers } = require("./builtinHandlers")
-const { PROXY_CONTEXT, COST } = require("./symbols")
-const { proxify } = require("./proxify")
+import { builtinHandlers } from "./builtinHandlers"
+import { PROXY_CONTEXT, COST } from "./symbols"
+import { proxify } from "./proxify"
 
 /**
  * Given a set of data sources with objects and handlers, returns an object that merges the given objects
@@ -8,7 +8,7 @@ const { proxify } = require("./proxify")
  * @param {...Record<any, any>} dataSources
  * @returns {Record<any, any>}
  */
-module.exports.rulify = function rulify(...dataSources) {
+export function rulify(...dataSources) {
     const merged = {}
     let handlers = {}
 

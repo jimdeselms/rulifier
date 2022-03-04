@@ -1,4 +1,4 @@
-const { Rulifier } = require("../src")
+import { Rulifier } from "../src"
 
 describe("if", () => {
     it("works in the true case", async () => {

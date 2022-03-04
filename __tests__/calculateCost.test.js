@@ -1,5 +1,5 @@
-const { Rulifier } = require("../src")
-const { COST } = require('../src/symbols')
+import { Rulifier } from "../src"
+import { COST } from '../src/symbols'
 
 describe('calculateCost', () => {
     it('calculates the cost of nodes and executes cheapest first', async () => {

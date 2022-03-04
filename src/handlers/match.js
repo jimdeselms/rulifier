@@ -1,8 +1,8 @@
-const { COST } = require("../symbols")
-const { eq } = require("./eq")
-const { DEFAULT_UNKNONN_COST } = require("../calculateCost")
+import { COST } from "../symbols"
+import { eq } from "./eq"
+import { DEFAULT_UNKNOWN_COST } from "../calculateCost"
 
-async function $match(obj, api) {
+export async function $match(obj, api) {
     if ((await api.getLength(obj)) === 2) {
         return await eq(obj[0], obj[1], true, false)
     } else {
@@ -16,10 +16,6 @@ $match[COST] = function matchCost(value, calculateCost) {
     if (value?.length === 2) {
         return calculateCost(value[0]) + calculateCost(value[1])
     } else {
-        return calculateClost(value) + DEFAULT_UNKNONN_COST
+        return calculateClost(value) + DEFAULT_UNKNOWN_COST
     }
-}
-
-module.exports = {
-    $match,
 }

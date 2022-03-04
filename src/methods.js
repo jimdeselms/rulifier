@@ -1,6 +1,6 @@
 /** @ignore */
 /** @private */
-const { PROXY_CONTEXT, RAW_VALUE } = require("./symbols")
+import { PROXY_CONTEXT, RAW_VALUE } from "./symbols"
 
 let materializeInternal, resolve
 
@@ -8,7 +8,7 @@ let materializeInternal, resolve
 /** 
  * @private
  */
-module.exports.initInternalFunctions = function initInternalFunctions(funcs) {
+export function initInternalFunctions(funcs) {
     materializeInternal = funcs.materializeInternal
     resolve = funcs.resolve
 }
@@ -19,7 +19,7 @@ module.exports.initInternalFunctions = function initInternalFunctions(funcs) {
  * @returns {any}
  * @private
  */
-module.exports.materialize = async function materialize(obj, visited = new Set()) {
+export async function materialize(obj, visited = new Set()) {
     const ctx = getProxyContext(obj)
     return ctx ? await materializeInternal(obj[RAW_VALUE], ctx, visited) : obj
 }
@@ -30,7 +30,7 @@ module.exports.materialize = async function materialize(obj, visited = new Set()
  * @returns {Promise<string>}
  * @private
  */
-module.exports.getTypeof = async function getTypeof(obj) {
+export async function getTypeof(obj) {
     const resolved = await resolveSafe(obj)
     return typeof resolved
 }
@@ -42,7 +42,7 @@ module.exports.getTypeof = async function getTypeof(obj) {
  * @returns {Promise<string[] | undefined>}
  * @private
  */
-module.exports.getKeys = async function getKeys(obj) {
+export async function getKeys(obj) {
     const resolved = await resolveSafe(obj)
 
     if (typeof resolved !== "object") {
@@ -58,7 +58,7 @@ module.exports.getKeys = async function getKeys(obj) {
  * @returns {Promise<string[] | undefined>}
  * @private
  */
-module.exports.getLength = async function getLength(obj) {
+export async function getLength(obj) {
     const resolved = await resolveSafe(obj)
 
     if (typeof resolved !== "object" || !Array.isArray(resolved)) {

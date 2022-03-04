@@ -1,7 +1,7 @@
-const { rulify } = require("./rulify")
-const { materialize, getTypeof, getKeys, getLength } = require("./methods")
+import { rulify } from "./rulify"
+import { materialize, getTypeof, getKeys, getLength } from "./methods"
 
-class Rulifier {
+export class Rulifier {
     #opts
     #root
 
@@ -41,5 +41,3 @@ class Rulifier {
         return getLength(obj)
     }
 }
-
-module.exports = { Rulifier }

@@ -1,6 +1,6 @@
-const { ROUTE } = require("./symbols")
+import { ROUTE } from "./symbols"
 
-module.exports.getHandlerAndArgument = function getHandlerAndArgument(obj, handlers) {
+export function getHandlerAndArgument(obj, handlers) {
     if (typeof obj !== "object") {
         return undefined
     }

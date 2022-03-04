@@ -1,5 +1,5 @@
-const { Rulifier } = require("../src")
-const { delayed } = require("./helpers.test")
+import { Rulifier } from "../src"
+import { delayed } from "./helpers.test"
 
 describe("predicates", () => {
     describe("$and", () => {

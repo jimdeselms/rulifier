@@ -1,9 +1,9 @@
-const { COST } = require("../symbols")
+import { COST } from "../symbols"
 const { DEFAULT_UNKNOWN_COST } = "../calculateCost"
 
 const STR_INTERP_REGEX = /\\?\${([^}]+)}*/g
 
-async function $str(obj, api) {
+export async function $str(obj, api) {
     let result = await api.materialize(obj)
 
     for (const match of result.matchAll(STR_INTERP_REGEX)) {
@@ -27,8 +27,4 @@ async function $str(obj, api) {
 
 $str[COST] = function strCost(value, calculateCost) {
     return calculateCost(value, calculateCost) + DEFAULT_UNKNOWN_COST
-}
-
-module.exports = {
-    $str,
 }

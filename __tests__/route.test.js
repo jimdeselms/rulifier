@@ -1,4 +1,4 @@
-const { Rulifier } = require("../src")
+import { Rulifier } from "../src"
 
 describe("route", () => {
     it("can return the root route", async () => {

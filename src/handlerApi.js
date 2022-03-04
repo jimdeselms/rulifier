@@ -1,10 +1,10 @@
-const { getRawValue } = require("./getRawValue")
-const { getRef } = require("./getRef")
-const { sortNodes } = require("./sortNodes")
+import { getRawValue } from "./getRawValue"
+import { getRef } from "./getRef"
+import { sortNodes } from "./sortNodes"
 
-const { materialize, getTypeof, getKeys, getLength } = require("./methods")
+import { materialize, getTypeof, getKeys, getLength } from "./methods"
 
-module.exports.HandlerApi = class HandlerApi {
+export class HandlerApi {
     #ctx
     #visited
     root

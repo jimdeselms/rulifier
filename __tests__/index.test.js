@@ -1,5 +1,5 @@
-const { Rulifier, rulify } = require("../src")
-const { delayed } = require("./helpers.test")
+import { Rulifier, rulify } from "../src"
+import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
 

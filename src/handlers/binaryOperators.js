@@ -1,14 +1,14 @@
-const { TRUE, FALSE, COST } = require("../symbols")
-const { DEFAULT_UNKNOWN_COST } = require("../calculateCost")
-const { materialize } = require("../methods")
+import { TRUE, FALSE, COST } from "../symbols"
+import { DEFAULT_UNKNOWN_COST } from "../calculateCost"
+import { materialize } from "../methods"
 
-const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
-const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)
-const $gt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x > y)
-const $gte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x >= y)
-const $ne = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x !== y)
+export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
+export const $lte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x <= y)
+export const $gt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x > y)
+export const $gte = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x >= y)
+export const $ne = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x !== y)
 
-const $regex = (obj, opt) =>
+export const $regex = (obj, opt) =>
     evaluateBinary(obj, opt, (x, y) => {
         if (typeof y === "string") {
             return new RegExp(y).test(x)
@@ -47,11 +47,3 @@ $gte[COST] = binaryOperatorCost
 $ne[COST] = binaryOperatorCost
 $regex[COST] = binaryOperatorCost
 
-module.exports = {
-    $lt,
-    $lte,
-    $gt,
-    $gte,
-    $ne,
-    $regex,
-}

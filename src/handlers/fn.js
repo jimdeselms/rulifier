@@ -1,6 +1,4 @@
-async function $fn(obj, api) {
+export async function $fn(obj, api) {
     const value = (await api.getRawValue(obj))()
     return value
 }
-
-module.exports = { $fn }

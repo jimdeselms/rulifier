@@ -1,9 +1,9 @@
-const { materialize, getTypeof, getKeys } = require("../methods")
-const { sortKeysForComparison } = require("../sortNodes")
-const { TRUE, FALSE, GET_WITH_NEW_ROOT, COST } = require("../symbols")
-const { DEFAULT_UNKNOWN_COST } = require("../calculateCost")
+import { materialize, getTypeof, getKeys } from "../methods"
+import { sortKeysForComparison } from "../sortNodes"
+import { TRUE, FALSE, GET_WITH_NEW_ROOT, COST } from "../symbols"
+import { DEFAULT_UNKNOWN_COST } from "../calculateCost"
 
-async function $eq(obj, ctx) {
+export async function $eq(obj, ctx) {
     if ((await materialize(obj.length)) === 2) {
         return await eq(obj[0], obj[1], false, false)
     } else {
@@ -11,7 +11,7 @@ async function $eq(obj, ctx) {
     }
 }
 
-async function eq(item1, item2, match, useRootDataSource) {
+export async function eq(item1, item2, match, useRootDataSource) {
     const i1 = await item1
     const i2 = await item2
 
@@ -82,5 +82,3 @@ $eq[COST] = function eqCost(value, calculateCost) {
         return calculateCost(value) + DEFAULT_UNKNOWN_COST
     }
 }
-
-module.exports = { eq, $eq }

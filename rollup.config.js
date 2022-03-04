@@ -1,4 +1,3 @@
-import { terser } from 'rollup-plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
 
 export default [
@@ -7,6 +6,7 @@ export default [
         plugins: [commonjs()],
         output: {
             file: "dist/index.esm.js",
+            sourcemap: true,
             format: "esm"
         }
     },
@@ -16,6 +16,7 @@ export default [
         output: {
             name: "rulifier",
             file: "dist/index.umd.js",
+            sourcemap: true,
             format: "umd"
         }
     }
