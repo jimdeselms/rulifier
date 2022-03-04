@@ -323,4 +323,24 @@ describe("rulify", () => {
 
         expect(calls).toBe(1)
     })
+
+    it("Two references to same thing", async () => {
+        const r = new Rulifier({
+            dataSources: [
+                {
+                    foo: [ { $ref: delayed("a") }, { $ref: delayed("a") } ],
+                    a: { $toLower: "HELLO" }
+                }
+            ],
+            handlers: {
+                async $toLower(a, b) {
+                    return (await b.materialize(a)).toLowerCase()
+                }
+            }
+        })
+
+        const a = r.applyContext()
+        expect(await r.materialize(a.foo)).toMatchObject(["hello", "hello"])
+
+    })
 })

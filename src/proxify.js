@@ -57,9 +57,9 @@ function get(target, prop, ctx) {
     return proxify(getAsync(target, ctx), ctx)
 }
 
-export async function resolve(target, ctx, visited = new Set()) {
+export async function resolve(target, ctx, visited = []) {
     let value = await target
-    if (visited.has(value)) {
+    if (visited.includes(value)) {
         throw new Error("Cycle detected")
     }
 
@@ -69,15 +69,13 @@ export async function resolve(target, ctx, visited = new Set()) {
 
     if (value !== null && (typeof value === "object" || typeof value === "function")) {
         if (typeof value === "object") {
-            visited.add(value)
-
             // Are we calling a handler? Then do it and pass back the result.
             const h = getHandlerAndArgument(value, ctx.handlers)
             if (h) {
                 // We'll cache the promise so that if another request tries to
                 // resolve the same value, they'll both be waiting on the same
                 // promise.
-                const resolvedValuePromise = resolveHandler(h, ctx, visited)
+                const resolvedValuePromise = resolveHandler(h, ctx, [...visited, value])
 
                 ctx.resolvedValueCache.set(value, resolvedValuePromise)
                 value = await resolvedValuePromise
@@ -177,8 +175,6 @@ export async function materializeInternal(value, ctx, visited) {
         return value
     }
 
-    visited.add(value)
-
     if (value instanceof RegExp) {
         return value
     }
@@ -192,15 +188,14 @@ export async function materializeInternal(value, ctx, visited) {
         // If we've never accessed a property off of the route, then we're just accessing the route path.
         const result =
             typeof route === "function"
-                ? await materializeInternal(await route([]), ctx, visited)
-                : await materializeInternal(await route.fn(route.path), ctx, visited)
+                ? await materializeInternal(await route([]), ctx, [...visited, value])
+                : await materializeInternal(await route.fn(route.path), ctx, [...visited, value])
 
-        visited.add(result)
         return result
     }
 
     for (const [k, v] of Object.entries(value)) {
-        result[k] = await materializeInternal(await v, ctx, visited)
+        result[k] = await materializeInternal(await v, ctx, [...visited, value])
     }
 
     return result

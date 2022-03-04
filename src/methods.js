@@ -8,7 +8,7 @@ export function initInternalFunctions(funcs) {
     resolve = funcs.resolve
 }
 
-export async function materialize(obj, visited = new Set()) {
+export async function materialize(obj, visited = []) {
     const ctx = getProxyContext(obj)
     return ctx ? await materializeInternal(obj[RAW_VALUE], ctx, visited) : obj
 }
