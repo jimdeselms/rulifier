@@ -1,8 +1,13 @@
+/** @ignore */
+/** @private */
 const { PROXY_CONTEXT, RAW_VALUE } = require("./symbols")
 
 let materializeInternal, resolve
 
 // In order to avoid a circular reference, we'll have the proxify module initialize these.
+/** 
+ * @private
+ */
 module.exports.initInternalFunctions = function initInternalFunctions(funcs) {
     materializeInternal = funcs.materializeInternal
     resolve = funcs.resolve
@@ -12,6 +17,7 @@ module.exports.initInternalFunctions = function initInternalFunctions(funcs) {
  * Given a rulified object, converts it into a fully materialized object.
  * @param {any}
  * @returns {any}
+ * @private
  */
 module.exports.materialize = async function materialize(obj, visited = new Set()) {
     const ctx = getProxyContext(obj)
@@ -22,6 +28,7 @@ module.exports.materialize = async function materialize(obj, visited = new Set()
  * Returns the basic Javascript type of the object
  * @param {any} obj
  * @returns {Promise<string>}
+ * @private
  */
 module.exports.getTypeof = async function getTypeof(obj) {
     const resolved = await resolveSafe(obj)
@@ -33,6 +40,7 @@ module.exports.getTypeof = async function getTypeof(obj) {
  * a type that has keys
  * @param {any} obj
  * @returns {Promise<string[] | undefined>}
+ * @private
  */
 module.exports.getKeys = async function getKeys(obj) {
     const resolved = await resolveSafe(obj)
@@ -48,6 +56,7 @@ module.exports.getKeys = async function getKeys(obj) {
  * Returns the length of an array, or undefined if the object is not an arary
  * @param {any} obj
  * @returns {Promise<string[] | undefined>}
+ * @private
  */
 module.exports.getLength = async function getLength(obj) {
     const resolved = await resolveSafe(obj)

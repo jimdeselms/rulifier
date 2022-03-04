@@ -9,6 +9,11 @@ module.exports.HandlerApi = class HandlerApi {
     #visited
     root
 
+    /**
+     * @private
+     * @param {*} ctx 
+     * @param {*} visited 
+     */
     constructor(ctx, visited) {
         this.#ctx = ctx
         this.#visited = visited

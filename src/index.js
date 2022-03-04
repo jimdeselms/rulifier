@@ -16,6 +16,11 @@ class Rulifier {
         this.#root = rulify(...dataSources, { $handlers: opts.handlers })
     }
 
+    /**
+     * 
+     * @param {any} obj 
+     * @returns {Promise<any>}
+     */
     materialize(obj) {
         return materialize(obj)
     }
@@ -37,6 +42,4 @@ class Rulifier {
     }
 }
 
-module.exports = {
-    Rulifier
-}
+module.exports = Rulifier

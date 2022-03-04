@@ -1,18 +1,22 @@
 {
   "name": "@jimdeselms/rulifier",
-  "version": "0.0.1-pre.7",
+  "version": "0.0.1-pre.12",
   "description": "A lightweight rule engine designed for speed and ease of use",
   "files": [
-    "dist/"
+    "dist"
   ],
+  "typings": "./index.d.ts",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.2",
+    "cp": "^0.2.0",
     "jest": "^27.5.1",
     "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
     "rollup": "^2.67.2",
-    "rollup-plugin-terser": "^7.0.2"
+    "rollup-plugin-terser": "^7.0.2",
+    "typescript": "^4.6.2"
   },
-  "module": ".dist/index.esm.js",
+  "module": "./dist/index.esm.js",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
@@ -24,11 +28,10 @@
     "test": "jest",
     "prettier": "prettier --write src",
     "build": "rimraf ./dist && rollup -c ./rollup.config.js",
-    "prepare": "npm run build"
+    "build:ts": "tsc",
+    "prepare": "npm run build && npm run build:ts"
   },
-  "author": "Jim DeSelms",
+  "author": "Jim DeSelms (jim.deselms@gmail.com)",
   "license": "ISC",
-  "dependencies": {
-    "@rollup/plugin-commonjs": "^21.0.2"
-  }
+  "dependencies": {}
 }
