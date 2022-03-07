@@ -192,9 +192,7 @@ function calc(cost, value=undefined, message=undefined) {
 }
 
 function funcWithCost(func, cost) {
-    func[COST] = typeof cost === "number"
-        ? () => cost
-        : cost
+    func[COST] = cost
 
     return {
         $fn: func

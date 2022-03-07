@@ -39,11 +39,3 @@ function binaryOperatorCost(value, calculateCost) {
         return calculateCost(value) + DEFAULT_UNKNOWN_COST
     }
 }
-
-$lt[COST] = binaryOperatorCost
-$lte[COST] = binaryOperatorCost
-$gt[COST] = binaryOperatorCost
-$gte[COST] = binaryOperatorCost
-$ne[COST] = binaryOperatorCost
-$regex[COST] = binaryOperatorCost
-

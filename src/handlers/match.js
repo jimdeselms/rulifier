@@ -11,11 +11,3 @@ export async function $match(obj, api) {
         return await eq(api.root, obj, true, true)
     }
 }
-
-$match[COST] = function matchCost(value, calculateCost) {
-    if (value?.length === 2) {
-        return calculateCost(value[0]) + calculateCost(value[1])
-    } else {
-        return calculateClost(value) + DEFAULT_UNKNOWN_COST
-    }
-}

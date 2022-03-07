@@ -74,11 +74,3 @@ export async function eq(item1, item2, match, useRootDataSource) {
         return i1Val === i2Val
     }
 }
-
-$eq[COST] = function eqCost(value, calculateCost) {
-    if (Array.isArray(value)) {
-        return calculateCost(value)
-    } else {
-        return calculateCost(value) + DEFAULT_UNKNOWN_COST
-    }
-}

@@ -1,12 +1,10 @@
 import { COST } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 
-const DEFAULT_HANDLER_COST = 1
-const DEFAULT_FUNCTION_COST = 1
 const DEFAULT_NODE_COST = 2
 
 const MAX_BREADTH_PER_NODE = 25
-const MAX_DEPTH = 3
+const MAX_DEPTH = 4
 
 // This is a helper for handlers that have to calculate the cost of unknown things.
 // We'll assume that these things are kind of expensive.
@@ -27,10 +25,15 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
         return 1
     }
 
-    // If this is a function, call its cost function if it has one.
-    const calculateCostFn = (rawValue) => calculateCost(rawValue, ctx)
+    // Don't go too deep.
+    if (depth >= MAX_DEPTH) {
+        return DEFAULT_NODE_COST
+    }
+
+    // If this is a function, get its cost or return the default.
     if (type === "function") {
-        return rawValue[COST]?.(undefined, calculateCostFn) ?? DEFAULT_FUNCTION_COST
+        const fnCost = rawValue[COST]
+        return fnCost ?? 1
     }
 
     // If this is a handler, then we'll try to calculate the cost of the handler
@@ -38,15 +41,18 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
     const handlerAndArg = getHandlerAndArgument(rawValue, ctx.handlers)
 
     if (handlerAndArg) {
-        return (
-            handlerAndArg.handler[COST]?.(handlerAndArg.argument, calculateCostFn) ??
-            calculateCostFn(handlerAndArg.argument)
-        )
-    }
+        const cost = handlerAndArg.handler[COST]
+        let baseCost = 1
+        if (cost) {
+            baseCost = typeof(cost) === "function"
+                ? cost(handlerAndArg.argument)
+                : cost
+            
+        }
 
-    // Don't go too deep.
-    if (depth >= MAX_DEPTH) {
-        return DEFAULT_NODE_COST
+        debugger
+
+        return baseCost + calculateCost(handlerAndArg.argument, ctx, depth + 1)
     }
 
     // We'll calculate the cost of each of the values in the object,
