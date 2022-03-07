@@ -174,7 +174,6 @@ async function getAsync(target, ctx) {
 }
 
 export async function materializeInternal(value, ctx, visited) {
-
     value = await resolve(value, ctx, visited)
 
     const type = typeof value

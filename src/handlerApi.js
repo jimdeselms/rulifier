@@ -11,8 +11,8 @@ export class HandlerApi {
 
     /**
      * @private
-     * @param {*} ctx 
-     * @param {*} visited 
+     * @param {*} ctx
+     * @param {*} visited
      */
     constructor(ctx, visited) {
         this.#ctx = ctx

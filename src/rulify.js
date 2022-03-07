@@ -11,7 +11,7 @@ initInternalFunctions({ materializeInternal, resolve, proxify, rulify })
  * @param {...Record<any, any>} dataSources
  * @returns {Record<any, any>}
  */
-export function rulify(dataSources, handlers={}) {
+export function rulify(dataSources, handlers = {}) {
     const merged = {}
     let mergedHandlers = {}
 

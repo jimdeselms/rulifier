@@ -44,10 +44,7 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
         const cost = handlerAndArg.handler[COST]
         let baseCost = 1
         if (cost) {
-            baseCost = typeof(cost) === "function"
-                ? cost(handlerAndArg.argument)
-                : cost
-            
+            baseCost = typeof cost === "function" ? cost(handlerAndArg.argument) : cost
         }
 
         debugger

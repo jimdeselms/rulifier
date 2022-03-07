@@ -7,4 +7,3 @@ export async function $ref(obj, api) {
 
 // we can't know the cost of a reference.
 $ref[COST] = DEFAULT_UNKNOWN_COST
- 

@@ -15,14 +15,16 @@ export class Rulifier {
         this.#opts = opts
 
         const dataSources = opts.dataSources
-            ? Array.isArray(opts.dataSources) ? opts.dataSources : [ opts.dataSources ]
+            ? Array.isArray(opts.dataSources)
+                ? opts.dataSources
+                : [opts.dataSources]
             : []
 
         this.#root = rulify(dataSources, opts.handlers)
     }
 
     /**
-     * Given a rulified object, the object is evaluated and converted into a 
+     * Given a rulified object, the object is evaluated and converted into a
      * fully materialized object
      * @template T
      * @param {Rulified<T>} obj A rulified object that
@@ -34,7 +36,7 @@ export class Rulifier {
 
     /**
      * Applies a new set of context to a rulified object and returns the new root.
-     * 
+     *
      * Any cached values will be cleared
      * @template T
      * @param {Record<any, any>} dataSource The new context to apply
@@ -46,7 +48,7 @@ export class Rulifier {
 
     /**
      * Returns the simple Javascript type of the given Rulified object
-     * @param {Rulified<any>} obj 
+     * @param {Rulified<any>} obj
      * @returns {Promise<string>}
      */
     getTypeof(obj) {
@@ -56,7 +58,7 @@ export class Rulifier {
     /**
      * Returns the keys of a rulified object, or undefined if the object is a type
      * that doesn't have keys (such as a number or string.)
-     * @param {Rulified<any>} obj 
+     * @param {Rulified<any>} obj
      * @returns {Promise<string[] | undefined>}
      */
     getKeys(obj) {
@@ -66,7 +68,7 @@ export class Rulifier {
     /**
      * Returns the length of the rulified object if it represents an array. Otherwise,
      * it returns undefined
-     * @param {Rulified<any>} obj 
+     * @param {Rulified<any>} obj
      * @returns {Promise<number | undefined>}
      */
     getLength(obj) {
