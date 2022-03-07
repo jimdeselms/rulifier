@@ -30,7 +30,7 @@ export function proxify(value, ctx) {
 
     // Make sure to set the proxy the first time through.
     if (!ctx.proxy) {
-        ctx = { ...ctx, proxy, comparisonProxy: proxy }
+        ctx = { ...ctx, proxy }
     }
 
     return proxy

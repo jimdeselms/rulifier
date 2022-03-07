@@ -359,6 +359,20 @@ describe("predicates", () => {
             expect(await rulifier.materialize(resp.value)).toBe(false)
         })
 
+        it("true if not in, using $not", async () => {
+            const rulifier = new Rulifier()
+            const resp = rulifier.applyContext({
+                age: 34,
+                value: {
+                    $match: {
+                        age: { $not: { $in: [30, 35, 40] }},
+                    },
+                },
+            })
+
+            expect(await rulifier.materialize(resp.value)).toBe(true)
+        })
+
         it("can match arrays", async () => {
             const rulifier = new Rulifier()
             const resp = rulifier.applyContext({
