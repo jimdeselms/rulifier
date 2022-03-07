@@ -21,6 +21,25 @@ describe('calculateCost', () => {
         expect(getCostCalls()).toBe(3)
     })
 
+    it('calculates the cost of based on complexity', async () => {
+        // In this case, all the nodes are false, but at least we execute them in
+        // order of cost
+        const { obj, rulifier, messages, getCostCalls } = await rulifyWithCalc({
+           value: {
+               $or: [ 
+                   calc(1, { $or:  [false, false]}, "third"),
+                   calc(1, { $or: [false]}, "second"),
+                   calc(1, false, "first")
+               ]
+           }
+        })
+
+        expect(await rulifier.materialize(obj.value)).toBe(false)
+
+        expect(messages).toMatchObject(["first", "second", "third"])
+        expect(getCostCalls()).toBe(3)
+    })
+
     it('short circuits if a cheaper node is true', async () => {
         // In this case, since the first is cheapest -- and true -- it short circuits
         // so that the other nodes don't have to be evaluated
