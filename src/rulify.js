@@ -1,6 +1,9 @@
 import { builtinHandlers } from "./builtinHandlers"
 import { PROXY_CONTEXT, COST } from "./symbols"
-import { proxify } from "./proxify"
+import { proxify, materializeInternal, resolve } from "./proxify"
+import { initInternalFunctions } from "./methods"
+
+initInternalFunctions({ materializeInternal, resolve, proxify, rulify })
 
 /**
  * Given a set of data sources with objects and handlers, returns an object that merges the given objects

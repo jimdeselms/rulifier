@@ -1,9 +1,7 @@
 import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 import { HandlerApi } from "./handlerApi"
-import * as METHODS from "./methods"
-
-METHODS.initInternalFunctions({ materializeInternal, resolve })
+import { resolveSafe } from "./methods"
 
 export function proxify(value, ctx) {
     // If this is already a proxy, then just return it.
@@ -58,6 +56,13 @@ function get(target, prop, ctx) {
 }
 
 export async function resolve(target, ctx, visited = []) {
+    if (target?.[PROXY_CONTEXT]) {
+        // If the thing we're resolving is itself a proxy, then use its
+        // own context, and get its raw value as the target.
+        ctx = target[PROXY_CONTEXT]
+        target = target[RAW_VALUE]
+    }
+
     let value = await target
     if (visited.includes(value)) {
         throw new Error("Cycle detected")
@@ -107,7 +112,7 @@ async function resolveHandler({ handler, argument }, ctx, visited) {
     let result = await handler(arg, new HandlerApi(ctx, visited))
 
     if (result !== null && typeof result === "object" && result[PROXY_CONTEXT]) {
-        result = await resolve(result[RAW_VALUE], ctx, visited)
+        result = await resolve(result[RAW_VALUE], result[PROXY_CONTEXT], visited)
     }
 
     return await resolve(result, ctx, visited)
@@ -143,7 +148,8 @@ async function getAsync(target, ctx) {
     const handler = getHandlerAndArgument(resolved, ctx.handlers)
     // Normal case; we just get the given property
     if (handler?.handler !== ROUTE) {
-        return resolved?.[ctx.prop]
+        const result = resolved?.[ctx.prop]
+        return await resolveSafe(result)
     }
 
     // Special case: if we're getting something from a route, then we add the property to the path.
@@ -168,6 +174,7 @@ async function getAsync(target, ctx) {
 }
 
 export async function materializeInternal(value, ctx, visited) {
+
     value = await resolve(value, ctx, visited)
 
     const type = typeof value

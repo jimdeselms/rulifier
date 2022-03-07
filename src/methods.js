@@ -1,11 +1,13 @@
 import { PROXY_CONTEXT, RAW_VALUE } from "./symbols"
 
-let materializeInternal, resolve
+let materializeInternal, resolve, proxify, rulify
 
 // In order to avoid a circular reference, we'll have the proxify module initialize these.
 export function initInternalFunctions(funcs) {
     materializeInternal = funcs.materializeInternal
     resolve = funcs.resolve
+    proxify = funcs.proxify
+    rulify = funcs.rulify
 }
 
 export async function materialize(obj, visited = []) {
@@ -38,9 +40,19 @@ export async function getLength(obj) {
     }
 }
 
-async function resolveSafe(obj) {
+export async function resolveSafe(obj) {
     const ctx = getProxyContext(obj)
     return ctx ? await resolve(obj[RAW_VALUE], ctx) : obj
+}
+
+export async function applyNewContext(expr, context) {
+    const ctx = getProxyContext(expr)
+
+    const o = rulify([ctx.proxy[RAW_VALUE], await context[RAW_VALUE]])
+
+    const newVal = proxify(await expr[RAW_VALUE], await o[PROXY_CONTEXT])
+
+    return newVal
 }
 
 function getProxyContext(obj) {

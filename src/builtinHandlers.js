@@ -6,6 +6,7 @@ import { $match } from "./handlers/match"
 import { $ref } from "./handlers/ref"
 import { $str } from "./handlers/str"
 import { $switch } from "./handlers/switch"
+import { $apply } from "./handlers/apply"
 import { $and, $or, $not } from "./handlers/booleanOperators"
 import { $lt, $gt, $lte, $gte, $ne, $regex } from "./handlers/binaryOperators"
 
@@ -35,4 +36,5 @@ export const builtinHandlers = {
     $str,
 
     $fn,
+    $apply,
 }

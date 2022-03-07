@@ -207,22 +207,6 @@ describe("rulify", () => {
         expect(executed).toBe(true)
     })
 
-    it("knows about handlers", async () => {
-        const rulifier = new Rulifier({
-            handlers: {
-                capitalize: async (name) => (await rulifier.materialize(name)).toUpperCase(),
-            }
-        })
-
-        const resp = rulifier.applyContext({
-            name: {
-                $capitalize: "Fred",
-            },
-        })
-
-        expect(await rulifier.materialize(resp.name)).toBe("FRED")
-    })
-
     it("a response can have more data source added to it", async () => {
         const rulifier = new Rulifier({
             dataSources: [
@@ -272,16 +256,6 @@ describe("rulify", () => {
         await expect(() => rulifier.materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
 
-    it("throws an error if a cycle in a handler", async () => {
-        const hasCycle = {}
-        hasCycle.$or = [hasCycle]
-
-        const rulifier = new Rulifier()
-        const resp = rulifier.applyContext(hasCycle)
-
-        await expect(() => rulifier.materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
-    })
-
     it("throws an error if a cycle when calculating cost", async () => {
         const hasCycle = {}
         hasCycle.$or = [hasCycle, hasCycle, hasCycle]
@@ -292,38 +266,6 @@ describe("rulify", () => {
         await expect(() => rulifier.materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
     
-    it("When materializing the same expression, the handler is only evaluated once.", async () => {
-        let calls = 0
-
-        const r = new Rulifier({
-            dataSources: [
-                {
-                    value: {
-                        $log: {
-                            a: {
-                                b: 1
-                            }
-                        }
-                    }
-                }
-            ],
-            handlers: {
-                $log(value) {
-                    calls++
-                    return value
-                }
-            }
-        })
-
-        const foo = r.applyContext()
-
-        await r.materialize(foo)
-        await r.materialize(foo.a)
-        await r.materialize(foo.a.b)
-
-        expect(calls).toBe(1)
-    })
-
     it("Two references to same thing", async () => {
         const r = new Rulifier({
             dataSources: [
@@ -341,6 +283,71 @@ describe("rulify", () => {
 
         const a = r.applyContext()
         expect(await r.materialize(a.foo)).toMatchObject(["hello", "hello"])
+    })
 
+    it("Can handle a data source that has a proxy for a value", async () => {
+        const r1 = new Rulifier({
+            dataSources: {
+                num: { v: 123 }
+            }
+        })
+        const obj1 = r1.applyContext()
+
+        const r2 = new Rulifier({
+            dataSources: { x: obj1.num }
+        })
+        const obj2 = r2.applyContext()
+
+        expect(await r2.materialize(obj2.x)).toMatchObject({ v: 123 })
+    })
+
+    it("Can handle a data source that has a proxy for a complex object as a value", async () => {
+        const r1 = new Rulifier({
+            dataSources: {
+                num: { v: 123 }
+            }
+        })
+        const obj1 = r1.applyContext()
+
+        const r2 = new Rulifier({
+            dataSources: { x: obj1.num }
+        })
+        const obj2 = r2.applyContext()
+
+        expect(await r2.materialize(obj2.x)).toMatchObject({ v: 123 })
+        expect(await r2.materialize(obj2.x.v)).toBe(123)
+    })
+
+    it("Can handle a data source that has a proxy for a simple object as a value", async () => {
+        const r1 = new Rulifier({
+            dataSources: {
+                num: 123
+            }
+        })
+        const obj1 = r1.applyContext()
+
+        const r2 = new Rulifier({
+            dataSources: { x: obj1.num }
+        })
+        const obj2 = r2.applyContext()
+
+        expect(await r2.materialize(obj2.x)).toBe(123)
+        expect(await r2.materialize(obj2)).toMatchObject({ x: 123 })
+    })
+
+    it("Can handle a data source that has a proxy for a root", async () => {
+        const r1 = new Rulifier({
+            dataSources: {
+                num: 123
+            }
+        })
+        const obj1 = r1.applyContext()
+
+        const r2 = new Rulifier({
+            dataSources: obj1
+        })
+        const obj2 = r2.applyContext()
+        expect(await r2.materialize(obj2)).toMatchObject({ num: 123 })
+        expect(await r2.materialize(obj2.num)).toBe(123)
     })
 })
