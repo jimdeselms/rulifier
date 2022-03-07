@@ -1,6 +1,6 @@
 {
   "name": "@jimdeselms/rulifier",
-  "version": "0.0.1-pre.13",
+  "version": "0.0.1-pre.15",
   "description": "A lightweight rule engine designed for speed and ease of use",
   "files": [
     "dist",

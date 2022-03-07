@@ -25,6 +25,4 @@ export async function $str(obj, api) {
     return result
 }
 
-$str[COST] = function strCost(value, calculateCost) {
-    return calculateCost(value, calculateCost) + DEFAULT_UNKNOWN_COST
-}
+$str[COST] = DEFAULT_UNKNOWN_COST

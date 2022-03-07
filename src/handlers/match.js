@@ -1,6 +1,4 @@
-import { COST } from "../symbols"
 import { eq } from "./eq"
-import { DEFAULT_UNKNOWN_COST } from "../calculateCost"
 
 export async function $match(obj, api) {
     if ((await api.getLength(obj)) === 2) {

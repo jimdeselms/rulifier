@@ -1,7 +1,6 @@
 import { materialize, getTypeof, getKeys } from "../methods"
 import { sortKeysForComparison } from "../sortNodes"
-import { TRUE, FALSE, GET_WITH_NEW_ROOT, COST } from "../symbols"
-import { DEFAULT_UNKNOWN_COST } from "../calculateCost"
+import { TRUE, FALSE, GET_WITH_NEW_ROOT } from "../symbols"
 
 export async function $eq(obj, ctx) {
     if ((await materialize(obj.length)) === 2) {

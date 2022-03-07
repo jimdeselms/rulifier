@@ -1,5 +1,4 @@
-import { TRUE, FALSE, COST } from "../symbols"
-import { DEFAULT_UNKNOWN_COST } from "../calculateCost"
+import { TRUE, FALSE } from "../symbols"
 import { materialize } from "../methods"
 
 export const $lt = (obj, opt) => evaluateBinary(obj, opt, (x, y) => x < y)
@@ -29,13 +28,5 @@ async function evaluateBinary(obj, api, predicate) {
         // In the root data source, we compare against a property of the root.
         const result = predicate(lhs, obj)
         return result ? TRUE : FALSE
-    }
-}
-
-function binaryOperatorCost(value, calculateCost) {
-    if (Array.isArray(value)) {
-        return calculateCost(value[0]) + calculateCost(value[1])
-    } else {
-        return calculateCost(value) + DEFAULT_UNKNOWN_COST
     }
 }

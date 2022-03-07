@@ -1,4 +1,4 @@
-import { rulify, materialize, Rulifier } from "../src"
+import { Rulifier } from "../src"
 
 describe("errorHandling", () => {
     it("will bubble up an exception if a handler throws an exception", async () => {
