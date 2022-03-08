@@ -266,7 +266,7 @@ async function rulifyWithCalc(value, costOptions) {
     
     const rulifier = new Rulifier({
         dataSources: [ value ],
-        handlers: { 
+        rules: { 
             $calc: { fn: calc, cost: calcCost }
         },
         costOptions

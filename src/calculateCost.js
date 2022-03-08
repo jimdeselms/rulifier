@@ -1,7 +1,7 @@
 import { COST } from "./symbols"
-import { getHandlerAndArgument } from "./getHandlerAndArgument"
+import { getRuleAndArgument } from "./getRuleAndArgument"
 
-// This is a helper for handlers that have to calculate the cost of unknown things.
+// This is a helper for rules that have to calculate the cost of unknown things.
 // We'll assume that these things are kind of expensive.
 export const DEFAULT_UNKNOWN_COST = 10
 
@@ -31,12 +31,12 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0, vi
         return fnCost ?? 1
     }
 
-    // If this is a handler, then we'll try to calculate the cost of the handler
+    // If this is a rule, then we'll try to calculate the cost of the rule
     // if it has a cost function. Otherwise we'll return the default.
-    const handlerAndArg = getHandlerAndArgument(rawValue, ctx.handlers)
+    const handlerAndArg = getRuleAndArgument(rawValue, ctx.rules)
 
     if (handlerAndArg) {
-        const cost = handlerAndArg.handler[COST]
+        const cost = handlerAndArg.rule[COST]
         let baseCost = 1
         if (cost) {
             baseCost = typeof cost === "function" ? cost(handlerAndArg.argument) : cost

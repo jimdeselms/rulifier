@@ -1,6 +1,6 @@
 import { GET_WITH_NEW_ROOT, RAW_VALUE, PROXY_CONTEXT, ROUTE, ITERATE_RAW } from "./symbols"
-import { getHandlerAndArgument } from "./getHandlerAndArgument"
-import { HandlerApi } from "./handlerApi"
+import { getRuleAndArgument } from "./getRuleAndArgument"
+import { RuleApi } from "./handlerApi"
 import { resolveSafe } from "./methods"
 
 export function proxify(value, ctx) {
@@ -20,7 +20,7 @@ export function proxify(value, ctx) {
         promisifiedObject = Promise.resolve(promisifiedObject)
     }
 
-    // Create the proxy, and add the handlers later so that they can reference the proxy.
+    // Create the proxy, and add the rules later so that they can reference the proxy.
     const proxyHandler = {}
     const proxy = new Proxy(promisifiedObject, proxyHandler)
 
@@ -74,8 +74,8 @@ export async function resolve(target, ctx, visited = []) {
 
     if (value !== null && (typeof value === "object" || typeof value === "function")) {
         if (typeof value === "object") {
-            // Are we calling a handler? Then do it and pass back the result.
-            const h = getHandlerAndArgument(value, ctx.handlers)
+            // Are we calling a rule? Then do it and pass back the result.
+            const h = getRuleAndArgument(value, ctx.rules)
             if (h) {
                 // We'll cache the promise so that if another request tries to
                 // resolve the same value, they'll both be waiting on the same
@@ -86,7 +86,7 @@ export async function resolve(target, ctx, visited = []) {
                 value = await resolvedValuePromise
             } else {
                 // This might not be worth it; if we have a cache hit, the only
-                // thing we've saved is the type check and call to getHandlerAndArgument.
+                // thing we've saved is the type check and call to getRuleAndArgument.
                 //
                 // Later when we do a performance analysis, we can see if this
                 // actually speeds it up or not.
@@ -98,18 +98,18 @@ export async function resolve(target, ctx, visited = []) {
     return value
 }
 
-async function resolveHandler({ handler, argument }, ctx, visited) {
+async function resolveHandler({ rule, argument }, ctx, visited) {
     const arg = await proxify(argument, ctx)
 
     // If this is $route, then we don't actually resolve it here.
     // The function is only invoked when the route is fully materialized.
-    if (handler === ROUTE) {
+    if (rule === ROUTE) {
         return {
             $route: arg,
         }
     }
 
-    let result = await handler(arg, new HandlerApi(ctx, visited))
+    let result = await rule(arg, new RuleApi(ctx, visited))
 
     if (result !== null && typeof result === "object" && result[PROXY_CONTEXT]) {
         result = await resolve(result[RAW_VALUE], result[PROXY_CONTEXT], visited)
@@ -145,15 +145,15 @@ async function iterateRaw(target, ctx) {
 async function getAsync(target, ctx) {
     const resolved = await resolve(target, ctx)
 
-    const handler = getHandlerAndArgument(resolved, ctx.handlers)
+    const rule = getRuleAndArgument(resolved, ctx.rules)
     // Normal case; we just get the given property
-    if (handler?.handler !== ROUTE) {
+    if (rule?.rule !== ROUTE) {
         const result = resolved?.[ctx.prop]
         return await resolveSafe(result)
     }
 
     // Special case: if we're getting something from a route, then we add the property to the path.
-    const arg = await handler.argument[RAW_VALUE]
+    const arg = await rule.argument[RAW_VALUE]
 
     if (typeof arg === "function") {
         return {

@@ -15,7 +15,7 @@ export class Rulifier {
     /**
      * @param {Object} [opts]
      * @param {Record<string, any>[]} opts.dataSources The set of data sources to rulify
-     * @param {Record<string, (arg: any, sdk: HandlerApi) => any>} [opts.handlers] Custom handlers
+     * @param {Record<string, (arg: any, sdk: RuleApi) => any>} [opts.rules] Custom rules
      * @param {CostOptions} [opts.costOptions] Defines limits when calculating costs
      */
     constructor(opts) {
@@ -27,7 +27,7 @@ export class Rulifier {
                 : [opts.dataSources]
             : []
 
-        this.#root = rulify(dataSources, opts.costOptions, opts.handlers)
+        this.#root = rulify(dataSources, opts.costOptions, opts.rules)
     }
 
     /**

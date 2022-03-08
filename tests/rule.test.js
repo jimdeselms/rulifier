@@ -2,9 +2,9 @@ import { Rulifier } from "../src"
 import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
-    it("knows about handlers", async () => {
+    it("knows about rules", async () => {
         const rulifier = new Rulifier({
-            handlers: {
+            rules: {
                 capitalize: async (name) => (await rulifier.materialize(name)).toUpperCase(),
             }
         })
@@ -18,7 +18,7 @@ describe("rulify", () => {
         expect(await rulifier.materialize(resp.name)).toBe("FRED")
     })
 
-    it("throws an error if a cycle in a handler", async () => {
+    it("throws an error if a cycle in a rule", async () => {
         const hasCycle = {}
         hasCycle.$or = [hasCycle]
 
@@ -28,7 +28,7 @@ describe("rulify", () => {
         await expect(() => rulifier.materialize(resp.hasCycle.hasCycle)).rejects.toThrow()
     })
 
-    it("When materializing the same expression, the handler is only evaluated once.", async () => {
+    it("When materializing the same expression, the rule is only evaluated once.", async () => {
         let calls = 0
 
         const r = new Rulifier({
@@ -43,7 +43,7 @@ describe("rulify", () => {
                     }
                 }
             ],
-            handlers: {
+            rules: {
                 $log(value) {
                     calls++
                     return value
@@ -60,7 +60,7 @@ describe("rulify", () => {
         expect(calls).toBe(1)
     })
 
-    it("a handler can return a value that calls a handler", async () => {
+    it("a rule can return a value that calls a rule", async () => {
         const r = new Rulifier({
             dataSources: [
                 {
@@ -72,7 +72,7 @@ describe("rulify", () => {
                     }
                 }
             ],
-            handlers: {
+            rules: {
                 async $toUpper(val, sdk) {
                     const str = await sdk.materialize(val)
                     return str.toUpperCase()
@@ -99,7 +99,7 @@ describe("rulify", () => {
                     a: { $toLower: "HELLO" }
                 }
             ],
-            handlers: {
+            rules: {
                 async $toLower(a, b) {
                     return (await b.materialize(a)).toLowerCase()
                 }
@@ -117,7 +117,7 @@ describe("rulify", () => {
                     value: { $greeting: "Hello" },
                 }
             ],
-            handlers: {
+            rules: {
                 async $greeting(obj, sdk) {
                     const greeting = await sdk.materialize(obj)
 

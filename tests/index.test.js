@@ -274,7 +274,7 @@ describe("rulify", () => {
                     a: { $toLower: "HELLO" }
                 }
             ],
-            handlers: {
+            rules: {
                 async $toLower(a, b) {
                     return (await b.materialize(a)).toLowerCase()
                 }

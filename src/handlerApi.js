@@ -5,9 +5,9 @@ import { sortNodes } from "./sortNodes"
 import { materialize, getTypeof, getKeys, getLength } from "./methods"
 
 /**
- * @classdesc Provides the interface between a handler and Rulifier
+ * @classdesc Provides the interface between a rule and Rulifier
  */
-export class HandlerApi {
+export class RuleApi {
     #ctx
     #visited
     root
@@ -24,7 +24,7 @@ export class HandlerApi {
     }
 
     /**
-     * In the context of a comparison handler such as $lt or $regex,
+     * In the context of a comparison rule such as $lt or $regex,
      * gets the value of the corresponding property to compare against.
      * @returns {Promise<any>}
      */
