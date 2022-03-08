@@ -1,13 +1,11 @@
 import { COST } from "./symbols"
 import { getHandlerAndArgument } from "./getHandlerAndArgument"
 
-const DEFAULT_NODE_COST = 2
-
 // This is a helper for handlers that have to calculate the cost of unknown things.
 // We'll assume that these things are kind of expensive.
 export const DEFAULT_UNKNOWN_COST = 10
 
-export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
+export const calculateCost = function calculateCost(rawValue, ctx, depth = 0, visited = 0) {
     const type = typeof rawValue
 
     // Primitive types are essentially free
@@ -23,8 +21,8 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
     }
 
     // Don't go too deep.
-    if (depth >= ctx.costOptions.maxDepth) {
-        return DEFAULT_NODE_COST
+    if (depth >= ctx.costOptions.maxDepth || visited >= ctx.costOptions.maxNodes) {
+        return 1
     }
 
     // If this is a function, get its cost or return the default.
@@ -61,7 +59,8 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
     let totalCost = values.length
 
     for (let i = 0; i < iterations; i++) {
-        totalCost += calculateCost(values[i], ctx, depth + 1)
+        visited++
+        totalCost += calculateCost(values[i], ctx, depth + 1, visited)
     }
     return totalCost
 }
