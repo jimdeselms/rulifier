@@ -3,9 +3,6 @@ import { getHandlerAndArgument } from "./getHandlerAndArgument"
 
 const DEFAULT_NODE_COST = 2
 
-const MAX_BREADTH_PER_NODE = 25
-const MAX_DEPTH = 4
-
 // This is a helper for handlers that have to calculate the cost of unknown things.
 // We'll assume that these things are kind of expensive.
 export const DEFAULT_UNKNOWN_COST = 10
@@ -26,7 +23,7 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
     }
 
     // Don't go too deep.
-    if (depth >= MAX_DEPTH) {
+    if (depth >= ctx.costOptions.maxDepth) {
         return DEFAULT_NODE_COST
     }
 
@@ -58,7 +55,7 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0) {
     //
     // TODO - make these limits configurable
     const values = Object.values(rawValue)
-    const iterations = Math.min(values.length, MAX_BREADTH_PER_NODE)
+    const iterations = Math.min(values.length, ctx.costOptions.maxBreadth)
 
     // Each node that we traverse starts with a value of 1.
     let totalCost = values.length

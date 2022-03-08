@@ -4,6 +4,9 @@ import { sortNodes } from "./sortNodes"
 
 import { materialize, getTypeof, getKeys, getLength } from "./methods"
 
+/**
+ * @classdesc Provides the interface between a handler and Rulifier
+ */
 export class HandlerApi {
     #ctx
     #visited

@@ -6,21 +6,28 @@ export class Rulifier {
     #root
 
     /**
+     * @typedef { Object } CostOptions Defines limits for calculating costs
+     * @property { number } [maxDepth] The maximum depth to explore
+     * @property { number } [maxBreadth] The maximum number of nodes to explore when iterating a large object or array
+     * @property { number } [maxNodes] The total number of nodes to explore when calculating cost
+     */
+
+    /**
      * @param {Object} [opts]
-     * @param {any} [opts.dataSources] The set of data sources to rulify
-     * @param {any} [opts.handlers] Custom handlers
+     * @param {Record<string, any>[]} opts.dataSources The set of data sources to rulify
+     * @param {Record<string, (arg: any, sdk: HandlerApi) => any>} [opts.handlers] Custom handlers
+     * @param {CostOptions} [opts.costOptions] Defines limits when calculating costs
      */
     constructor(opts) {
         opts = opts ?? {}
         this.#opts = opts
-
         const dataSources = opts.dataSources
             ? Array.isArray(opts.dataSources)
                 ? opts.dataSources
                 : [opts.dataSources]
             : []
 
-        this.#root = rulify(dataSources, opts.handlers)
+        this.#root = rulify(dataSources, opts.costOptions, opts.handlers)
     }
 
     /**
@@ -43,7 +50,7 @@ export class Rulifier {
      * @returns {Rulified<T>}
      */
     applyContext(dataSource = {}) {
-        return rulify([this.#root, dataSource])
+        return rulify([this.#root, dataSource], this.#opts.costOptions)
     }
 
     /**

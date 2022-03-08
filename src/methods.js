@@ -48,7 +48,7 @@ export async function resolveSafe(obj) {
 export async function applyNewContext(expr, context) {
     const ctx = getProxyContext(expr)
 
-    const o = rulify([ctx.proxy[RAW_VALUE], await context[RAW_VALUE]])
+    const o = rulify([ctx.proxy[RAW_VALUE], await context[RAW_VALUE]], ctx.costOptions)
 
     const newVal = proxify(await expr[RAW_VALUE], await o[PROXY_CONTEXT])
 

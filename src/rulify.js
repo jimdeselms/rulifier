@@ -11,7 +11,7 @@ initInternalFunctions({ materializeInternal, resolve, proxify, rulify })
  * @param {...Record<any, any>} dataSources
  * @returns {Record<any, any>}
  */
-export function rulify(dataSources, handlers = {}) {
+export function rulify(dataSources, costOptions = {}, handlers = {}) {
     const merged = {}
     let mergedHandlers = {}
 
@@ -27,6 +27,8 @@ export function rulify(dataSources, handlers = {}) {
         Object.assign(merged, dataSource)
     }
 
+    debugger
+
     Object.assign(mergedHandlers, normalizeHandlers(handlers), builtinHandlers)
 
     // Set up the context
@@ -40,6 +42,11 @@ export function rulify(dataSources, handlers = {}) {
         handlers: mergedHandlers,
         dataSource: merged,
         resolvedValueCache: new WeakMap(),
+        costOptions: {
+            maxDepth: costOptions.maxDepth ?? 4,
+            maxBreadth: costOptions.maxBreadth ?? 25,
+            maxNodes: costOptions.maxNodes ?? 200
+        }
     }
 
     return proxify(merged, ctx)

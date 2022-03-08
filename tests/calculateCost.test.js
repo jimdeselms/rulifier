@@ -198,7 +198,38 @@ describe('calculateCost', () => {
  
          expect(messages).toMatchObject(["first", "first", "second", "second", "third", "third", "fourth", "fourth"])
      })
-})
+
+     it('if cost options limit cost calculation, then nodes will be processed in sequential order', async () => {
+        // In this case, all the nodes are false, but at least we execute them in
+        // order of cost
+        const { obj, rulifier, messages } = await rulifyWithCalc({
+            value: {
+                $eq: [
+                    { 
+                        name: calc(5, "Fred", "first"),
+                        age: calc(10, 20, "second"),
+                        city: calc(15, "Springfield", "third"),
+                        zipCode: calc(1, 20, "fourth")
+                    },
+                    { 
+                        name: calc(5, "Fred", "first"),
+                        age: calc(9, 20, "second"),
+                        city: calc(2, "Springfield", "third"),
+                        zipCode: calc(10, 20, "fourth")
+                    }
+                ]
+            }
+         }, {
+             maxDepth: 0,
+             maxBreadth: 0,
+             maxNodes: 0
+         })
+
+         expect(await rulifier.materialize(obj.value)).toBe(true)
+ 
+         expect(messages).toMatchObject(["first", "first", "second", "second", "third", "third", "fourth", "fourth"])
+     })
+    })
 
 function calc(cost, value=undefined, message=undefined) {
     return {
@@ -218,7 +249,7 @@ function funcWithCost(func, cost) {
     }
 }
 
-async function rulifyWithCalc(value) {
+async function rulifyWithCalc(value, costOptions) {
     const messages = []
     let costCalls = 0
 
@@ -237,7 +268,8 @@ async function rulifyWithCalc(value) {
         dataSources: [ value ],
         handlers: { 
             $calc: { fn: calc, cost: calcCost }
-        }
+        },
+        costOptions
     })
 
     const obj = rulifier.applyContext({})
