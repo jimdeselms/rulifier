@@ -2,7 +2,7 @@ import { Rulifier } from "../src"
 
 describe("errorHandling", () => {
     it("will bubble up an exception if a rule throws an exception", async () => {
-        const rulifier = new Rulifier({
+        const rulifier = new Rulifier({}, {
             rules: { $throw }
         })
 
@@ -17,7 +17,7 @@ describe("errorHandling", () => {
     })
 
     it("will throw an exception if the root object rule an exception", async () => {
-        const rulifier = new Rulifier({
+        const rulifier = new Rulifier({}, {
             rules: { $throw }
         })
 
@@ -32,7 +32,7 @@ describe("errorHandling", () => {
     })
 
     it("will not throw an exception if you don't reference a rule that would throw an exception", async () => {
-        const rulifier = new Rulifier({
+        const rulifier = new Rulifier({}, {
             rules: { $throw }
         })
 

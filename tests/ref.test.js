@@ -92,4 +92,26 @@ describe("ref", () => {
         expect(await rulifier.materialize(resp.value1)).toBe(1)
         expect(await rulifier.materialize(resp.value2)).toBe(5)
     })
+
+    it("returns undefined if looking up a non-existent property on value that does exist.", async () => {
+        const rulifier = new Rulifier()
+        const resp = await rulifier.applyContext({
+            a: {
+                b: {
+                    c: 1
+                }
+            }
+        })
+
+        expect(await rulifier.materialize(resp.a.b.UNDEFINED)).toBe(undefined)
+    })
+
+    it("throws an error when referencing a property on an undefined value.", async () => {
+        const rulifier = new Rulifier()
+        const resp = await rulifier.applyContext({
+            a: {}
+        })
+
+        await expect(() => rulifier.materialize(resp.a.b.UNDEFINED)).rejects.toThrow()
+    })
 })

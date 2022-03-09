@@ -130,17 +130,15 @@ describe('calculateCost', () => {
         // In this case, all the nodes are false, but at least we execute them in
         // order of cost
         const values = []
-        const rulifier = new Rulifier({
-            dataSources: [
-                {
-                    $or: [
-                        funcWithCost(() => (values.push(20), false), 20),
-                        funcWithCost(() => (values.push(5), false), 5),
-                        funcWithCost(() => (values.push(10), false), 10)
-                    ]
-                }
-            ]
-        })
+        const rulifier = new Rulifier([
+            {
+                $or: [
+                    funcWithCost(() => (values.push(20), false), 20),
+                    funcWithCost(() => (values.push(5), false), 5),
+                    funcWithCost(() => (values.push(10), false), 10)
+                ]
+            }
+        ])
 
         const resp = rulifier.applyContext()
 
@@ -264,13 +262,15 @@ async function rulifyWithCalc(value, costOptions) {
         return rawValue.cost
     }
     
-    const rulifier = new Rulifier({
-        dataSources: [ value ],
-        rules: { 
-            $calc: { fn: calc, cost: calcCost }
-        },
-        costOptions
-    })
+    const rulifier = new Rulifier(
+        [ value ],
+        {
+            rules: { 
+                $calc: { fn: calc, cost: calcCost }
+            },
+            costOptions
+        }
+    )
 
     const obj = rulifier.applyContext({})
 

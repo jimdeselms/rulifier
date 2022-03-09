@@ -3,7 +3,7 @@ import { delayed } from "./helpers.test"
 
 describe("rulify", () => {
     it("knows about rules", async () => {
-        const rulifier = new Rulifier({
+        const rulifier = new Rulifier({}, {
             rules: {
                 capitalize: async (name) => (await rulifier.materialize(name)).toUpperCase(),
             }
@@ -31,25 +31,25 @@ describe("rulify", () => {
     it("When materializing the same expression, the rule is only evaluated once.", async () => {
         let calls = 0
 
-        const r = new Rulifier({
-            dataSources: [
-                {
-                    value: {
-                        $log: {
-                            a: {
-                                b: 1
-                            }
+        const r = new Rulifier(
+            {
+                value: {
+                    $log: {
+                        a: {
+                            b: 1
                         }
                     }
                 }
-            ],
-            rules: {
-                $log(value) {
-                    calls++
-                    return value
+            },
+            {
+                rules: {
+                    $log(value) {
+                        calls++
+                        return value
+                    }
                 }
             }
-        })
+        )
 
         const foo = r.applyContext()
 
@@ -61,8 +61,8 @@ describe("rulify", () => {
     })
 
     it("a rule can return a value that calls a rule", async () => {
-        const r = new Rulifier({
-            dataSources: [
+        const r = new Rulifier(
+            [
                 {
                     val: {
                         $greetToUpper: {
@@ -72,20 +72,22 @@ describe("rulify", () => {
                     }
                 }
             ],
-            rules: {
-                async $toUpper(val, sdk) {
-                    const str = await sdk.materialize(val)
-                    return str.toUpperCase()
-                },
-                async $greetToUpper(val, sdk) {
-                    val = await sdk.materialize(val)
+            {
+                rules: {
+                    async $toUpper(val, sdk) {
+                        const str = await sdk.materialize(val)
+                        return str.toUpperCase()
+                    },
+                    async $greetToUpper(val, sdk) {
+                        val = await sdk.materialize(val)
 
-                    return {
-                        $toUpper: { $str: `${val.greeting}, ${val.name}!` }
+                        return {
+                            $toUpper: { $str: `${val.greeting}, ${val.name}!` }
+                        }
                     }
                 }
             }
-        })
+        )
 
         const resp = r.applyContext()
         expect(await r.materialize(resp.val)).toBe("HOWDY, WORLD!")
@@ -93,12 +95,10 @@ describe("rulify", () => {
 
     it("can have two references to same thing without causing a cycle", async () => {
         const r = new Rulifier({
-            dataSources: [
-                {
-                    foo: [ { $ref: delayed("a") }, { $ref: delayed("a") } ],
-                    a: { $toLower: "HELLO" }
-                }
-            ],
+                foo: [ { $ref: delayed("a") }, { $ref: delayed("a") } ],
+                a: { $toLower: "HELLO" }
+        },
+        {
             rules: {
                 async $toLower(a, b) {
                     return (await b.materialize(a)).toLowerCase()
@@ -112,11 +112,9 @@ describe("rulify", () => {
 
     it("can add context within a proxy", async () => {
         const r = new Rulifier({
-            dataSources: [
-                {
-                    value: { $greeting: "Hello" },
-                }
-            ],
+            value: { $greeting: "Hello" },
+        },
+        {
             rules: {
                 async $greeting(obj, sdk) {
                     const greeting = await sdk.materialize(obj)

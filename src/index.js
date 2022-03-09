@@ -13,21 +13,21 @@ export class Rulifier {
      */
 
     /**
+     * @param {Record<string, any>[] | Record<string, any>} dataSources The set of data sources to rulify
      * @param {Object} [opts]
-     * @param {Record<string, any>[]} opts.dataSources The set of data sources to rulify
      * @param {Record<string, (arg: any, sdk: RuleApi) => any>} [opts.rules] Custom rules
      * @param {CostOptions} [opts.costOptions] Defines limits when calculating costs
      */
-    constructor(opts) {
+    constructor(dataSources, opts) {
         opts = opts ?? {}
         this.#opts = opts
-        const dataSources = opts.dataSources
-            ? Array.isArray(opts.dataSources)
-                ? opts.dataSources
-                : [opts.dataSources]
+        const ds = dataSources
+            ? Array.isArray(dataSources)
+                ? dataSources
+                : [dataSources]
             : []
 
-        this.#root = rulify(dataSources, opts.costOptions, opts.rules)
+        this.#root = rulify(ds, opts.costOptions, opts.rules)
     }
 
     /**

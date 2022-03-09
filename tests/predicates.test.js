@@ -147,7 +147,7 @@ describe("predicates", () => {
     })
 
     test("binary match", async () => {
-        const rulifier = new Rulifier({
+        const rulifier = new Rulifier({}, {
             rules: {
                 async $capitalize(str, api) {
                     return (await api.materialize(str)).toUpperCase()

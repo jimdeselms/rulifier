@@ -11,10 +11,6 @@ import { $and, $or, $not } from "./rules/booleanOperators"
 import { $lt, $gt, $lte, $gte, $ne, $regex } from "./rules/binaryOperators"
 
 export const builtinRules = {
-    async $rules() {
-        throw new Error("rules can only be defined at the root of a data source")
-    },
-
     $if,
     $switch,
     $match,

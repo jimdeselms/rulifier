@@ -208,13 +208,11 @@ describe("rulify", () => {
     })
 
     it("a response can have more data source added to it", async () => {
-        const rulifier = new Rulifier({
-            dataSources: [
-                { a: 1 },
-                { b: 2 },
-                { c: 3 }
-            ]
-        })
+        const rulifier = new Rulifier([
+            { a: 1 },
+            { b: 2 },
+            { c: 3 }
+        ])
 
         const resp = rulifier.applyContext()
 
@@ -267,19 +265,20 @@ describe("rulify", () => {
     })
     
     it("Two references to same thing", async () => {
-        const r = new Rulifier({
-            dataSources: [
+        const r = new Rulifier([
                 {
                     foo: [ { $ref: delayed("a") }, { $ref: delayed("a") } ],
                     a: { $toLower: "HELLO" }
                 }
-            ],
-            rules: {
-                async $toLower(a, b) {
-                    return (await b.materialize(a)).toLowerCase()
+            ], 
+            {
+                rules: {
+                    async $toLower(a, b) {
+                        return (await b.materialize(a)).toLowerCase()
+                    }
                 }
             }
-        })
+        )
 
         const a = r.applyContext()
         expect(await r.materialize(a.foo)).toMatchObject(["hello", "hello"])
@@ -287,14 +286,12 @@ describe("rulify", () => {
 
     it("Can handle a data source that has a proxy for a value", async () => {
         const r1 = new Rulifier({
-            dataSources: {
-                num: { v: 123 }
-            }
+            num: { v: 123 }
         })
         const obj1 = r1.applyContext()
 
         const r2 = new Rulifier({
-            dataSources: { x: obj1.num }
+            x: obj1.num
         })
         const obj2 = r2.applyContext()
 
@@ -303,14 +300,12 @@ describe("rulify", () => {
 
     it("Can handle a data source that has a proxy for a complex object as a value", async () => {
         const r1 = new Rulifier({
-            dataSources: {
-                num: { v: 123 }
-            }
+            num: { v: 123 }
         })
         const obj1 = r1.applyContext()
 
         const r2 = new Rulifier({
-            dataSources: { x: obj1.num }
+            x: obj1.num
         })
         const obj2 = r2.applyContext()
 
@@ -320,14 +315,12 @@ describe("rulify", () => {
 
     it("Can handle a data source that has a proxy for a simple object as a value", async () => {
         const r1 = new Rulifier({
-            dataSources: {
-                num: 123
-            }
+            num: 123
         })
         const obj1 = r1.applyContext()
 
         const r2 = new Rulifier({
-            dataSources: { x: obj1.num }
+            x: obj1.num
         })
         const obj2 = r2.applyContext()
 
@@ -337,15 +330,11 @@ describe("rulify", () => {
 
     it("Can handle a data source that has a proxy for a root", async () => {
         const r1 = new Rulifier({
-            dataSources: {
-                num: 123
-            }
+            num: 123
         })
         const obj1 = r1.applyContext()
 
-        const r2 = new Rulifier({
-            dataSources: obj1
-        })
+        const r2 = new Rulifier(obj1)
         const obj2 = r2.applyContext()
         expect(await r2.materialize(obj2)).toMatchObject({ num: 123 })
         expect(await r2.materialize(obj2.num)).toBe(123)
