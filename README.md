@@ -298,7 +298,83 @@ Instead of matching against specific values, you can also use rules to match:
 ```
 # Working with rulified objects
 
+Rulified objects are Javascript proxies that intercept proxy requests to return a new rulified object. 
+
+For example:
+
+```javascript
+// Here we get a rulified object
+const obj = rulifier.applyContext({...})
+
+// This is also a rulified object; it is not a string.
+const nameProxy = obj.person[0].name
+```
+
+After you get a rulified object, in order to evaluate it and get a real Javascript object, you must then "materialize" it.
+
+```javascript
+const name = await rulifier.materialize(nameProxy)
+```
+
+In addition to materializing a rulified object, you can perform a number of other operations on objects without fully materializing them.  
+
+Here are the methods on `Rulifier`. These methods will evaluate only the root of the object; any properties of that value will remain unevaluated until they are specifically requested.
+
+* `getTypeof(obj: any): Promise<string>` - get the Javascript type of the evaluated object
+* `getKeys(obj: any): Promise<string[] | undefined>` - returns the set of keys on an object, or undefined the argument isn't an object.
+* `has(obj: any, key: string): Promise<boolean>` - returns true if the given key exists on the evaluated object
+* `getLength(array: any[]): Promise<number | undefined>` - returns the number of elements in an array, or undefined if the argument isn't an array.
+
 ## Iterating
+
+You can also iterate over the values of a rulified array without fully materializing it. The root of the object will be evaluated, but not the entries of the array themselves.
+
+Iterating takes advantage of Javascript asynchronous iterators; note the `for await` syntax in this example:
+
+```Javascript
+// Use async iterator syntax
+for await (const person of people) {
+    // Note that we still have to materialize the name. None of the other properties of the object need to be materialized.
+    const name = await rulifier.materialize(person.name)
+    console.log(name)
+}
+```
+
+# Writing custom rules
+
+In addition to the built-in rules provided by Rulifier, you can define your own rules. The `Rulifier` constructor includes an `options` object where you can defined `rules`.
+
+This example references the rule $toLowerCase to read the "name" value and convert it to lowercase:
+
+```Javascript
+const rulifier = new Rulifier(
+    {
+        lowerCaseName: { 
+            $toLowerCase: {
+                $ref: "name"
+            }
+        }
+    },
+    {
+        rules: {
+            async $toLowerCase(strObj, sdk) {
+                str = await sdk.materialize(strObj)
+                return str
+            }
+        }
+    }
+)
+
+const obj = rulifier.applyContext({ name: "Steve" })
+const name = await rulifier.materialize(obj.lowerCaseName) // "steve"
+
+```
+
+To reference a rule, you define an object with a single property, which is the name of the rule to invoke. The value of that property will be the argument to the rule. In the example above,
+the rule `{ $ref: "name" }` is passed as an argument to the `$toLowerCase` rule.
+
+Rules are just functions that take two parameters: the rulified object that is the value given in the rule reference, and a Rulifier.
+
 # Performance
 
 Rulifier is fast for several reasons:
@@ -307,6 +383,12 @@ Rulifier is fast for several reasons:
 * Since boolean rules (like `$or` and `$and`) will short circuit as soon as it can be determined that the
 rule is true or false, the cases are sorted in order of complexity; if you have an expensive term in your `$or` statement, you may be able to quickly determine that you don't need to evaluate it at all.
 
+## Improving performance
+
+Since Rulifier only evalutes rules if it absolutely has to, avoid fully materializing objects if you only need a subset of its properties. You can also take advantage of the methods on `Rulifier` 
+to get the set of keys on an object, the length of an array, etc.
+
+Additionally, you can iterate over a rulified array without actually materializing it. (See "Iterating" above.)
 ## Usage
 
 
