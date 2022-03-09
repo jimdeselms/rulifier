@@ -2,7 +2,7 @@ import { getRawValue } from "./getRawValue"
 import { getRef } from "./getRef"
 import { sortNodes } from "./sortNodes"
 
-import { materialize, getTypeof, getKeys, getLength } from "./methods"
+import { materialize, getTypeof, getKeys, getLength, has } from "./methods"
 
 /**
  * @classdesc Provides the interface between a rule and Rulifier
@@ -93,6 +93,16 @@ export class RuleApi {
      */
     getKeys(obj) {
         return getKeys(obj)
+    }
+
+    /**
+     * Returns true if the given object has the given key,
+     * otherwise, false
+     * @param {any} obj
+     * @returns {Promise<boolean>}
+     */
+    has(obj, key){
+        return has(obj, key)
     }
 
     /**

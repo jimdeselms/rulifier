@@ -100,23 +100,23 @@ describe('calculateCost', () => {
         // order of cost
         const { obj, rulifier, messages, getCostCalls } = await rulifyWithCalc({
            value: {
-               $switch: {
-                    cases: [
-                        {
-                            condition: calc(5, false, "second"),
-                            value: "dontcare"
-                        },
-                        {
-                            condition: calc(10, false, "third"),
-                            value: "dontcare"
-                        },
-                        {
-                            condition: calc(1, false, "first"),
-                            value: "dontcare"
-                        }
-                    ],
-                    default: 123
-                }
+               $switch: [
+                    {
+                        condition: calc(5, false, "second"),
+                        value: "dontcare"
+                    },
+                    {
+                        condition: calc(10, false, "third"),
+                        value: "dontcare"
+                    },
+                    {
+                        condition: calc(1, false, "first"),
+                        value: "dontcare"
+                    },
+                    {
+                        value: 123
+                    }
+               ]
            }
         })
 

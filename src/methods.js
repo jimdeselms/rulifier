@@ -30,6 +30,16 @@ export async function getKeys(obj) {
     }
 }
 
+export async function has(obj, key) {
+    const resolved = await resolveSafe(obj)
+
+    if (typeof resolved !== "object") {
+        return undefined
+    } else {
+        return key in resolved
+    }
+}
+
 export async function getLength(obj) {
     const resolved = await resolveSafe(obj)
 

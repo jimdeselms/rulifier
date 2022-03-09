@@ -2,7 +2,10 @@ import { calculateCost } from "./calculateCost"
 import { ITERATE_RAW, RAW_VALUE, PROXY_CONTEXT } from "./symbols"
 
 export async function sortNodes(nodes, ctx, accessor = (x) => x) {
-    const rawNodes = await nodes[ITERATE_RAW]()
+    const rawNodes = await nodes?.[ITERATE_RAW]()
+    if (!rawNodes) {
+        return []
+    }
 
     if (rawNodes.length >= 2) {
         const nodeCostPairs = rawNodes.map((n, i) => [nodes[i], calculateCost(accessor(n), ctx)])
