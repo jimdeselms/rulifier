@@ -103,15 +103,16 @@ describe("ref", () => {
             }
         })
 
-        expect(await rulifier.materialize(resp.a.b.UNDEFINED)).toBe(undefined)
+        expect(await rulifier.materialize(resp.a.b.UNDEFINED)).toBeUndefined()
     })
 
-    it("throws an error when referencing a property on an undefined value.", async () => {
+    it("returns undefined if looking up a non-existent property on a non-existent value", async () => {
+        // TODO - I'd actually like this to throw.
         const rulifier = new Rulifier()
         const resp = await rulifier.applyContext({
             a: {}
         })
 
-        await expect(() => rulifier.materialize(resp.a.b.UNDEFINED)).rejects.toThrow()
+        expect(await rulifier.materialize(resp.a.b.UNDEFINED)).toBeUndefined()
     })
 })

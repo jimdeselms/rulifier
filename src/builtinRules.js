@@ -13,21 +13,22 @@ import { $lt, $gt, $lte, $gte, $ne, $regex } from "./rules/binaryOperators"
 export const builtinRules = {
     $if,
     $switch,
-    $match,
-    $eq,
 
+    $match,
+
+    $eq,
     $lt,
     $gt,
     $lte,
     $gte,
     $ne,
     $regex,
+    $in,
 
     $and,
     $or,
     $not,
 
-    $in,
     $ref,
     $str,
 

@@ -129,14 +129,17 @@ const rulifier = new Rulifier([,
     })
 ```
 
-## Built-in rules
+# Built-in rules
 
-### `$ref`
+## `$ref`
 
-The `$ref` rule reads a value from the 
+The `$ref` accepts a string path and, starting from the root of the object, follows the properties down to the referenced property.
+
+The path uses typical Javascript syntax for accesssing a string of properties, such as `person.address.city`. You can also refrence
+arary elements by index, such as `people[0].address.city`
 
 ```typescript
-{ $ref: string }
+{ $ref: string } // returns any
 ```
 
 Example: 
@@ -153,20 +156,69 @@ For this example, we'll assume that we have these data sources and context:
                 country: "USA"
             }
         }
-    ]
+    ],
+    // This evaluates to "Hitsville
+    johnCity: {
+        $ref: "people[0].address.city"
+    }
 }
 ```
 
-We can use this `$ref` to reference the city above:
+## `$str`
+
+The `$str` rule allows you to reference properties using string interpolation, and replace those references with the values of those references.
+
+```typescript
+{ $str: string } // returns string
+```
+
+Properties are referenced using the syntax `${reference}`.
+
+Given the `$ref` example above, we could add this context:
+
 ```javascript
 {
-    $ref: "people[0].address.city"
+    ...
+    // This evalutes to "Good morning, John Donson, how are things in Hitsville?"
+    johnGreeting: { $str: "Good morning, ${people[0].name}, how are things in ${johnCity}?" }
 }
 ```
 
+## Boolean rules `$and`, `$or`, and `$not`
 
+```typescript
+{ $and: boolean[] } // returns boolean
+{ $or: boolean[] } // returns boolean
+{ $not: boolean } // returns boolean
+```
 
-## Performance
+`$and` takes an array of expressions and returns `true` if they are all truthy. If the
+given array is empty, then `$and` returns true.
+
+Likewise, `$or` returns false if any of the expressions is falsy, and if the array is
+empty, then `$or` returns false.
+
+`$and` and `$or` will short-circuit -- that is -- they will only evaluate expressions for
+as long as it takes to determine the result. 
+
+**NOTE** - unlike most languages, the expressions are not evaluated in the given order, but rather,
+the expressions are sorted by cost, evaluating the least-expensive predicates first.
+
+`$not` will return the boolean opposite of the given expression. It returns `true` if expression is falsy, and `false` if the expression is truthy.
+
+## `$if`
+
+```typescript
+{
+    $if: {
+        condition: boolean,
+        then: any
+        else: any
+    }
+}
+```
+
+# Performance
 
 Rulifier is fast for several reasons:
 * Rules are evaluated lazily, and only if they need to be
