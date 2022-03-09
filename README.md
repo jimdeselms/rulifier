@@ -218,6 +218,87 @@ the expressions are sorted by cost, evaluating the least-expensive predicates fi
 }
 ```
 
+`$if` evaluates the given expression and -- if it is truthy -- returns the `then` value, otherwise, it returns the `else` value.
+
+## `$switch`
+
+```typescript
+{
+    $switch: Array<{
+        condition?: boolean
+        value: any
+    }>
+}
+```
+
+`$switch` evalutes a set of conditions, returning the value of the first case that evalutes to true. If a case doesn't include a `condition`, then that case will be considered to be a default
+if no other cases match.
+
+**NOTE** Cases are not evaluated in sequential order, but rather, in the order of cost, with the least expensive cases being evaluated first.
+
+### Example
+
+In this example, if the `city` value evalutes to "New York", then `areaCode` evalutes to "212",
+otherwise, "UKNOWN".
+
+```Javascript
+{
+    areaCode {
+        $switch: [
+            {
+                condition: { $eq: [ { $ref("city") }, "New York" ] },
+                value: "212"
+            },
+            {
+                value: "UNKNOWN"
+            }
+        ]
+    }
+}
+```
+
+## `$match`
+
+```typescript
+{
+    $match: object
+}
+```
+
+`$match` is a boolean rule that evalutes to true if the properties of the given object
+match the values of the rulified object itself.
+
+## Example
+```javascript
+{
+    isFred: {
+        $match: {
+            name: "Fred",
+            age: 25
+            address: {
+                zipCode: "01234"
+            }
+        }
+    }
+}
+```
+
+In this example, the `isFred` property matches the given references (`name`, `age`, and `address.zipCode`) match the given values.
+
+Instead of matching against specific values, you can also use rules to match:
+
+```javascript
+{
+    isOld: {
+        $match: {
+            age: { $gt: 80 }
+        }
+    }
+}
+```
+# Working with rulified objects
+
+## Iterating
 # Performance
 
 Rulifier is fast for several reasons:
