@@ -42,8 +42,6 @@ export const calculateCost = function calculateCost(rawValue, ctx, depth = 0, vi
             baseCost = typeof cost === "function" ? cost(handlerAndArg.argument) : cost
         }
 
-        debugger
-
         return baseCost + calculateCost(handlerAndArg.argument, ctx, depth + 1)
     }
 

@@ -27,8 +27,6 @@ export function rulify(dataSources, costOptions = {}, rules = {}) {
         Object.assign(merged, dataSource)
     }
 
-    debugger
-
     Object.assign(mergedHandlers, normalizeHandlers(rules), builtinRules)
 
     // Set up the context

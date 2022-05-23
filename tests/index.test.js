@@ -339,4 +339,25 @@ describe("rulify", () => {
         expect(await r2.materialize(obj2)).toMatchObject({ num: 123 })
         expect(await r2.materialize(obj2.num)).toBe(123)
     })
+
+    it("Can handle nested rules", async () => {
+        const rulifier = new Rulifier({
+            num: {
+                $add1: { $add1: 5 }
+            }
+        }, {
+            rules: {
+                async $add1(arg, sdk) {
+                    const num = await sdk.materialize(arg)
+                    return num + 1
+                }
+            }
+        })
+
+        const obj = rulifier.applyContext()
+
+        const result = await rulifier.materialize(obj.num)
+
+        expect(result).toBe(7)
+    })
 })
