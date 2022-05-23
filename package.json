@@ -1,6 +1,6 @@
 {
   "name": "rulifier",
-  "version": "0.0.1-pre.18",
+  "version": "0.0.1-pre.19",
   "description": "A lightweight rule engine designed for speed and ease of use",
   "files": [
     "dist",
@@ -37,5 +37,7 @@
   },
   "author": "Jim DeSelms (jim.deselms@gmail.com)",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "json5": "^2.2.1"
+  }
 }
